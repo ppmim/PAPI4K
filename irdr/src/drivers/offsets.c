@@ -25,9 +25,9 @@
 #include "listIO.h"
 
 #define HWID 10.0     /* default half-width of cross-corr search box, arcsec */
-#define MAXNFILES 399
+#define MAXNFILES 999
 #define MAXNLIST 999999L
-#define MINFRAC  0.1      /* 0.15; correlation failed if overlap < MINFRAC */
+#define MINFRAC  0.001      /* 0.15; correlation failed if overlap < MINFRAC */
 
 static char *fn[MAXNFILES];              /* FITS OBJECTS frames filenames */
 static int n, x[MAXNLIST], y[MAXNLIST];       /* list of object pixels */
