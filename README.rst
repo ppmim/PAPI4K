@@ -1,3 +1,6 @@
+PAPI: The PANIC data reduction PIpeline
+=======================================
+
 This is PAPI, the PANIC data reduction PIpeline. 
 
 PAPI is distributed under GNU GPL, either version 3 of the License, 
@@ -18,7 +21,7 @@ It is optimized for use at the 2.2m telescope, but can also be installed
 at the 3.5m telescope. It will work in the nIR bands Z, J, H and K. 
 
 Installing
-**********
+==========
 
 1. Unzip and untar the papi files in a suitable location.
 
@@ -43,9 +46,9 @@ Installing
 
 
 Documentation
-*************
+=============
 
-See the docs/ directory for full documentation.
+See the docs/ directory for full documentation or www.iaa.es/PANIC/software_tools
 
 
 
