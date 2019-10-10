@@ -125,7 +125,7 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         print("IMTDEV=", os.environ['IMTDEV'])
     
     if 'PYRAF_NO_DISPLAY' in os.environ:
-        print("QUE PASAAAAAAAAAAAAA -- PYRAF_NO_DISPLAY=",os.environ['PYRAF_NO_DISPLAY'])
+        print("QUE PASAAAAAAAAAAAAA -- PYRAF_NO_DISPLAY=", os.environ['PYRAF_NO_DISPLAY'])
     if 'PYTOOLS_NO_DISPLAY' in os.environ:
         print("QUE PASAAAAAAAAAAAAA -- PYTOOLS_NO_DISPLAY=", os.environ['PYTOOLS_NO_DISPLAY'])
     

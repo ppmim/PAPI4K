@@ -44,7 +44,6 @@ nosetests.xml
 *.a
 *.so
 # DATA Files
-*.fits
-*.fit
-D
-# Dat
+#*.fits
+#*.fit
+
