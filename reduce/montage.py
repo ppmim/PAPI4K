@@ -98,7 +98,6 @@ def mosaic(files_to_mosaic, raw_dir, output_dir, tmp_dir,
                    work_dir=m_work_dir,
                    combine='mean')
     
-    
     shutil.rmtree(m_raw_dir, ignore_errors=True)
     shutil.rmtree(m_work_dir, ignore_errors=True)
     
@@ -118,8 +117,7 @@ def mosaic(files_to_mosaic, raw_dir, output_dir, tmp_dir,
 # main
 # #######################################################
 if __name__ == "__main__":
-    
-    
+
     usage = "usage: %prog [options]"
     desc = "Build mosaic from input images using Montage tool."
     parser = OptionParser(usage, description=desc)

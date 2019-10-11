@@ -49,7 +49,7 @@ import numpy
 import matplotlib.pyplot as plt
 import pylab
             
-import catalog_query
+import photo.catalog_query as catalog_query
 import photo.coords as coords
 
 
@@ -182,7 +182,7 @@ def catalog_xmatch2( cat1, cat2, filter_column, error=2.0, min_snr=10):
         ind1, ind2 = coords.indmatch(table1['X_WORLD'], table1['Y_WORLD'], 
                                      table2['ra'], table2['dec'],
                                      error)
-    except Exception, e:
+    except Exception as e:
         log.error("Erron in xmatch-ing tables :%s"%str(e))
         raise e
 
@@ -213,7 +213,7 @@ def catalog_xmatch2( cat1, cat2, filter_column, error=2.0, min_snr=10):
                                           (table2_xm['k_snr'] > min_snr)]
             
         table1_tmp = table1_xm[(table1_xm['FLUX_AUTO']/table1_xm['FLUXERR_AUTO'] > min_snr)]
-    except Exception,e:
+    except Exception as e:
         log.error("Error creating table %s"%(str(e)))
         raise e
 
@@ -224,7 +224,7 @@ def catalog_xmatch2( cat1, cat2, filter_column, error=2.0, min_snr=10):
         ind1_p, ind2_p = coords.indmatch(table1_tmp['X_WORLD'], table1_tmp['Y_WORLD'], 
                                      table2_tmp['ra'], table2_tmp['dec'], 
                                      error)
-    except Exception, e:
+    except Exception as  e:
         log.error("Erron in xmatch-ing tables :%s"%str(e))
         raise e
 
@@ -392,7 +392,7 @@ def compute_regresion2( column_x, column_y , filter_name,
     #b = res[1]
     #r = 0
     # end of test
-    print "Coeffs =", res
+    print("Coeffs =", res)
     
     # Plot the results
     pol = numpy.poly1d(res[0])
@@ -544,7 +544,7 @@ def compute_regresion( vo_catalog, column_x, column_y ,
     
     try:
         table = Table.read(vo_catalog, format="votable", table_id=0)
-    except Exception,e:
+    except Exception as e:
         log.error("Canno't read the input table")
         return None
     
@@ -562,7 +562,7 @@ def compute_regresion( vo_catalog, column_x, column_y ,
                              (table.FLUX_AUTO/table.FLUXERR_AUTO>min_snr)]
     
     """
-    print ">> Number of matched points = ", len(table_new)
+    print(">> Number of matched points = ", len(table_new))
     
     # If there aren't enough 2MASS objects, don't use color cut (J-K)<1
     if len(table_new)<25:
@@ -573,7 +573,7 @@ def compute_regresion( vo_catalog, column_x, column_y ,
                              (table['k_snr']>min_snr) & 
                              (table['FLUX_AUTO']/table['FLUXERR_AUTO']>min_snr)]
         
-        print ">> Number of matched points (no color cut)= ",len(table_new)
+        print(">> Number of matched points (no color cut)= ",len(table_new))
 
         
     #X = -2.5 * numpy.log10(table_new['FLUX_AUTO']/1.0)
@@ -680,8 +680,8 @@ def compute_regresion( vo_catalog, column_x, column_y ,
     # Second ZP
     log.debug("Second iteration")
     temp = n_Y - n_X 
-    print "LEN1=",len(temp)
-    print "LEN2=",len(temp[numpy.where(numpy.abs(m_err)<std*2)])
+    print("LEN1=",len(temp))
+    print("LEN2=",len(temp[numpy.where(numpy.abs(m_err)<std*2)]))
     zp2 = numpy.median( temp[numpy.where(numpy.abs(m_err)<std*2)])
     m_err2 = n_Y - (n_X + zp2) 
     rms2 = numpy.sqrt( numpy.mean( (m_err2)**2 ) )
@@ -861,7 +861,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
             log.error("Filter %s not supported" %l_filter)
             raise Exception("Filter %s not supported"%l_filter)
             
-    except Exception, e:
+    except Exception as  e:
         log.error("Cannot read properly FITS file : %s:", str(e))
         raise e
     
@@ -885,7 +885,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
     
     try:
         sex.run(input_image, updateconfig=True, clean=False)
-    except Exception, e:
+    except Exception as  e:
         log.error("Canno't create SExtractor catalog : %s", str(e))
         raise e 
     
@@ -902,7 +902,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
                                      catalog_query.ICatalog.cat_names['2MASS'], 
                                      out_base_catalog, 'votable')[0]
         log.debug("Output file generated : %s", i_catalog) 
-    except Exception, e:
+    except Exception as  e:
         log.error("Sorry, cann't solve the query to ICatalog: %s", str(e))
         raise e
 
@@ -916,7 +916,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
         xm, ym = catalog_xmatch2( image_catalog, i_catalog, two_mass_col_name, 
                                    error=2.0 , min_snr=snr)
         log.debug("XMatch done !")
-    except Exception, e:
+    except Exception as  e:
         log.error("XMatch failed %s. Check astrometric calibration of source.", str(e))
         raise e
     
@@ -933,7 +933,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
         
         log.info("Estimated ZP_err=%s"%est_zp_err)
         #sys.exit(0)
-    except Exception, e:
+    except Exception as  e:
         log.error("Sorry, some error while computing linear fit or\
         ploting the results: %s", str(e))
         raise e
@@ -954,7 +954,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
     
     try:
         sex.run(input_image, updateconfig=True, clean=False)
-    except Exception, e:
+    except Exception as  e:
         log.error("Canno't create SExtractor catalog : %s", str(e))
         raise e 
 
@@ -1020,7 +1020,7 @@ Zero Point."""
         catalog = "2MASS"
         doPhotometry(options.input_image, options.pix_scale, catalog, 
             options.output_filename, options.snr, options.zero_point, True)
-    except Exception, e:
+    except Exception as  e:
         log.info("Some error while running photometric calibration: %s"%str(e))
         sys.exit(0)
         

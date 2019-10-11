@@ -38,8 +38,11 @@
 
 ################################################################################
 # Import necessary modules
-
-import urllib, os
+import os
+import urllib
+import urllib.parse
+import urllib.request
+import urllib.error
 from optparse import OptionParser
 
 
@@ -102,7 +105,7 @@ class ICatalog (object):
         
         log.debug("Searching into catalog: %s  RA: %s  Dec: %s  Radius(arcsec): %s"%(cat_name, ar, dec, sr))
 
-        query = urllib.urlencode(params)
+        query = urllib.parse.urlencode(params)
         get_url = ICatalog.url + "?" + query
 
         #query = self.url + "?" + out_fmt + "&" +  radius + "&" + objstr + "&" \
@@ -115,9 +118,9 @@ class ICatalog (object):
             log.debug("Warning, overwriting file %s" %out_filename)
         
         try:
-            urllib.urlcleanup()    
-            r = urllib.urlretrieve(get_url, out_filename)
-        except urllib.ContentTooShortError, e:
+            urllib.request.urlcleanup()
+            r = urllib.request.urlretrieve(get_url, out_filename)
+        except urllib.error.ContentTooShortError as e:
             log.error("Amount of data available was less than the expected \
             amount; might download was interrupted : %s", e)
             raise e
@@ -140,7 +143,7 @@ if __name__ == "__main__":
                                      "/tmp/prueba.xml", 
                                      'votable')[0]
         log.debug("Output file generated : %s", res_file) 
-    except Exception,e:
+    except Exception as e:
         log.error("Sorry, cann't solve the query")
         raise e
-            
+

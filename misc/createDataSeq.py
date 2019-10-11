@@ -111,7 +111,7 @@ def createDataSeq(input_files, seq_type, overwrite=False, output_dir=None):
     for l_tuple in dataset:
         sorted_files.append(l_tuple[0])
 
-    print "SORTED", sorted_files
+    print("SORTED", sorted_files)
       
     for ifile in sorted_files:
         pat_expn += 1

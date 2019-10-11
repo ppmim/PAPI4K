@@ -56,6 +56,7 @@ def unwrap_self_applyModel(arg, **kwarg):
     #print "ARG=",arg
     return NonLinearityCorrection.applyModel(*arg, **kwarg)
 
+
 class NonLinearityCorrection(object):
     """
     Class used to correct the Non-linearity of the PANIC detectors based on the 
