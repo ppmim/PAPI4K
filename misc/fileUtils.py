@@ -117,10 +117,11 @@ def splitMEF_deprecated(fnameMEF, out_filenames):
    print("File %s created " %(out_filenames[i-1]))
 
  
- return next 
  print("End of createMEF")
-  
-################################################################################  
+ return next
+
+
+################################################################################
 def linkSourceFiles( source, dest ):
     """Create a symbolic link to all the sources specified in 'source', which can be a file a dir"""
 

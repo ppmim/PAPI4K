@@ -82,7 +82,7 @@ def readHeader(filename, extension=1):
     
     try:
         myfits = clfits.ClFits(filename)
-    except Exception,e:
+    except Exception as e:
         msg = "Error reading FITS file: " + filename
         logging.error(msg)
         logging.error(str(e))
@@ -189,7 +189,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     
     try:
         path_astrometry = os.path.dirname(spawn.find_executable("solve-field"))  
-    except Exception, e:
+    except Exception as e:
         msg = "Cannot find the pathname for solve-field"
         logging.error(msg)
         raise Exception(msg)
@@ -228,14 +228,14 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         "%(path_astrometry, out_dir, tmp_dir, filename, ext_str)
     
     logging.debug("CMD=" + str_cmd)
-    print "CMD_Astrometry.net =", str_cmd
+    print("CMD_Astrometry.net =", str_cmd)
     
     try:
         p = subprocess.Popen(str_cmd, bufsize=0, shell=True, 
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              close_fds=True)
-    except Exception, e:
+    except Exception as e:
         logging.error("Some error while running subprocess: " + str_cmd)
         logging.error(str(e))
         raise e
@@ -300,7 +300,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
             # in parallel executions.
             #for fl in glob.glob(tmp_dir + "/tmp.sanitized.*"):
             #    os.remove(fl)
-        except Exception, e:
+        except Exception as e:
             logging.warning("Some error while deleting temporal files for file %s"%filename)
             
         return out_file
@@ -376,7 +376,7 @@ def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
             # Instead of pool.map() that blocks until
             # the result is ready, we use pool.map_async()
             results += [pool.map_async(calc, [red_parameters])]
-        except Exception,e:
+        except Exception as e:
             logging.error("Error processing file: " + file)
             logging.error(str(e))
             
@@ -386,7 +386,7 @@ def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
             # the 0 index is *ONLY* required if map_async is used !!!
             solved.append(result.get()[0])
             logging.info("New file created => %s"%solved[-1])
-        except Exception,e:
+        except Exception as e:
             logging.error("Cannot process file \n" + str(e))
             
     
@@ -533,7 +533,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     logging.info("No. files solved = %s"%(len(filelist) - len(files_not_solved)))
     logging.info("----------------")
     logging.info(files_solved)
-    print "\n"
+    print("\n")
     logging.info("No. files NOT solved = %s", len(files_not_solved))
     logging.info("--------------------")
     logging.info(files_not_solved)

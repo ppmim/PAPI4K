@@ -22,10 +22,8 @@
 # Import requered modules
 
 import threading
-import time
-
-
 import misc.display as display
+
 
 #######################################
 lock = threading.Lock()
@@ -52,7 +50,7 @@ class ExecTaskThread(threading.Thread):
             self._task_info._return      = self._task(*self._args)  # Execute the task
             self._task_info._exit_status = 0             # EXIT_SUCCESS, all was OK
             self._task_info._exc = None
-        except Exception, e:
+        except Exception as e:
             self._task_info._curr_status = "FINISHED"
             self._task_info._return      = None
             self._task_info._exit_status = 1             # EXIT_FAILURE, some error happened
@@ -87,18 +85,19 @@ class WaitTaskThread(threading.Thread):
     def run(self):
       
         while self._run:
-            print "WaitTaskThread waiting ..."
+            print("WaitTaskThread waiting ...")
             self._event.wait()
-            print "WaitTaskThread running ..."
+            print("WaitTaskThread running ...")
             if self._task_info._exit_status == 0: # EXIT_SUCCESS, all was OK
-                if self._task_info._return!=None:
+                if self._task_info._return != None:
                     display.showFrame(self._task_info._return)
             else:
                 #QMessageBox.critical(None, "Error", "Error while running task ")
-                print "[WaitTaskThread] Error while running task !"
+                print("[WaitTaskThread] Error while running task !")
                 pass # nothing to do
             
             self._event.clear()   # restore the event condition
+
 
 class TaskInfo():
     """ 
