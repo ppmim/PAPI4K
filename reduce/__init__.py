@@ -37,3 +37,5 @@ from .calSuperFlat import *
 from .calDomeFlat import *
 from .dxtalk import *
 from .eval_focus_serie import *
+from .correctNonLinearity import NonLinearityCorrection
+from .montage import *

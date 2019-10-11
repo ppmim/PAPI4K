@@ -319,9 +319,9 @@ time and creates the master dark model and computes several statistics.
     if not options.source_file_list or not options.output_filename:
         parser.print_help()
         parser.error("Incorrect number of arguments " )
-    
-    
-    if os.path.isdir(options.source_file_list) or os.path.isdir(options.output_filename):
+
+    if os.path.isdir(options.source_file_list) or \
+            os.path.isdir(options.output_filename):
         parser.print_help()
         parser.error("Source and output must be a file, not a directory")
         

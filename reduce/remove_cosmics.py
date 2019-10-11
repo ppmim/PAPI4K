@@ -29,7 +29,7 @@
 # Created    : 09/03/2012    jmiguel@iaa.es -
 #
 # Last update: 
-#
+#              11/10/2019    Migrated to python3 + astropy + ccdproc
 # TODO
 #   - Include SATURATION_LEVEL and/or other option  
 #   - Speed up ! (i.e.,number of iterations, .....)
@@ -54,12 +54,11 @@ from optparse import OptionParser
 import sys
 
 import astropy.io.fits as fits
+from ccdproc import cosmicray_lacosmic
 
 # Logging
 from misc.paLog import log
 from misc.version import __version__
-
-import thirdparty.cosmics.cosmics as cosmics
 
 
 def remove_cr(in_image, out_image=None, overwrite=False, want_mask=False):
@@ -93,47 +92,37 @@ def remove_cr(in_image, out_image=None, overwrite=False, want_mask=False):
         out_file = in_image
     else:   
         if not out_image:
-            out_file = in_image.replace(".fits","_dcr.fits")
+            out_file = in_image.replace(".fits", "_dcr.fits")
         else:
             out_file = out_image
             
     try:
         f_in = fits.open(in_image)
-        if len(f_in)==1:
-            data_in = f_in[0].data
-        else:
+        if len(f_in) != 1:
             log.error("MEF files currently not supported !")
             raise Exception("MEF files currently not supported !")
-            
     except Exception as e:
-        log.error("Error opening FITS file : %s"%in_image)
+        log.error("Error opening FITS file : %s" % in_image)
         raise e
     
 
     try:
         # Read the FITS :
-        array, header = cosmics.fromfits(in_image)
-        
-        # array is a 2D numpy array
-        
-        # Build the object :
-        c = cosmics.cosmicsimage(array, gain=2.2, readnoise=10.0, sigclip = 5.0, 
-                                 sigfrac = 0.3, objlim = 5.0)
-        # There are other options, check the manual...
-        
-        # Run the full artillery :
-        c.run(maxiter = 4)
-        
-        # Write the cleaned image into a new FITS file, conserving the original header :
-        cosmics.tofits(out_file, c.cleanarray, header)
-        
+
+        newdata, mask = cosmicray_lacosmic(f_in[0].data, sigclip=5)
+
+        # Write the cleaned image into a new FITS file, conserving the
+        # original header
+        fits.writeto(out_file, newdata, f_in[0].header)
+        # Add keyword
         fits.setval(out_file, keyword="PAPIVERS",
-                        value= __version__, comment="PANIC Pipeline version")
+                        value=__version__, comment="PANIC Pipeline version")
         
         # If you want the mask, here it is :
         if want_mask:
-            cosmics.tofits("mask.fits", c.mask, header)
-            # (c.mask is a boolean numpy array, that gets converted here to an integer array)
+            cosmics.tofits("mask.fits", mask, f_in[0].header)
+            # (c.mask is a boolean numpy array, that gets converted here
+            # to an integer array)
     
     except Exception as e:
         log.error("Error removing cosmic rays in file : %s , Error %s:"%(in_image,str(e)))

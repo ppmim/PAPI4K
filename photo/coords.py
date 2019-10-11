@@ -1,6 +1,6 @@
 """Astronomical coordinate functions."""
 
-import re,pdb
+import re, pdb
 import numpy as np
 from numpy import arccos,sin,cos
 from math import pi
@@ -230,7 +230,7 @@ def match(ra1, dec1, ra2, dec2, tol, allmatches=False):
         i2 = i1 + sra2[i1:].searchsorted(ra + RA_LIM)
         #print i1,i2
         close = []
-        for j in xrange(i1,i2):
+        for j in range(i1,i2):
             if abs(dec - sdec2[j]) > LIM:
                 continue
             else:
@@ -329,7 +329,7 @@ def unique_radec(ra, dec, tol):
     assigned = set()
     for j,m in enumerate(matches):
         if not (j % 1000):
-            print j
+            print(j)
         # get the lowest index in this group
         isort = sorted(m.ind)
         ilow = isort[0]

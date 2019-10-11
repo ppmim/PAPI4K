@@ -27,26 +27,23 @@
 #
 ################################################################################
     
-#From system
-import os
+# From system
 import os.path
 import fileinput
 import shutil
 import tempfile
-import dircache
 import multiprocessing
 import math
 import subprocess
 
 # IRAF packages
 import pyraf
-from pyraf import iraf
-#from iraf import noao
+# from pyraf import iraf
+# from iraf import noao
 
 # Math module for efficient array processing
 import numpy
 import astropy.io.fits as fits
-from astropy import wcs
 
 # Log
 import misc.paLog
@@ -54,8 +51,7 @@ from misc.paLog import log
 from misc.version import __version__
 
 
-#PAPI packages 
-import datahandler
+# PAPI packages
 import reduce
 import reduce.checkQuality
 import misc.fileUtils
@@ -65,12 +61,13 @@ import misc.imtrim
 import reduce.remove_cosmics
 import reduce.astrowarp
 import reduce.solveAstrometry
-import misc.mef 
+import misc.mef
+import datahandler
 import datahandler.dataset
 import misc.collapse
-import correctNonLinearity
+import reduce.correctNonLinearity as correctNonLinearity
 import misc.cleanBadPix as cleanBadPix
-import montage
+import reduce.montage as montage
 
 
 # If your parallel tasks are going to use the same instance of PyRAF (and thus 
@@ -122,10 +119,10 @@ def _unpickle_method(func_name, obj, cls):
             break
     return func.__get__(obj, cls)        
 
-import copy_reg 
+import copyreg
 import types 
 
-copy_reg.pickle(types.MethodType,  
+copyreg.pickle(types.MethodType,
     _pickle_method,  
     _unpickle_method)  
 
@@ -212,7 +209,7 @@ class ReductionSet(object):
         
         """
         
-        super (ReductionSet, self).__init__ (*a, **k)
+        super (ReductionSet, self).__init__(*a, **k)
         
         # CONFIG dictionary
         if not config_dict:
@@ -244,7 +241,7 @@ class ReductionSet(object):
             self.papi_home = os.environ['PAPI_HOME']
             if self.papi_home[-1] != '/':
                 self.papi_home += '/'
-        except Exception, ex:
+        except Exception as ex:
             log.error("Error, variable PAPI_HOME not defined.")
             raise ex
 
@@ -348,7 +345,7 @@ class ReductionSet(object):
             # images (from irdr::offset.c)
             self.MIN_CORR_FRAC = self.config_dict['offsets']['min_corr_frac'] 
         else:
-            print "Program should not enter here  !!!"
+            print("Program should not enter here  !!!")
             # Some "default" config values (see below how they are updated from 
             # the config_dict)
             # Environment variables
@@ -405,11 +402,11 @@ class ReductionSet(object):
         # Further info: http://stackoverflow.com/questions/393554/python-sqlite3-and-concurrency  
         #               http://www.sqlite.org/cvstrac/wiki?p=MultiThreading
         self.ext_db_files = []
-        if external_db_files == None:
-            if self.config_dict != None:
+        if external_db_files is None:
+            if self.config_dict is not None:
                 cal_dir = self.config_dict['general']['ext_calibration_db']
                 if os.path.isdir(cal_dir):
-                    for ifile in dircache.listdir(cal_dir):
+                    for ifile in os.listdir(cal_dir):
                         if ifile.endswith(".fits") or ifile.endswith(".fit"):
                             self.ext_db_files.append((cal_dir + "/" + ifile).replace('//','/'))
         else:
@@ -446,7 +443,7 @@ class ReductionSet(object):
             self.db = datahandler.dataset.DataSet(self.rs_filelist, instrument)
             self.db.createDB()
             self.db.load()
-        except Exception,e:
+        except Exception as e:
             log.error("Error while LOCAL data base initialization: \n %s"%str(e))
             raise Exception("Error while LOCAL data base initialization")
             
@@ -469,7 +466,7 @@ class ReductionSet(object):
                 self.ext_db.load()
                 log.info("Calibration files found in External DB:")
                 self.ext_db.ListDataSet()
-            except Exception,e:
+            except Exception as e:
                 log.error("Error while EXTERNAL data base initialization: \n %s"%str(e))
                 raise Exception("Error while EXTERNAL data base initialization")
 
@@ -735,8 +732,8 @@ class ReductionSet(object):
                     mef = misc.mef.MEF(frame_list)
                     (nExt, sp_frame_list) = mef.splitGEIRSToSimple(".Q%02d.fits", 
                                                                    out_dir=self.temp_dir)
-                except Exception,e:
-                    log.error("Some error while splitting PANIC data set. %s",str(e))
+                except Exception as e:
+                    log.error("Some error while splitting PANIC data set. %s", str(e))
                     raise e   
             else:
                 # No split is required
@@ -771,7 +768,7 @@ class ReductionSet(object):
                                                     out_dir=self.temp_dir, 
                                                     copy_keyword=kws_to_cp,
                                                     instrument=instr)
-            except Exception,e:
+            except Exception as e:
                 log.debug("Some error while splitting data set. %s",str(e))
                 raise e
             
@@ -836,7 +833,7 @@ class ReductionSet(object):
                     fits = datahandler.ClFits(file)
                     if not fits.isSky():
                         return 'other'
-                i = i + 1
+                i += 1
         elif fits_0.isObject() and fits_1.isObject():
             # check if all are objects ...
             # and if are, then, we are going to suppose the sequence T-T-T-T-T- .... (dither)
@@ -864,7 +861,7 @@ class ReductionSet(object):
             m_list=list
             
         for file in m_list:
-            fits=datahandler.ClFits(file)
+            fits = datahandler.ClFits(file)
             if fits.isSky():
                 sky_list.append(file)
                 
@@ -1126,21 +1123,21 @@ class ReductionSet(object):
         # files printed in "debug" output 
         if show:
             k = 0
-            print "\n ========================================================="
-            print " =========== GROUPED SEQUENCES (by %s) =============="%self.group_by
-            print " ========================================================="
+            print("\n =========================================================")
+            print(" =========== GROUPED SEQUENCES (by %s) ==============" % self.group_by)
+            print(" =========================================================")
             for type in seq_types:
                 if stype != 'all' and type == 'UNKNOWN':
                     continue
                 else:
-                    print "\nSEQUENCE #[%d]  - TYPE= %s   FILTER= %s  TEXP= %f  #files = %d " \
+                    print("\nSEQUENCE #[%d]  - TYPE= %s   FILTER= %s  TEXP= %f  #files = %d " \
                             %(k, type, self.db.GetFileInfo(seqs[k][0])[3], 
                             self.db.GetFileInfo(seqs[k][0])[4], 
-                            len(seqs[k]))
-                    print "-------------------------------------------------------------------"
+                            len(seqs[k])))
+                    print("-------------------------------------------------------------------")
                     for file in seqs[k]:
                         #print file + " type= %s"%self.db.GetFileInfo(file)[2]
-                        print file 
+                        print(file)
                 k+=1
             log.debug("Found %d groups of files", len(seq_types))
         
@@ -1393,8 +1390,8 @@ class ReductionSet(object):
             raise Exception("Observing mode not supported in skyFilter")
                   
         
-        print "SKY_FILTER_CMD = ", skyfilter_cmd
-        print "CMD_ARGS = ", skyfilter_cmd.split()
+        print("SKY_FILTER_CMD = ", skyfilter_cmd)
+        print("CMD_ARGS = ", skyfilter_cmd.split())
         args = skyfilter_cmd.split()
         
         output_lines = []
@@ -1404,7 +1401,7 @@ class ReductionSet(object):
             log.debug("irdr::skyfilter command executed ...")
             sys.stdout.flush()
             sys.stderr.flush()
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             log.critical("Error running skyfilter: %s" % output_lines)
             log.debug("Exception: %s"%str(e))
             raise Exception("Error running skyfilter")
@@ -1490,7 +1487,7 @@ class ReductionSet(object):
                                                 bpm=None, norm=True, 
                                                 temp_dir=self.temp_dir)
                 superflat.create()
-            except Exception,e:
+            except Exception as e:
                 log.error("Error while creating gain map : %s", str(e))
                 raise
         else: l_gainMap = self.master_flat
@@ -1518,14 +1515,14 @@ class ReductionSet(object):
             # selected science file
             listfile = self.out_dir + "/nearfiles.list"
             misc.utils.listToFile(obj_ext[n], listfile)
-            print "NEAR_FILES=", obj_ext[n]
-            print "GAIN_EXT_N=", gain_ext[n][0]
+            print("NEAR_FILES=", obj_ext[n])
+            print("GAIN_EXT_N=", gain_ext[n][0])
             # Call external app skyfilter (irdr)
             hwidth = self.HWIDTH
             
             cmd = self.m_irdr_path + "/skyfilter_single %s %s %d nomask none %d %s %d"\
                         %(listfile, gain_ext[n][0], hwidth, file_pos, self.out_dir, fix_type)
-            print "CMD=",cmd
+            print("CMD=", cmd)
             e = misc.utils.runCmd( cmd )
             if e==1: # success
                 fname = self.out_dir + "/" + os.path.basename(obj_ext[n][file_pos-1].replace(".fits", (".fits.skysub")))
@@ -1600,7 +1597,7 @@ class ReductionSet(object):
             ra0 = ref.ra    
             dec0 = ref.dec
             log.debug("Ref. image: %s RA0= %s DEC0= %s PIXSCALE= %f" % (ref_image, ra0, dec0, pix_scale))
-      except Exception,e:
+      except Exception as e:
           log.error("Cannot get reference RA_0,Dec_0 coordinates: %s"%str(e))
           raise e
         
@@ -1621,7 +1618,7 @@ class ReductionSet(object):
                 
                 offset_txt_file.write(my_image + "   " + "%.6f   %0.6f\n" % (offsets[i][0], offsets[i][1]))
                 i+=1
-            except Exception,e:
+            except Exception as e:
                 log.error("Error computing the offsets for image %s. \n %s" % (my_image, str(e)))
                 raise e
         
@@ -1739,7 +1736,7 @@ class ReductionSet(object):
         try:
             makeObjMask( my_input, mask_minarea, mask_maxarea, mask_thresh, 
                          satur_level, output_list_file, single_point=single_p)
-        except Exception,e:
+        except Exception as e:
             log.error("Error making object mask")
             raise e
         
@@ -1961,7 +1958,7 @@ class ReductionSet(object):
             master_files += self.reduceSet(self.red_mode, seqs_to_reduce=None, 
                                            types_to_reduce=['DARK', 'DOME_FLAT',
                                                            'SKY_FLAT'])
-        except Exception,e:
+        except Exception as e:
             log.error("Some error while builing master calibration files...: %s", str(e))
             raise e
         
@@ -1987,7 +1984,7 @@ class ReductionSet(object):
             master_files += self.buildMasterTwFlats()
             master_files += self.buildMasterSuperFlats()
             master_files += self.buildGainMaps(type="all")
-        except Exception,e:
+        except Exception as e:
             log.error("Some error while builing master calibration files...: %s", str(e))
             raise e
         
@@ -2072,7 +2069,7 @@ class ReductionSet(object):
                     nyblock = self.config_dict['gainmap']['nyblock']
                     nsigma = self.config_dict['gainmap']['nsigma']
                 else:
-                    print "Program should never enter here !"
+                    print("Program should never enter here !")
                     mingain = 0.5
                     maxgain = 1.5
                     nxblock = 16
@@ -2088,7 +2085,7 @@ class ReductionSet(object):
                 out = None
                 out = task.create()
                 l_gainmaps.append(out) # out must be equal to outfile
-            except Exception,e:
+            except Exception as e:
                 log.error("Some error while creating gainmap: %s",str(e))
                 raise e
             if k<len(sorted_list):
@@ -2144,11 +2141,11 @@ class ReductionSet(object):
                                                   outfile, texp_scale=False)
                 out = task.createMaster()
                 l_mdarks.append(out) # out must be equal to outfile
-            except Exception,e:
-                log.error("Some error while creating master dark: %s",str(e))
+            except Exception as e:
+                log.error("Some error while creating master dark: %s", str(e))
                 log.error("Proceding to next dark group ...")
                 #raise e
-            if k<len(full_dark_list):
+            if k < len(full_dark_list):
                 # reset the new group
                 group = []
                 last_texp = full_dark_list[k][1]
@@ -2198,7 +2195,7 @@ class ReductionSet(object):
                                                             outfile, None)
                 out=task.createMaster()
                 l_mflats.append(out) # out must be equal to outfile
-            except Exception,e:
+            except Exception as e:
                 log.error("Some error while creating master DomeFlat: %s",str(e))
                 log.error("but, proceding with next flat group ...")
                 #raise e
@@ -2262,7 +2259,7 @@ class ReductionSet(object):
                 else:
                     log.error("MASTER_DARK_MODEL not found. Cannot build master TwFlat")
                     raise Exception("MASTER_DARK_MODEL not found. Cannot build master TwFlat.")
-            except Exception,e:
+            except Exception as e:
                 log.error("Some error while creating master TwFlat: %s",str(e))
                 log.error("but, proceding with next twflat group ...")
                 raise Exception("Cannot build master TwFlat: %s"%(str(e)))
@@ -2314,7 +2311,7 @@ class ReductionSet(object):
                         norm=False, temp_dir=self.temp_dir)
                     out=superflat.create()
                     l_mflats.append(out)
-                except Exception,e:
+                except Exception as e:
                     log.error("Some error while creating master SuperFlat: %s",
                         str(e))
                     log.error("but, proceding with next group ...")
@@ -2400,7 +2397,7 @@ class ReductionSet(object):
                 try:
                     files_created += self.reduceSeq(seq, type)
                     reduced_sequences+=1
-                except Exception,e:
+                except Exception as e:
                     # If an error happen while proecessing a sequence, we 
                     # do NOT STOP, but continue with the next ones. 
                     # However, if there is only one sequence, raise the exception,
@@ -2535,7 +2532,7 @@ class ReductionSet(object):
                             sequence, out_dir=self.temp_dir, suffix='_LC')
                 corr_sequence = nl_task.runMultiNLC()
 
-            except Exception, e:
+            except Exception as  e:
                 log.error("Error while applying NL model: %s" % str(e))
                 raise e
             
@@ -2634,8 +2631,8 @@ class ReductionSet(object):
                     log.error("An error in data checking was found. Review your data.")
                     raise Exception("An error in data checking was found. Review your data.")
                         
-                if out!=None: files_created.append(out) # out must be equal to outfile
-            except Exception,e:
+                if out is not None: files_created.append(out) # out must be equal to outfile
+            except Exception as e:
                 log.error("[reduceSeq] Some error while creating master DARK: %s",str(e))
                 raise e
         elif cfits.isDomeFlatON() or cfits.isDomeFlatOFF():
@@ -2670,7 +2667,7 @@ class ReductionSet(object):
                 pool.join()
                 
                 if out!=None: files_created.append(out) # out must be equal to outfile
-            except Exception,e:
+            except Exception as e:
                 log.error("[reduceSeq] Some error while creating master DomeFlat: %s",str(e))
                 raise e
         elif cfits.isTwFlat() or cfits.getType(False)=="DOME_FLAT":
@@ -2750,7 +2747,7 @@ class ReductionSet(object):
                     msg = "No MASTER_DARK or MASTER_DARK_MODEL found. Cannot build Master TwFlat" 
                     log.error(msg)
                     raise Exception(msg)
-            except Exception,e:
+            except Exception as e:
                 log.error("[reduceSeq] Some error while creating master TwFlat: %s",str(e))
                 raise e
         elif cfits.isFocusSerie():
@@ -2796,9 +2793,9 @@ class ReductionSet(object):
                 pool.close()
                 pool.join()
 
-                if out!=None: 
+                if out is not None:
                     files_created.append(out) # out must be equal to outfile
-            except Exception,e:
+            except Exception as e:
                 log.error("[reduceSeq] Error while processing Focus Series: %s",str(e))
                 raise e
         
@@ -2958,7 +2955,7 @@ class ReductionSet(object):
                         #close() or terminate() before using join().
                         pool.join()
                         log.result("[reduceSeq] DONE PARALLEL REDUCTION ")
-                    except Exception,e:
+                    except Exception as e:
                         log.error("[reduceSeq] Error while parallel data reduction ! --> %s",str(e))
                         raise e
                     
@@ -3006,8 +3003,9 @@ class ReductionSet(object):
                                             bpm, self.red_mode,
                                             out_dir=self.out_dir,
                                             output_file = extension_outfilename))
-                        except Exception,e:
-                            log.error("[reduceSeq] Error while serial data reduction of extension %d of object sequence", q_ext)
+                        except Exception as e:
+                            log.error("[reduceSeq] Error while serial data"
+                            "reduction of extension %d of object sequence", q_ext)
                             raise e
         
             # LEMON mode
@@ -3055,7 +3053,7 @@ class ReductionSet(object):
                     # Normalize the final path name 
                     seq_result_outfile = os.path.abspath(seq_result_outfile)
             
-            except Exception,e:
+            except Exception as e:
                 log.error("Error: %s" % str(e))
                 raise e
             
@@ -3069,7 +3067,7 @@ class ReductionSet(object):
                             resample=True, subtract_back=True)
                     try:
                         aw.run(engine=self.config_dict['astrometry']['engine'])
-                    except Exception, ex:
+                    except Exception as  ex:
                         log.error("Some error while running Astrowarp to build final mosaic....")
                         raise ex
                     
@@ -3083,7 +3081,7 @@ class ReductionSet(object):
                                 tmp_dir=self.temp_dir,
                                 background_match=True,
                                 out_mosaic=seq_result_outfile)
-                    except Exception, ex:
+                    except Exception as  ex:
                         log.error("Some error while building final Mosaic (Montage)")
                         raise ex
                 else:
@@ -3133,7 +3131,7 @@ class ReductionSet(object):
             if cfits.isScience():
                 # input image (and weight map) is overwritten
                 misc.imtrim.imgTrim(file)
-            if file!=None and os.path.splitext(file)[1]=='.fits':
+            if file is not None and os.path.splitext(file)[1] == '.fits':
                 log.debug("Inserting result in DB: %s",file)
                 self.db.insert(file)
         
@@ -3341,7 +3339,7 @@ class ReductionSet(object):
                 else:
                     log.error("Dither mode not supported")
                     raise Exception("Error, dither mode not supported")
-            except Exception, e:
+            except Exception as e:
                 raise e
         else:
             local_master_flat = master_flat 
@@ -3440,7 +3438,7 @@ class ReductionSet(object):
                         log.error("Please, review your data.")           
                     else:
                         log.error("ERROR: Cannot estimate FWHM of file %s"%r_file)           
-                except Exception,e:
+                except Exception as e:
                     log.error("ERROR: something wrong while computing FWHM")
                     raise e
             
@@ -3493,7 +3491,7 @@ class ReductionSet(object):
                             [None] * len(self.m_LAST_FILES), 
                             [True] * len(self.m_LAST_FILES))
                 self.m_LAST_FILES = res
-            except Exception,e:
+            except Exception as e:
                 raise e      
 
         ########################################################################
@@ -3529,8 +3527,8 @@ class ReductionSet(object):
                                 out_dir, # self.temp_dir produces collision
                                 self.temp_dir,
                                 self.config_dict['general']['pix_scale'])
-                except Exception, e:
-                    raise Exception("[solveAstrometry] Cannot solve Astrometry for file: %s \n%s"%(my_file, str(e)))
+                except Exception as e:
+                    raise Exception("[solveAstrometry] Cannot solve Astrometry for file: %s \n%s" % (my_file, str(e)))
                 else:
                     # Rename the file
                     out_filename = my_file.replace(".fits", ".ast.fits")
@@ -3550,7 +3548,7 @@ class ReductionSet(object):
                     out = cleanBadPix.cleanBadPixels( my_file, gainmap, 
                                                      output_file=out, 
                                                      is_gainmap=True)
-                except Exception, e:
+                except Exception as e:
                     log.error("Error in call to cleanBadPix: %s" % str(e))
                     raise e
                 else:
@@ -3584,7 +3582,7 @@ class ReductionSet(object):
             try:
                 offset_mat = self.getWCSPointingOffsets(self.m_LAST_FILES, 
                                                         out_dir + '/offsets1.pap')                
-            except Exception,e:
+            except Exception as e:
                 log.error("Error while computing WCS pointing offsets. Cannot continue with data reduction...")
                 raise e
         else:
@@ -3593,7 +3591,7 @@ class ReductionSet(object):
             try:
                 offset_mat = self.getPointingOffsets(out_dir + "/files_skysub.list", 
                                                     out_dir + '/offsets1.pap')
-            except Exception,e:
+            except Exception as e:
                 log.error("Error while getting pointing offsets. Cannot continue with data reduction...")
                 raise e
         
@@ -3617,7 +3615,7 @@ class ReductionSet(object):
                         weight_maps=[gainmap])
             try:
                 aw.run(engine=self.config_dict['astrometry']['engine'])
-            except Exception,e:
+            except Exception as e:
                 log.error("Some error while running Astrowarp: %s"%str(e))
                 raise e
         else:
@@ -3642,7 +3640,7 @@ class ReductionSet(object):
                     reduce.astrowarp.doAstrometry(out_dir + '/coadd1.fits', output_file, 
                                           self.config_dict['astrometry']['catalog'], 
                                           do_votable=False)
-                except Exception,e:
+                except Exception as e:
                     raise Exception("[astrowarp] Cannot solve Astrometry %s"%str(e))
             else:
                 try:
@@ -3651,7 +3649,7 @@ class ReductionSet(object):
                                                     self.temp_dir,
                                                     self.config_dict['general']['pix_scale'])
 
-                except Exception,e:
+                except Exception as e:
                     raise Exception("[solveAstrometry] Cannot solve Astrometry %s"%str(e))
                 else:
                     # Rename the file
@@ -3684,7 +3682,7 @@ class ReductionSet(object):
                     log.error("Please, review your data.")           
                 else:
                     log.error("ERROR: Cannot estimate FWHM of file %s" % output_file)           
-            except Exception, e:
+            except Exception as  e:
                 log.error("ERROR: something wrong while computing FWHM")
                 raise e
 
@@ -3719,7 +3717,7 @@ class ReductionSet(object):
             temp_list = [obj_mask] + self.m_LAST_FILES
             offset_mat = self.getWCSPointingOffsets(temp_list, 
                                                         out_dir + '/offsets1.pap')
-        except Exception, e:
+        except Exception as e:
             log.error("Error while computing WCS pointing offsets. "
                 "Cannot continue with data reduction...")
             raise e
@@ -3807,7 +3805,7 @@ class ReductionSet(object):
                 res = map(reduce.dxtalk.remove_crosstalk, self.m_LAST_FILES, 
                          [None]*len(self.m_LAST_FILES), [True]*len(self.m_LAST_FILES))
                 self.m_LAST_FILES = res
-            except Exception,e:
+            except Exception as e:
                 raise e
         
         ########################################################################
@@ -3819,7 +3817,7 @@ class ReductionSet(object):
                 try:
                     out = my_file.replace(".fits", ".cl.fits")
                     out = cleanBadPix.cleanBadPixels( my_file, gainmap, output_file=out, is_gainmap=True)
-                except Exception, e:
+                except Exception as  e:
                     log.error("Error in call to cleanBadPix: %s" % str(e))
                     raise e
                 else:
@@ -3840,7 +3838,7 @@ class ReductionSet(object):
                             [None]*len(self.m_LAST_FILES), [True]*len(self.m_LAST_FILES),
                             [False]*len(self.m_LAST_FILES))
                 self.m_LAST_FILES = res
-            except Exception,e:
+            except Exception as e:
                 raise e
 	
         
@@ -3869,7 +3867,7 @@ class ReductionSet(object):
                                out_dir, # self.temp_dir produces collision
                                self.temp_dir,
                                self.config_dict['general']['pix_scale'])
-            except Exception,e:
+            except Exception as e:
                 raise Exception("[solveAstrometry] Cannot solve Astrometry for file: %s \n%s"%(my_file, str(e)))
             else:
                 # Rename the file
@@ -3910,7 +3908,7 @@ class ReductionSet(object):
                          weight_maps=[gainmap])
             try:
                 aw.run(engine=self.config_dict['astrometry']['engine'])
-            except Exception,e:
+            except Exception as e:
                 log.error("Some error while running Astrowarp....")
                 raise e
         else:
@@ -3939,7 +3937,7 @@ class ReductionSet(object):
                                      do_votable=False,
                                      resample=True, # it means remove field distorion
                                      subtract_back=True)
-                except Exception,e:
+                except Exception as e:
                     raise Exception("[astrowarp] Cannot solve Astrometry %s"%str(e))
             else:
                 try:
@@ -3948,7 +3946,7 @@ class ReductionSet(object):
                                        self.temp_dir,
                                        self.config_dict['general']['pix_scale'])
 
-                except Exception,e:
+                except Exception as e:
                     raise Exception("[solveAstrometry] Cannot solve Astrometry %s"%str(e))
                 else:
 		  # Rename the file
