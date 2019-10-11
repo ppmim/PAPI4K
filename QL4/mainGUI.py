@@ -39,7 +39,7 @@
 import locale
 locale.setlocale(locale.LC_ALL, '')
 locale.setlocale(locale.LC_NUMERIC, 'C')
-#print "LC_NUMERIC =", locale.getlocale(locale.LC_NUMERIC) 
+# print "LC_NUMERIC =", locale.getlocale(locale.LC_NUMERIC)
 
 #import matplotlib
 # Next is needed in order to avoid a crash/deadlock when running 
@@ -54,13 +54,11 @@ import sys
 import os
 import os.path
 import fnmatch
-import shutil
 import time
 import math
 import tempfile
 from optparse import OptionParser
 import datetime
-from distutils import spawn
 
 # Tell PyRAF to skip all graphics initialization and run in terminal-only mode (=1).
 # Otherwise (=0) we will get annoying warning messages (such as "could not open
@@ -70,7 +68,7 @@ from distutils import spawn
 # not going to make use of any of them, anyway.
 
 # What is check is if 'PYRAF_NO_DISPLAY' in os.environ:, so no definition !!
-#os.environ['PYRAF_NO_DISPLAY'] = '0'
+# os.environ['PYRAF_NO_DISPLAY'] = '0'
 
 # PANIC modules
 import reduce
@@ -106,10 +104,7 @@ from astropy import units as u
 # "Warning: no login.cl found" if this IRAF file cannot be found either. 
 # To avoid these two annoying messages, and do not clutter the filesystem with pyraf/
 # directories, if $HOME/iraf/login.cl exists, it is used and pyraf/ directory
-# is created there. 
-from pyraf import iraf
-from iraf import noao
-from iraf import mscred
+# is created there.
 
 
 # Multiprocessing
@@ -633,7 +628,7 @@ class MainGUI(QtGui.QMainWindow, form_class):
             #Create working thread that process the file
             try:
                 ltemp = self.inputsDB.GetFilesT('SCIENCE') # (mjd sorted)
-                if len(ltemp) >1 :
+                if len(ltemp) > 1 :
                     last_file = ltemp[-2] # actually, the last in the list is the current one (filename=ltemp[-1])
                     # Put into the queue the task to be done
                     func_to_run = mathOp

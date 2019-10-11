@@ -123,7 +123,7 @@ class MasterDarkModel(object):
             raise
         
         if not os.path.exists( os.path.abspath(os.path.join(self.__output_filename, os.pardir))):
-            raise NameError, 'Wrong output path'
+            raise NameError('Wrong output path')
         if not self.__output_filename:
             log.error("Output DARK frame not defined")
             raise Exception("Wrong output filename")
@@ -230,8 +230,8 @@ class MasterDarkModel(object):
             prihdu.header.set('LST', hdr0['LST'])
             prihdu.header.set('ORIGIN', hdr0['ORIGIN'])
             prihdu.header.set('OBSERVER', hdr0['OBSERVER'])
-        except Exception,e:
-            log.warning("%s"%str(e))
+        except Exception as e:
+            log.warning("%s" % str(e))
 
         prihdu.header.set('PAPITYPE','MASTER_DARK_MODEL')
         prihdu.header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
@@ -258,8 +258,8 @@ class MasterDarkModel(object):
         try:
             hdulist.writeto(self.__output_filename)
             hdulist.close(output_verify='ignore')
-        except Exception,e:
-            log.error("Error writing dark model %s"%self.__output_filename)
+        except Exception as e:
+            log.error("Error writing dark model %s" % self.__output_filename)
             raise e
         
         log.debug('Saved DARK Model to %s' , self.__output_filename)
@@ -333,10 +333,7 @@ time and creates the master dark model and computes several statistics.
                                 options.output_filename,
                                 options.show_stats)
         mDark.createDarkModel()
-    except Exception,e:
+    except Exception as e:
         log.error("Error computing dark model: %s"%str(e))
         sys.exit(0)
-    
-    
-        
-        
+

@@ -303,7 +303,7 @@ class BadPixelMask(object):
             if 'LST' in hdr0: prihdu.header.set('LST', hdr0['LST'])
             if 'ORIGIN' in hdr0: prihdu.header.set('ORIGIN', hdr0['ORIGIN'])
             if 'OBSERVER' in hdr0: prihdu.header.set('OBSERVER', hdr0['OBSERVER'])
-        except Exception,e:
+        except Exception as e:
             log.warning("%s"%str(e))
 
         prihdu.header.set('PAPITYPE',
@@ -332,7 +332,7 @@ class BadPixelMask(object):
         try:
             hdulist.writeto(self.output)
             hdulist.close(output_verify='ignore')
-        except Exception,e:
+        except Exception as e:
             log.error("Error writing linearity model %s"%self.output)
             raise e
 
@@ -467,9 +467,9 @@ class BadPixelMask(object):
                     mad = numpy.median(numpy.abs(tmpf - median))
                     mad*=1.4826
                 
-                    print ">>MEDIAN=",median
-                    print ">>STD=",std
-                    print ">>MAD=",mad
+                    print(">>MEDIAN=", median)
+                    print(">>STD=", std)
+                    print(">>MAD=", mad)
                 
                     #log.debug("Divide each flatted flat by its median")
                     tmpf = tmpf / median
@@ -479,8 +479,8 @@ class BadPixelMask(object):
                     #low = 1.0 - self.lthr*mad/median
                     #high = 1.0 + self.hthr*mad/median
                 
-                    print ">>LOW=", low
-                    print ">>HIGH=", high
+                    print(">>LOW=", low)
+                    print(">>HIGH=", high)
                 
                     # STEP 4.3 Define the bad pixels
                     tmpf.shape = nx1, nx2
@@ -520,8 +520,8 @@ class BadPixelMask(object):
                 prihdu.header.set('LST', hdr0['LST'])
                 prihdu.header.set('ORIGIN', hdr0['ORIGIN'])
                 prihdu.header.set('OBSERVER', hdr0['OBSERVER'])
-            except Exception,e:
-                log.warning("%s"%str(e))
+            except Exception as e:
+                log.warning("%s" % str(e))
 
             prihdu.header.set('PAPITYPE','MASTER_BPM','TYPE of PANIC Pipeline generated file')
             prihdu.header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
@@ -548,7 +548,7 @@ class BadPixelMask(object):
             try:
                 hdulist.writeto(self.output)
                 hdulist.close(output_verify='ignore')
-            except Exception,e:
+            except Exception as e:
                 log.error("Error writing linearity model %s"%self.output)
                 raise e
 
@@ -711,32 +711,11 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
             fits.writeto(filename, source_data, header=gh, clobber=True)
         else:
             fits.writeto(output_filename, source_data, header=gh, clobber=True)
-    except Exception,e:
+    except Exception as e:
         raise e
     else:
         if not overwrite: return output_filename
         else: return filename
-
-
-def gauss_kern(size, sizey=None):
-    """ Returns a normalized 2D gauss kernel array for convolutions """
-    size = int(size)
-    if not sizey:
-        sizey = size
-    else:
-        sizey = int(sizey)
-    x, y = numpy.mgrid[-size:size+1, -sizey:sizey+1]
-    g = numpy.exp(-(x**2/float(size) + y**2/float(sizey)))
-    return g / g.sum()
-
-def blur_image(im, n, ny=None) :
-    """ blurs the image by convolving with a gaussian kernel of typical
-        size n. The optional keyword argument ny allows for a different
-        size in the y direction.
-    """
-    g = gauss_kern(n, sizey=ny)
-    improc = signal.convolve(im, g, mode='valid')
-    return(improc)
 
 
 
@@ -815,8 +794,8 @@ def main(arguments=None):
         
     # Make sure we are not overwriting an existing file 
     if os.path.exists(options.output_filename):
-        print "Error. The output file '%s' already exists."  % \
-              (options.output_filename)
+        print("Error. The output file '%s' already exists."  %
+              (options.output_filename))
         return 1
 
     # Now, check how the routine will work:
@@ -850,12 +829,12 @@ def main(arguments=None):
             bpm = BadPixelMask(options.source_file_list, options.output_filename, 
                           options.lthr, options.hthr, raw_flag=options.raw_flag)
             bpm.create()
-        except Exception, e:
+        except Exception as e:
             log.error("Error running BPM: %s"%str(e))
             return 0
         
 ###############################################################################
 if __name__ == "__main__":
-    print 'Starting BadPixelMap....'
+    print('Starting BadPixelMap....')
     sys.exit(main())
         

@@ -303,7 +303,7 @@ class BadPixelMask(object):
         try:
             my_hdu = fits.open(flat_ratio)
             nExt = 1 if len(my_hdu) == 1 else len(my_hdu) - 1
-        except Exception,e:
+        except Exception as e:
             log.error("Cannot read file: %"%flat_ratio)
             raise Exception("Cannot read file: %"%flat_ratio)
 
@@ -331,9 +331,9 @@ class BadPixelMask(object):
             for i_nExt in range(0, nExt):
                 mfnp = self.output_file.partition('.fits')
                 outfitsname = mfnp[0] + ".Q%02d" % (i + 1) + mfnp[1] + mfnp[2]
-                print "Outfitsname=",outfitsname
-                print "image=",flat_ratio.replace('//','/') + "[%d]" %( i + 1)
-                print "mask=",outfitsname.partition(".fits")[0] + ".pl"
+                print("Outfitsname=",outfitsname)
+                print("image=",flat_ratio.replace('//','/') + "[%d]" %( i + 1))
+                print("mask=",outfitsname.partition(".fits")[0] + ".pl")
                 iraf.imred.ccdred.ccdmask(image=flat_ratio.replace('//','/') + "[%d]" %( i + 1),
                          mask=outfitsname.partition(".fits")[0] + ".pl",
                          ncmed = 7, # Column box size for median level calculation
@@ -462,8 +462,8 @@ class BadPixelMask(object):
                         )
             flats_on_frames[flats_on_frames.index(file)] = file.replace(".fits","_D.fits")                                                
 
-        print "OFF = ", flats_off_frames
-        print "ON  = ", flats_on_frames
+        print("OFF = ", flats_off_frames)
+        print("ON  = ", flats_on_frames)
         
         # STEP 3: Combine dome dark subtracted flats (off & on)
         flat_off_comb = self.temp_dir + "flats_comb_off.fits"
@@ -494,7 +494,7 @@ class BadPixelMask(object):
         misc.fileUtils.removefiles(flat_on_comb)
         flats = self.temp_dir + "/flats_on.txt"
         misc.utils.listToFile(flats_on_frames, flats)
-        print "FILE=",flats
+        print("FILE=", flats)
         # Combine dome dark subtracted ON-flats
         # For making a master flat, this parameter must always be set to 'mode'.
         iraf.mscred.flatcombine(input="@" + flats.replace('//','/'),
@@ -564,7 +564,7 @@ class BadPixelMask(object):
             prihdu.header.set('LST', hdr0['LST'])
             prihdu.header.set('ORIGIN', hdr0['ORIGIN'])
             prihdu.header.set('OBSERVER', hdr0['OBSERVER'])
-        except Exception, e:
+        except Exception as e:
             log.warning("%s"%str(e))
 
         prihdu.header.set('PAPITYPE', 'MASTER_BPM', 'TYPE of PANIC Pipeline generated file')
@@ -592,7 +592,7 @@ class BadPixelMask(object):
         try:
             hdulist.writeto(self.output_file)
             hdulist.close(output_verify='ignore')
-        except Exception,e:
+        except Exception as e:
             log.error("Error writing linearity model %s"%self.output_file)
             raise e
         
@@ -643,7 +643,7 @@ def fixPix(image, mask):
         os.remove(outfits)
         return cleaned
 
-    interp2d = interpolate.interp2d
+    # interp2d = interpolate.interp2d
     #     x = xarray(im.shape)
     #     y = yarray(im.shape)
     #     z = im.copy()
@@ -749,11 +749,11 @@ def main(arguments=None):
         
     # Make sure we are not overwriting an existing file 
     if options.output_filename and os.path.exists(options.output_filename):
-        print "Error. The output file '%s' already exists."  % \
-              (options.output_filename)
+        print("Error. The output file '%s' already exists."  %
+              (options.output_filename))
         return 1
     if not options.master_dark or not os.path.exists(options.master_dark):
-        print "Error, The master dark frame does not exists."
+        print("Error, The master dark frame does not exists.")
         return 1
     
     try:
@@ -761,10 +761,10 @@ def main(arguments=None):
                            options.output_filename, 
                            options.lthr, options.hthr)
         bpm.create()
-    except Exception, e:
+    except Exception as e:
         log.error("Error creating BPM:  %s"%str(e))
         return 0
 ###############################################################################
 if __name__ == "__main__":
-    print 'Start BadPixelMap....'
+    print('Start BadPixelMap....')
     sys.exit(main())
