@@ -82,9 +82,9 @@ class FocusSerie(object):
 
         """
         
-        super(FocusSerie, self).__init__ (*a, **k)
+        super(FocusSerie, self).__init__(*a, **k)
 
-        if type(input_files)!=type(list()) and os.path.isfile(input_files):
+        if type(input_files) != type(list()) and os.path.isfile(input_files):
             files = [line.replace("\n", "").replace('//','/')
                      for line in fileinput.input(input_files)]
 
@@ -282,10 +282,10 @@ def check_python_env():
     Check for Python 2.X with X >= 5; the 'optparse' module needs
     Python 2.5 for the used 'epilog' feature (see below).
     """
-    version = string.split(string.split(sys.version) [0], ".")
+    version = sys.version.split()[0].split('.')
     # well, Python version 3 just gives us a syntax error at the
     # first print statement :-)
-    if map(int, version) >= [3, 0, 0] or map(int, version) < [2, 5, 0]:
+    if list(map(int, version)) >= [3, 0, 0] or list(map(int, version)) < [2, 5, 0]:
         sys.stderr.write("This script needs Python 2.Y.X (with Y >= 5)\n\n")
         sys.stderr.write("You have Python V%s.%s.%s\n" \
                           % (version[0], version[1], version[2]))
@@ -383,7 +383,7 @@ if __name__ == "__main__":
     
     # Eval the focus exposures
     try:
-        focus_serie = FocusSerie( files , options.output, 
+        focus_serie = FocusSerie(files, options.output,
                         options.pix_scale, options.satur_level,
                         False, options.window , options.min_isoarea)
 

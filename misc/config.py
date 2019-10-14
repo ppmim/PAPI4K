@@ -61,7 +61,7 @@ def check_required_option(option_name, option_value):
 
 
 def read_parameter(config_object, section, parameter, type, required = False,
-                   config_file = default_config_file()):
+                   config_file=default_config_file()):
     """ Read a parameter from the configuration file.
 
     The method attemps to read the specified parameter in the section in which
@@ -94,8 +94,7 @@ def read_parameter(config_object, section, parameter, type, required = False,
                 "' cannot be left empty.")
                 sys.exit(style.error_exit_message())    
 
-
-        if type == int:    
+        if type == int:
             value = config_object.getint(section, parameter)
         elif type == float:
             value = config_object.getfloat(section, parameter)
@@ -112,17 +111,19 @@ def read_parameter(config_object, section, parameter, type, required = False,
               "section '" + section + "'.")
         print(style.prefix() + "Is it a " + str(type) + " data type?")
         sys.exit(style.error_exit_message())
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
         print(style.prefix() + "The section '" + section + "' could not be found.")
         sys.exit(style.error_exit_message())
-    except ConfigParser.NoOptionError:
-        if  not required: return None
+    except configparser.NoOptionError:
+        if not required:
+            return None
         else:
             print(style.prefix() + "The parameter '" + parameter + "' could not be found in section '" + section + "'.")
             sys.exit(style.error_exit_message())
     except ConfigParser.Error: 
         print(style.prefix() + "An error occurred while parsing parameter '" + parameter +".")
         sys.exit(style.error_exit_message())    
+
 
 def read_file_parameter(config_object, section, parameter, \
                         config_file = default_config_file(), check_exist=False):
@@ -346,7 +347,7 @@ def read_list_of_intervals(config_object, section, parameter, separator = "-"):
     return parse_list_of_intervals(intervals, section, parameter)
            
 
-class CommentlessFile(io.TextIOBase):
+class CommentlessFile(io.FileIO):
     """ Implements a commentless file subclass.
 
     ConfigParser forces comments to start on their only line (that is, only
@@ -359,9 +360,9 @@ class CommentlessFile(io.TextIOBase):
     def readline(self):
         """ Read a single commentless line from the file. """
 
-        line = super(CommentlessFile, self).readline()
+        line = super(CommentlessFile, self).readline().decode('utf-8')
         if line:
-            line = line.split('#', 1)[0].strip()
+            line = line.split('#', 1)[1].strip()
             return line + '\n'
         else:
             return ''
@@ -383,13 +384,13 @@ def read_config_file(config_file = default_config_file()):
 
     """
    
-    config = configparser.SafeConfigParser()
-    config.optionxform = str # make ConfigParser case sensitive
+    config = configparser.ConfigParser()
+    config.optionxform = str  # make ConfigParser case sensitive
 
     try:
-        config.read_file(CommentlessFile(config_file))
+        config.read(config_file)
     except IOError:
-        print(style.prefix() + "The configuration file '" + config_file + \
+        print(style.prefix() + "The configuration file '" + config_file +
               "' could not be read.")
         sys.exit(style.error_exit_message())    
 
@@ -472,7 +473,7 @@ def read_config_file(config_file = default_config_file()):
 
     nonlinearity = {}
     
-    nonlinearity["suffix"] = read_parameter(config, "nonlinearity", "suffix", str, False, config_file)
+    nonlinearity["suffix"] = read_parameter(config, "nonlinearity", "suffix", False, config_file)
     nonlinearity["apply"] = read_parameter(config, "nonlinearity", "apply", bool, False, config_file)
 
     if nonlinearity["apply"]:
@@ -712,7 +713,7 @@ def read_options(options, section, config_file = default_config_file()):
     """
 
     # Make a temporary copy of the configuration file
-    temp_config = ConfigParser.SafeConfigParser()
+    temp_config = configparser.ConfigParser()
     temp_config.optionxform = str # make ConfigParser case sensitive
 
     if not temp_config.read(config_file):

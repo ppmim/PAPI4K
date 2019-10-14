@@ -102,7 +102,7 @@ def do_skySubtration(in_filelist, out_dir=None, n_nearest=1,
                                 config_dict=conf)
                 
         task.subtractNearSky()
-    except Exception, e:
+    except Exception as e:
         log.error("Error in ReductionSet")
         raise e
     
@@ -152,8 +152,8 @@ TO BE COMPLETED !!!!
     try:
         do_skySubtration(options.input_file, options.output_dir, 
                          options.n_nearest, options.overwrite, options.config_file)
-    except Exception, e:
+    except Exception as e:
         log.error("Fail of sky subtraction !")
         raise e
-    print "\nWell done !"
+    print("\nWell done !")
     

@@ -22,15 +22,15 @@ def testmodule(modulename, moduleversion):
     a reference version
     """
 
-    print bold + \
-          "Testing Python module installation for module '%s':" % \
-          (modulename) + reset
-    print "PAPI needs at least version %s" % (moduleversion)
+    print(bold +
+          "Testing Python module installation for module '%s':" %
+          (modulename) + reset)
+    print("PAPI needs at least version %s" % (moduleversion))
     
     try:
         mod = __import__(modulename)
         refversion = string.split(moduleversion, ".")
-        if modulename=="PyQt4.QtCore":
+        if modulename == "PyQt5.QtCore":
             cv = mod.QtCore.PYQT_VERSION_STR
             currversion = string.split(cv , ".")
             currversion = [ a.split('-')[0] for a in currversion ]
@@ -39,46 +39,44 @@ def testmodule(modulename, moduleversion):
             currversion = string.split(cv , ".")
             currversion = [ a.split('-')[0] for a in currversion ]
 
-        if map(int, currversion) < map(int, refversion):            
-            print probbold + "PROBLEM: You have it with V%s\n" % \
-                  (cv) + reset
+        if list(map(int, currversion)) < list(map(int, refversion)):
+            print(probbold + "PROBLEM: You have it with V%s\n" %
+                  (cv) + reset)
         else:
-            print "Your version %s of '%s' is fine!\n" % \
-                  (cv, modulename)
+            print("Your version %s of '%s' is fine!\n" %
+                  (cv, modulename))
     except:
-        print probbold
-        print probbold + \
-              "PROBLEM: You do not have the Python module '%s' installed!\n" % \
-              (modulename) + reset
+        print(probbold)
+        print(probbold +
+              "PROBLEM: You do not have the Python module '%s' installed!\n" %
+              (modulename) + reset)
 
 
 def check_modules():
     # --------------------
     # Check Python version
     # --------------------
-    print bold + "PAPI Python checking tool" + reset
-    print bold + "=========================" + reset
-    print
-    print bold + "Checking Python Version:" + reset
-    print "PAPI needs Python Version 2.Y with Y>=2.7"
-    pyversion = string.split(string.replace(string.split(sys.version)[0], 
-                                            '+', ''), ".")
-    # well, Python version 3 just gives us a syntax error at the
-    # first print statement :-)
-    if map(int, pyversion) >= [3, 0] or map(int, pyversion) < [2, 7]:
-        print probbold + "PROBLEM: You have Python V%s.%s\n" \
-                          % (pyversion[0], pyversion[1]) + reset
-        print
+    print(bold + "PAPI Python checking tool" + reset)
+    print(bold + "=========================" + reset)
+    print("\n")
+    print(bold + "Checking Python Version:" + reset)
+    print("PAPI needs Python Version 3.Y with Y>=6")
+    pyversion = sys.version.split()[0].split('.')
+
+    if list(map(int, pyversion)) >= [3, 7] or list(map(int, pyversion)) < [3, 2, 0]:
+        print(probbold + "PROBLEM: You have Python V%s.%s\n"
+                          % (pyversion[0], pyversion[1]) + reset)
+        print("\n")
     else:
-        print "Your Python version %s is fine!" % (string.split(sys.version)[0])
-        print
+        print("Your Python version %s is fine!" % pyversion)
+        print("\n")
     
     # ----------------------------------------------------
     # Define the Python modules, and the versions we need
     # ----------------------------------------------------
-    PAPImodules = { 'numpy' : '1.6', 'pyraf' : '1.1',   
+    PAPImodules = { 'numpy': '1.6', 'pyraf' : '1.1',
                    'matplotlib' : '0.98.1', 'scipy': '0.10', 
-                   'PyQt4.QtCore': '4.8',
+                   'PyQt5.QtCore': '5.8',
                    'astropy': '0.3', 'montage_wrapper': '0.9.8' }
     
     # -----------------
@@ -93,9 +91,9 @@ def check_install():
     Check PAPI installation (external tools as Astrometry.net, SExtractor, SCAMP,...)
     """
     
-    print bold + "PAPI checking external tools" + reset
-    print bold + "============================" + reset
-    print
+    print(bold + "PAPI checking external tools" + reset)
+    print(bold + "============================" + reset)
+    print("\n")
     # Check external tools (Astromatic.net, IRAF, xgterm, Astrometry.net, ...)
     astromatic = ['sex', 'scamp', 'swarp','aclient',
                   'cl','mkiraf','xgterm',
@@ -105,12 +103,12 @@ def check_install():
                   'skyfilter']
     for tool in astromatic:
         if not spawn.find_executable(tool):
-            print probbold + "Tool %s was not found in your path" % tool + reset
+            print(probbold + "Tool %s was not found in your path" % tool + reset)
         else:
             # check libs dependencies (eg., libplplot) 
             tool_path = spawn.find_executable(tool)
             # TBD
-            print tool_path
+            print(tool_path)
        
     
     

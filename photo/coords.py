@@ -2,7 +2,7 @@
 
 import re, pdb
 import numpy as np
-from numpy import arccos,sin,cos
+from numpy import arccos, sin, cos
 from math import pi
 
 # constants

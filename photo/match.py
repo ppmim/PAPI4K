@@ -7,10 +7,9 @@
 #__author__ = "H. C. Ferguson"
 
 from numpy import *
-import angsep
-import string
-import sys
+from . import angsep
 import copy
+
 
 def matchsorted(ra,dec,ra1,dec1,tol):
     """ Find closest ra,dec within tol to a target in an ra-sorted list of ra,dec.
@@ -38,8 +37,9 @@ def matchsorted(ra,dec,ra1,dec1,tol):
         return -1, tol
     ibest = indices[0] + i1
     return ibest, sep[indices[0]]
-    
-def matchpos(ra1,dec1,ra2,dec2,tol):
+
+
+def matchpos(ra1, dec1, ra2, dec2, tol):
     """ Match two sets of ra,dec within a tolerance.
         Longer catalog should go first
         Arguments:
