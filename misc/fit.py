@@ -59,7 +59,7 @@ def polyfitr(x, y, order=2, clip=6, xlim=None, ylim=None,
 
     Examples
     --------
-    >>> x = np.linspace(0,4)
+    >>> x = np.linspace(0, 4)
     >>> np.random.seed(13)
     >>> y = x**2 + np.random.randn(50)
     >>> coeff, x1, y1 = polyfitr(x, y)
@@ -103,7 +103,7 @@ def polyfitr(x, y, order=2, clip=6, xlim=None, ylim=None,
         pts, = ax.plot(x, y, '.')
         poly, = ax.plot(x, np.polyval(coeff, x), lw=2)
         pl.show()
-        raw_input('Enter to continue')
+        input('Enter to continue')
     norm = np.abs(y - np.polyval(coeff, x))
     stdev = np.std(norm)
     condition =  norm < clip * stdev
@@ -117,7 +117,7 @@ def polyfitr(x, y, order=2, clip=6, xlim=None, ylim=None,
             pts.set_data(x, y)
             poly.set_data(x, np.polyval(coeff, x))
             pl.show()
-            raw_input('Enter to continue')
+            input('Enter to continue')
         norm = np.abs(y - np.polyval(coeff, x))
         stdev = norm.std()
         condition =  norm < clip * stdev

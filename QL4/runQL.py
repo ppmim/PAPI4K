@@ -55,7 +55,7 @@ try:
 except Exception as e:
     log.warning("Cannot delete ~/iraf/focus_seq.txt")
 
-import mainGUI
+import QL4.mainGUI as mainGUI
 import misc.config
 
 ################################################################################
@@ -63,7 +63,7 @@ import misc.config
 ################################################################################
 
 
-def main(arguments = None):
+def main(arguments=None):
     
     if arguments is None:
         arguments = sys.argv[1:] # ignore argv[0], the script name
@@ -135,7 +135,7 @@ def main(arguments = None):
     log.debug("   + run_mode: %s", ql_opts['run_mode'])
     log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     try:
         f = mainGUI.MainGUI(ql_opts['source'], ql_opts['output_dir'], 
                             ql_opts['temp_dir'], config_opts=options)

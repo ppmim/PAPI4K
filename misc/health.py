@@ -227,12 +227,12 @@ def run_health_check ( input_file, packet_size, f_from, f_to,  window='full-fram
         log.error(msg)
         raise Exception(msg)
 
-    print "Selected area = [%d:%d, %d:%d]"%(x1,x2,y1,y2)
-    print "Packet size = ", packet_size
+    print("Selected area = [%d:%d, %d:%d]" % (x1,x2,y1,y2))
+    print("Packet size = ", packet_size)
     
     # check packet-range
-    if not (f_from >= 0 and f_from < packet_size and 
-            f_to >0 and f_to <= packet_size):
+    if (not (f_from >= 0 and f_from < packet_size and
+            f_to >0 and f_to <= packet_size)):
         raise Exception("Wrong values of packet file range")
       
     # check window-shape
@@ -262,7 +262,7 @@ def run_health_check ( input_file, packet_size, f_from, f_to,  window='full-fram
                     temp_dir + "/stack%02d.fits" % n,
                     temp_dir + "/stack_sigma%02d.fits" % n, 
                     10, 100000, 3)    
-            except Exception, e:
+            except Exception as e:
                 raise e
             n = n + 1
 
@@ -278,7 +278,7 @@ def run_health_check ( input_file, packet_size, f_from, f_to,  window='full-fram
             log.debug("Reading file %s"%(temp_dir+"/stack%02d.fits"%i)) 
             pf = fits.open(temp_dir + "/stack%02d.fits"%i)
             pf2 = fits.open(temp_dir + "/stack_sigma%02d.fits"%i)
-        except Exception, e:
+        except Exception as  e:
             log.error("Cannot open file %s"%(temp_dir+"/stack%02d.fits"%i))
             continue
         signal[i] = robust.r_nanmean(pf[0].data[x1:x2, y1:y2])
@@ -286,7 +286,7 @@ def run_health_check ( input_file, packet_size, f_from, f_to,  window='full-fram
         if kw_time in pf[0].header: 
             itime[i] = pf[0].header[kw_time]
         else:
-            itime[i] = NaN
+            itime[i] = numpy.NaN
 
         stat_values[i] = [itime[i], signal[i], std[i]]
         pf.close()
@@ -430,7 +430,7 @@ be dark corrected and non MEF 4kx4k files."""
                          options.start_packet, options.end_packet, 
                          options.window, options.output_file,
                          options.temp_dir)
-    except Exception, e:
+    except Exception as e:
         log.error("Some error while running Health-Check routine: %s"%str(e))
         sys.exit(0)
         

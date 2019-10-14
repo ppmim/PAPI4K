@@ -143,7 +143,7 @@ def createDataSeq(input_files, seq_type, overwrite=False, output_dir=None):
                                 'PANIC Observing Number of Expositions')
                 hdu[0].header.set('IMAGETYP', seq_type,
                                 'PANIC Image type')
-            except Exception,e:
+            except Exception as e:
                 msg = "Error updating FITS header: %s" %str(e)
                 log.error(msg)
                 raise Exception(msg)
@@ -196,12 +196,11 @@ if __name__ == "__main__":
         files = [line.replace("\n", "").replace('//','/')
             for line in fileinput.input(options.source_file)]
     else:
-        print "Error, cannot read file : ", options.source_file
+        print("Error, cannot read file : ", options.source_file)
         sys.exit(0)
     try:    
         res_files = createDataSeq(files, options.seq_type, options.overwrite, options.output_dir)
-    except Exception,e:
+    except Exception as e:
         log.error("Error, cannot create Date Sequence: %s",str(e))
-    
-    
+
     sys.exit(0)

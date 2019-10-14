@@ -81,7 +81,7 @@ def align_stack_cube(input_file, output_file=None):
             if 'PIXSCALE' in f[0].header:
                 pix_scale = f[0].header['PIXSCALE']
             else:
-                print "Cannot find PIXSCALE, assuming PIXSCALE = 1.0"
+                print("Cannot find PIXSCALE, assuming PIXSCALE = 1.0")
                 pix_scale = 1.0
             if 'CTYPE3' in f[0].header: f[0].header.remove("CTYPE3")
             if 'CRPIX3' in f[0].header: f[0].header.remove("CRPIX3")
@@ -229,7 +229,7 @@ def getPointingOffsets(image_list,
             misc.utils.listToFile(image_list, out_dir + "/makeObjMask.list")
             makeObjMask( out_dir + "/makeObjMask.list", mask_minarea, mask_maxarea, mask_thresh, 
                          satur_level, output_list_file, single_point=single_p)
-        except Exception,e:
+        except Exception as e:
             log.error("Error making object mask")
             raise e
         
@@ -321,7 +321,7 @@ def getWCSPointingOffsets(images_in,
             ra0 = w0.wcs_pix2world(x_pix, y_pix, 1)[0]
             dec0 = w0.wcs_pix2world(x_pix, y_pix, 1)[1]
             log.debug("Ref. image: %s RA0= %s DEC0= %s"%(ref_image, ra0,dec0))
-      except Exception,e:
+      except Exception as e:
           raise e
         
       offset_txt_file = open(p_offsets_file, "w")
@@ -341,7 +341,7 @@ def getWCSPointingOffsets(images_in,
               
               offset_txt_file.write(my_image + "   " + "%.6f   %0.6f\n"%(offsets[i][0], offsets[i][1]))
               i+=1
-        except Exception,e:
+        except Exception as e:
           raise e
         
       offset_txt_file.close()
@@ -371,7 +371,7 @@ def doAstroCalib( image_list, pix_scale ):
                             out_dir, # self.temp_dir produces collision,
                             temp_dir,
                             pix_scale)
-        except Exception,e:
+        except Exception as e:
             raise Exception("[solveAstrometry] Cannot solve Astrometry for file: %s \n%s"%(my_file, str(e)))
         else:
             # Rename the file
@@ -403,12 +403,12 @@ def coaddImages(images_in, list_file, gain_file,
         sys.stdout.flush()
         sys.stderr.flush()
             
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         log.debug("Error running dithercubemean: %s"%output_lines)
         log.debug("Exception: %s"%str(e))
         raise Exception("Error running dithercubemean")
         
-    print "OUTPUT=", output_lines
+    print("OUTPUT=", output_lines)
     
 def mkdir_p(path):
     """
@@ -461,8 +461,8 @@ in principle, with small drift of the planes. No resampling is done.
     if not options.config_file:
         try:
             config_file = os.environ['PAPI_CONFIG']
-        except KeyError, error:
-            print 'Environment variable PAPI_CONFIG not found!'
+        except KeyError as  error:
+            print('Environment variable PAPI_CONFIG not found!')
             sys.exit()
     else:
         config_file = options.config_file
@@ -487,7 +487,7 @@ in principle, with small drift of the planes. No resampling is done.
             try:
                 r = align_stack_cube(ifile, options.output_filename)
                 log.info("COADD of %s  ---> %s"%(ifile, r))
-            except Exception,e:
+            except Exception as e:
                 msg = "Error processing file %s - %s"%(ifile,str(e))
                 log.error(msg)
                 raise e

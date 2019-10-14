@@ -149,9 +149,9 @@ def run_spatial_noise ( input_catalog, area, window, gain,
         y2 = shape[1]-10
         s_area = [x1, y1, x2, y2] 
     
-    print "Selected window = ",s_area
-    print "Gain = ", gain
-    print "Files (%d) = %s" %(n_files, filelist)
+    print("Selected window = ", s_area)
+    print("Gain = ", gain)
+    print("Files (%d) = %s" %(n_files, filelist))
     
     # check window-shape
     pf = fits.open(filelist[0])
@@ -183,7 +183,7 @@ def run_spatial_noise ( input_catalog, area, window, gain,
                 else:
                     log.error("Shape mismatch; frames %s skipped"%(str(packet)))
                     continue
-            except Exception, e:
+            except Exception as e:
                 raise e
             pf1.close()
             pf2.close()
@@ -201,12 +201,12 @@ def run_spatial_noise ( input_catalog, area, window, gain,
         t.append([str(i), str(row[0]), str(row[1]), str(row[2]) ])
         i += 1
     print_table(t)
-    print "------------------------"
+    print("------------------------")
     #print "Std", std_sub
     #print "Itimes", itime
-    print "Gain = ", gain
-    print "Mean noise", mean_noise
-    print "------------------------"
+    print("Gain = ", gain)
+    print("Mean noise", mean_noise)
+    print("------------------------")
     
     # Compute the linear fit Itime VS stddev ( std = a*itime+b )
     # ==============================================================
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     try:
         run_spatial_noise(options.input_images, options.area, options.window,
                          options.gain, options.output_file)
-    except Exception, e:
+    except Exception as e:
         log.error("Some error while running routine: %s"%str(e))
         sys.exit(0)
         

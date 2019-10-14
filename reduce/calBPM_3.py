@@ -44,8 +44,6 @@ from optparse import OptionParser
 # Pyraf modules
 import pyraf
 from pyraf import iraf
-from iraf import noao
-from iraf import mscred
 
 import astropy.io.fits as fits
 import numpy
@@ -123,21 +121,21 @@ class BadPixelMask(object):
         __epsilon = 1.0e-20
         
 
-        if self.dark_list == None and self.flat_list = =None:
+        if self.dark_list is None and self.flat_list is None:
             msg = "Neither Darks nor Flats images provided !"
             log.error(msg)
             raise Exception(msg)
 
-        if self.dark_list != None and len(self.dark_list) < 3:
+        if self.dark_list is not None and len(self.dark_list) < 3:
             log.error('Not enough darks provided. At least 3 darks frames are required')
             raise Exception("Not enough darks provided. At least 3 darks frames are required")
         
-        if self.flat_list != None and len(self.flat_list) < 3:
+        if self.flat_list is not None and len(self.flat_list) < 3:
             log.error('Not enough dome flats provided. At least 3 flat frames are required')
             raise Exception("Not enough dome flats provided. At least 3 flat frames are required")
         
         dark = None
-        if self.dark_list != None:    
+        if self.dark_list is not None:
             # STEP 1: Make the combine of DARK frames
             log.debug("Combining DARKS frames...")
             dark_comb = self.temp_dir + '/darkcomb.fits'
@@ -145,7 +143,7 @@ class BadPixelMask(object):
             # Call IRAF task (it works with MEF or simple images)
             # With next combine, cosmic rays are rejected.
             # Note that frames are scaled by EXPTIME
-            iraf.mscred.darkcombine(input=("'"+"@"+self.dark_list+"'").replace('//','/'), 
+            iraf.mscred.darkcombine(input=("'"+"@"+self.dark_list+"'").replace('//','/'),
                             output=dark_comb, 
                             combine='median', 
                             ccdtype='', 
@@ -212,7 +210,7 @@ class BadPixelMask(object):
                                 subsets='no'
                                 )
                 log.debug("Created combined Flat %s"%flat_comb)
-            except Exception,e:
+            except Exception as e:
                 raise e
 
             flat = fits.open(flat_comb)
@@ -278,8 +276,10 @@ class BadPixelMask(object):
         # STEP 6: Save the BPM ---
         misc.fileUtils.removefiles(self.output)
         hdulist = fits.HDUList()     
-        if self.flat_list != None: hdr0 = flat[0].header
-        else: hdr0 = dark[0].header
+        if self.flat_list is not None:
+            hdr0 = flat[0].header
+        else:
+            hdr0 = dark[0].header
 
         prihdu = fits.PrimaryHDU (data = None, header = None)
         try:
@@ -293,7 +293,7 @@ class BadPixelMask(object):
             if 'LST' in hdr0: prihdu.header.set('LST', hdr0['LST'])
             if 'ORIGIN' in hdr0: prihdu.header.set('ORIGIN', hdr0['ORIGIN'])
             if 'OBSERVER' in hdr0: prihdu.header.set('OBSERVER', hdr0['OBSERVER'])
-        except Exception,e:
+        except Exception as e:
             log.warning("%s"%str(e))
 
         prihdu.header.set('PAPITYPE','MASTER_BPM','TYPE of PANIC Pipeline generated file')
@@ -333,7 +333,7 @@ class BadPixelMask(object):
         try:
             hdulist.writeto(self.output)
             hdulist.close(output_verify='ignore')
-        except Exception,e:
+        except Exception as e:
             log.error("Error writing linearity model %s"%self.output)
             raise e
 
@@ -406,8 +406,8 @@ def main(arguments=None):
         
     # Make sure we are not overwriting an existing file 
     if os.path.exists(options.output_filename):
-        print "Error. The output file '%s' already exists."  % \
-              (options.output_filename)
+        print("Error. The output file '%s' already exists."  %
+              (options.output_filename))
         return 1
 
     try:
@@ -415,12 +415,12 @@ def main(arguments=None):
                         options.output_filename, 
                         options.dthr, options.fthr)
         bpm.create()
-    except Exception, e:
+    except Exception as  e:
         log.error("Error running BPM: %s"%str(e))
         return 0
         
 ###############################################################################
 if __name__ == "__main__":
-    print 'Starting BadPixelMap....'
+    print('Starting BadPixelMap....')
     sys.exit(main())
-        
+

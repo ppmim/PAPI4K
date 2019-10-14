@@ -180,14 +180,15 @@ copyreg.pickle(types.MethodType,
 path = os.path.dirname(os.path.abspath(__file__))
 
 # compile on-the-fly the .ui file
-form_class, base_class = uic.loadUiType(os.path.join(path,
-                                                     'UI/panicQL.ui'))
+form_class, base_class = uic.loadUiType(os.path.join(path, 'panicQL.ui'))
+
 
 # set locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 locale.setlocale(locale.LC_NUMERIC, 'C')
 
-class MainGUI(QtGui.QMainWindow, form_class):
+
+class MainGUI(QtWidgets.QMainWindow, form_class):
     def __init__(self, source_dir="/tmp/data", output_dir="/tmp/out", 
                  temp_dir="/tmp", config_opts=None, *args):
         super(MainGUI, self).__init__(*args)
@@ -1174,7 +1175,7 @@ class MainGUI(QtGui.QMainWindow, form_class):
                                          "Error", 
                                          "Error while running task. " + str(self._task_info._exc))
             except Exception as e:
-                raise Exception("Error while checking_task_info_list: %s"%str(e))
+                raise Exception("Error while checking_task_info_list: %s" % str(e))
             finally:
                 #Anyway, restore cursor
                 QApplication.restoreOverrideCursor()
@@ -1910,7 +1911,7 @@ class MainGUI(QtGui.QMainWindow, form_class):
             triggered=self.image_info_slot)
         self.infoAct.setShortcut(self.tr('Ctrl+H'))
         
-        self.copyAct = QtGui.QAction("&Copy files to clipboard", self,
+        self.copyAct = QtWidgets.QAction("&Copy files to clipboard", self,
             shortcut="Ctrl+C",
             statusTip="Copy current selected files to clipboard", 
             triggered=self.copy_sel_files_slot)
