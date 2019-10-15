@@ -108,7 +108,7 @@ class ClFits (object):
             Mainly used on QL the know whether file writting finished. 
         """
         
-        super (ClFits, self).__init__ (*a,**k)
+        super(ClFits, self).__init__(*a, **k)
       
         self.check_integrity = check_integrity
         self.pathname = full_pathname # path_name + root_name
@@ -169,8 +169,7 @@ class ClFits (object):
         self.binning = 1
         self.telescope = "unknown"
         self._softwareVer = ''
-        
-        
+
         self.recognize()
 
     def getType(self, distinguish_domeflat=True):
@@ -348,12 +347,10 @@ class ClFits (object):
 
     def recognize(self, retries=5):
      
-        #log.info("Recognizing file %s" %self.filename)
-
         # Check the file exists
-        if not os.path.exists( self.pathname ):
+        if not os.path.exists(self.pathname):
             log.error('Cannot find frame : "%s"' % self.pathname)
-            raise Exception("File %s not found"%self.pathname)
+            raise Exception("File %s not found" % self.pathname)
         
         # Read FITS and check FITS-file integrity
         nTry = 0
@@ -361,8 +358,8 @@ class ClFits (object):
 
         if self.check_integrity:
             # First, check if the file has the right extension (.fit, .fits)
-            if not ( self.pathname.endswith('.fits') or 
-                    self.pathname.endswith('.fit') ):
+            if not (self.pathname.endswith('.fits') or
+                    self.pathname.endswith('.fit')):
                 msg = "%s does not seem a FITS file (.fits, .fit)" % self.pathname
                 log.error(msg)
                 raise Exception(msg)

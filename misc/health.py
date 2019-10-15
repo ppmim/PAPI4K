@@ -431,6 +431,6 @@ be dark corrected and non MEF 4kx4k files."""
                          options.window, options.output_file,
                          options.temp_dir)
     except Exception as e:
-        log.error("Some error while running Health-Check routine: %s"%str(e))
+        log.error("Some error while running Health-Check routine: %s" % str(e))
         sys.exit(0)
-        
+
