@@ -42,12 +42,10 @@
     
 #From system
 import sys
-#import os
+import os
 import os.path
 from optparse import OptionParser
-#from optparse import IndentedHelpFormatter
 import fileinput
-import dircache
 
 
 #Log
@@ -224,7 +222,7 @@ def main(arguments = None):
             config_file = os.environ['PAPI_CONFIG']
             log.info("Using PAPI_CONFIG : %s" %config_file)
         except KeyError:
-            print 'Environment variable PAPI_CONFIG not found!'
+            print('Environment variable PAPI_CONFIG not found!')
             sys.exit()
     else:
         config_file = init_options.config_file
@@ -278,12 +276,12 @@ def main(arguments = None):
                     if name.endswith(".fits") or name.endswith(".fit"):
                         rs_files.append(os.path.join(root, name))
         else:
-            for file in dircache.listdir(general_opts['source']):
+            for file in os.listdir(general_opts['source']):
                 if file.endswith(".fits") or file.endswith(".fit"):
                     rs_files.append((general_opts['source']+"/"+file).replace('//','/'))
     
     # Check for list files sorted by MJD
-    if init_options.list == True:
+    if init_options.list:
         log.debug("Creating logsheet file ....")
         logSheet = gls.LogSheet(rs_files, "/tmp/logsheet.txt", [0,len(rs_files)], True)
         logSheet.create()
@@ -355,7 +353,7 @@ def main(arguments = None):
                              seqs_to_reduce=m_seqs_to_reduce,
                              types_to_reduce=stype)
                 
-    except RS.ReductionSetException, e:
+    except RS.ReductionSetException as  e:
         log.error("Error during data reduction: %s " % str(e))
     
     # The following handles ctrl-c. We need to do it this way due to a
@@ -365,15 +363,14 @@ def main(arguments = None):
     except (KeyboardInterrupt, SystemExit):
         log.error("Ctrl-c, KeyboardInterrupt !")
         sys.exit()
-    except Exception, e:
-        print "Cannot reduce the Data Set, check error log...."
-        print str(e)
+    except Exception as e:
+        print("Cannot reduce the Data Set, check error log....")
+        print(str(e))
     else:
-        print "\n\nWell done (I hope) -  %s!!!"%t.tac()
+        print("\n\nWell done (I hope) -  %s!!!" % t.tac())
         return 0
     
 ######################################################################
 if __name__ == "__main__":
     sys.exit(main())
-    
-    
+

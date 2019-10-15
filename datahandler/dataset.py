@@ -55,7 +55,7 @@ class DataSet(object):
     MAX_NFILES = 50
     ############################################################
 
-    def __init__( self , source, instrument=None ):
+    def __init__(self, source, instrument=None):
         """
         Initialize the object.
         
@@ -70,7 +70,7 @@ class DataSet(object):
             with the FITS keyword 'INSTRUME'; whether the keyword does not
             exist, the file is inserted into DB.
         """
-        self.con = None #connection
+        self.con = None  # connection
         self.source = source
         self.id = 0
         
@@ -92,25 +92,26 @@ class DataSet(object):
         self.id = 0
 
     ############################################################    
-    def load(self, source=None ):
+    def load(self, source=None):
 
         """
         Load the source for files and insert them into the dataset DB
         """
 
-        log.debug("Loading DB ...")
+        log.debug("Loading DB ...(source=%s)" % source)
         
-        if source == None: source = self.source
+        if not source:
+            source = self.source
         
         # 1. Load the source
         if isinstance(source, list):
             contents = source 
         elif os.path.isdir(source):
-            log.debug("Loadding Source Directory %s" %source)
+            log.debug("Loadding Source Directory %s" % source)
             contents = [os.path.join(source, file) for file in os.listdir(source)]
         elif os.path.isfile(source):
-            log.debug("Loadding Source File %s" %source)
-            contents = [line.replace( "\n", "") for line in fileinput.input(source)]
+            log.debug("Loadding Source File %s" % source)
+            contents = [line.replace("\n", "") for line in fileinput.input(source)]
         else:
             log.error("Error, DB input source not supported !!")
             raise Exception("Error, DB input source not supported")
@@ -119,11 +120,12 @@ class DataSet(object):
         #    -Load and check the FITS file
         #    -Insert into 'dataset' table a new row with data from FITS file
         for file in contents:
+            log.debug("Reading file: %s" % file)
             try:
                 self.insert(file)
             except Exception as e:
-                log.error("Error while inserting file %s " %file)
-                #raise
+                log.error("Error while inserting file %s " % file)
+                # raise
                 continue
                         
     ############################################################
@@ -141,22 +143,21 @@ class DataSet(object):
         True if all was successful, otherwise False
         """
 
-        #log.debug("Inserting file %s into dataset" % filename)
-        if filename == None: 
+        if not filename:
             return False
         
         try:
-            if self.GetFileInfo(filename) != None:
-                log.error("File %s not inserted, it is already in Database."%filename)
+            if self.GetFileInfo(filename) is not None:
+                log.error("File %s not inserted, it is already in Database." % filename)
                 return False
         except Exception as e:
-            log.exception("Unexpected error reading FITS file %s" %filename)
+            log.exception("Unexpected error reading FITS file %s" % filename)
             raise e
         
         try:
             fitsf = datahandler.ClFits(filename, check_integrity=False)
         except Exception as e:
-            log.exception("Unexpected error reading FITS file %s" %filename)
+            log.exception("Unexpected error reading FITS file %s" % filename)
             raise e
         
         data = (self.id, fitsf.runID, 
@@ -184,8 +185,8 @@ class DataSet(object):
                 raise e
     
             self.id += 1
-            #log.debug("File %s inserted correctly in DB:"%filename)
-            
+
+            log.debug("File %s inserted correctly in DB:" % filename)
             return True
             
         else:

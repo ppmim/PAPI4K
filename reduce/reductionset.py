@@ -437,7 +437,7 @@ class ReductionSet(object):
         """
         
         # Local DataBase (in memory)
-        log.info("Initializing Local DataBase")
+        log.info("Initializing Local DataBase: %s " % self.rs_filelist)
         instrument = self.config_dict['general']['instrument'].lower()
         try:
             self.db = datahandler.dataset.DataSet(self.rs_filelist, instrument)
@@ -446,13 +446,16 @@ class ReductionSet(object):
         except Exception as e:
             log.error("Error while LOCAL data base initialization: \n %s"%str(e))
             raise Exception("Error while LOCAL data base initialization")
-            
+
+        # Later properly initialized in reduceSingleObj()
+        self.m_LAST_FILES = self.rs_filelist
         
-        self.m_LAST_FILES = self.rs_filelist # Later properly initialized in reduceSingleObj()
-        
-        if self.master_dark != None: self.db.insert(self.master_dark)
-        if self.master_flat != None: self.db.insert(self.master_flat)
-        if self.master_bpm  != None: self.db.insert(self.master_bpm)
+        if self.master_dark is not None:
+            self.db.insert(self.master_dark)
+        if self.master_flat is not None:
+            self.db.insert(self.master_flat)
+        if self.master_bpm is not None:
+            self.db.insert(self.master_bpm)
         
         # self.db.ListDataSet()
         
