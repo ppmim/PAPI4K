@@ -87,7 +87,7 @@ import reduce.montage as montage
 pyraf.iraf.prcacheOff()
 
 #
-# Next functions are needed to allow the use of  multiprocessing.Pool() with 
+# Next functions are needed to allow the use of multiprocessing.Pool() with
 # class methods, that need to be picklable (at least 
 # Solution obtained from :
 # http://www.frozentux.net/2010/05/python-multiprocessing/  
@@ -97,6 +97,7 @@ pyraf.iraf.prcacheOff()
 # but it does not work (at least for me!) 
 #
 
+
 def _pickle_method(method):
     """
     Pickle methods properly, including class methods.
@@ -105,6 +106,7 @@ def _pickle_method(method):
     obj = method.im_self
     cls = method.im_class
     return _unpickle_method, (func_name, obj, cls)
+
 
 def _unpickle_method(func_name, obj, cls):
     """
@@ -119,13 +121,12 @@ def _unpickle_method(func_name, obj, cls):
             break
     return func.__get__(obj, cls)        
 
-import copyreg
+#import copyreg
 import types 
 
-copyreg.pickle(types.MethodType,
-    _pickle_method,  
-    _unpickle_method)  
-
+#copyreg.pickle(types.MethodType,
+#    _pickle_method,
+#    _unpickle_method)
 
 
 class ReductionSetException(Exception):
@@ -415,7 +416,7 @@ class ReductionSet(object):
 
         # Print config_dictonary values in log file for debugging
         log.info("[ReductionSet] CONFIGURATION VALUES OF RS ------------------")
-        log.info("PAPI Version: %s" %__version__)
+        log.info("PAPI Version: %s" % __version__)
         log.info(printDict(self.config_dict))
         log.info("------------------------------------------------------------")
   
@@ -444,17 +445,20 @@ class ReductionSet(object):
             self.db.createDB()
             self.db.load()
         except Exception as e:
-            log.error("Error while LOCAL data base initialization: \n %s"%str(e))
+            log.error("Error while LOCAL data base initialization: \n %s" % str(e))
             raise Exception("Error while LOCAL data base initialization")
 
         # Later properly initialized in reduceSingleObj()
         self.m_LAST_FILES = self.rs_filelist
         
-        if self.master_dark is not None:
+        if self.master_dark is not None and self.master_dark != "None":
+            log.info("Inserting DARK")
             self.db.insert(self.master_dark)
-        if self.master_flat is not None:
+        if self.master_flat is not None and self.master_flat != "None":
+            log.info("Inserting FLAT")
             self.db.insert(self.master_flat)
-        if self.master_bpm is not None:
+        if self.master_bpm is not None and self.master_bpm != "None":
+            log.info("Inserting BPM")
             self.db.insert(self.master_bpm)
         
         # self.db.ListDataSet()
@@ -470,7 +474,7 @@ class ReductionSet(object):
                 log.info("Calibration files found in External DB:")
                 self.ext_db.ListDataSet()
             except Exception as e:
-                log.error("Error while EXTERNAL data base initialization: \n %s"%str(e))
+                log.error("Error while EXTERNAL data base initialization: \n %s" % str(e))
                 raise Exception("Error while EXTERNAL data base initialization")
 
             # self.ext_db.ListDataSet()
@@ -857,11 +861,11 @@ class ReductionSet(object):
         'sky' frames in the m_LAST_FILES
         """
        
-        sky_list=[]
-        if list==None:
-            m_list=self.m_LAST_FILES
+        sky_list = []
+        if list is None:
+            m_list = self.m_LAST_FILES
         else:
-            m_list=list
+            m_list = list
             
         for file in m_list:
             fits = datahandler.ClFits(file)
@@ -1240,7 +1244,8 @@ class ReductionSet(object):
         log.debug("[getObjectSequences] Looking for GEIRS/MIDAS generated Data Sequences into the DataSet")
         
         # Init the DB    
-        if self.db==None: self.__initDB()
+        if self.db is None:
+            self.__initDB()
         
         # group data file (only science) by Filter,TExp 
         seq_list = []
@@ -1954,7 +1959,8 @@ class ReductionSet(object):
         
         log.debug("Start builing the whole calibration files ...")
         # If not initialized, Init DB
-        if self.db == None: self.__initDB()
+        if self.db is None:
+            self.__initDB()
         master_files = []
         
         try:
@@ -1979,7 +1985,8 @@ class ReductionSet(object):
         
         log.debug("Start builing the whole calibration files ...")
         # If not initialized, Init DB
-        if self.db==None: self.__initDB()
+        if self.db is None:
+            self.__initDB()
         master_files = []
         try:
             master_files += self.buildMasterDarks()
@@ -2475,7 +2482,10 @@ class ReductionSet(object):
             
 
         return new_sequences, new_seq_types
-    
+
+    def __call__(self, args):
+        return self.calc(args)
+
     def calc(self, args):
         """
         Method used only to use with Pool.map_asycn() function
@@ -2535,7 +2545,7 @@ class ReductionSet(object):
                             sequence, out_dir=self.temp_dir, suffix='_LC')
                 corr_sequence = nl_task.runMultiNLC()
 
-            except Exception as  e:
+            except Exception as e:
                 log.error("Error while applying NL model: %s" % str(e))
                 raise e
             
@@ -2612,7 +2622,7 @@ class ReductionSet(object):
                     use_dark_model = True
                     if use_dark_model==True:# and self.red_mode !="quick":
                         # Build master dark model from a dark serie
-                        task = reduce.calDarkModel.MasterDarkModel (sequence, 
+                        task = reduce.calDarkModel.MasterDarkModel(sequence,
                                                                     self.temp_dir, 
                                                                     outfile)
                         #out = task.createDarkModel()
@@ -2764,7 +2774,7 @@ class ReductionSet(object):
             log.warning("[reduceSeq] Proccessing of Focus Serie deactivated")
             return files_created
             
-            log.warning("[reduceSeq] Focus Serie is going to be reduced:\n%s"%str(sequence))
+            log.warning("[reduceSeq] Focus Serie is going to be reduced:\n%s" % str(sequence))
             try:
                 # 
                 # Generate a random filename for the pdf, to ensure we do not
@@ -2856,7 +2866,8 @@ class ReductionSet(object):
                     elif detector == 'Q4': q = 3 # SG4
                     elif detector == 'Q123': q = -4 # all except SG4
                     else: q = -1 # all detectors
-                    if q >=0 :
+
+                    if q >= 0:
                     #if q!=-1:
                         # A single detector will be reduced.
                         obj_ext = [obj_ext[q]]
@@ -2869,7 +2880,7 @@ class ReductionSet(object):
                         # Nothing to do, **all** detectors will be processed
                         pass
 
-                if parallel == True:
+                if parallel:
                     ######## Parallel #########
                     log.info("[reduceSeq] Entering PARALLEL data reduction ...")
                     try:
@@ -2886,7 +2897,7 @@ class ReductionSet(object):
                           
                         for n in range(next):
                             if next == 1 and q >= 0:
-                            #if next==1 and q!=-1: # single detector processing
+                            # if next==1 and q!=-1: # single detector processing
                                 q_ext = q + 1
                             else:
                                 q_ext = n + 1
@@ -2900,30 +2911,39 @@ class ReductionSet(object):
                             # For the moment, we have the first calibration file 
                             # for each extension; what rule could we follow ?
                             #
-                            if dark_ext == []: mdark = None
-                            else: mdark = dark_ext[n][0] 
-                            if flat_ext == []: mflat = None
-                            else: mflat = flat_ext[n][0]
-                            if bpm_ext == []: mbpm = None
-                            else: mbpm = bpm_ext[n][0]
+                            if dark_ext == []:
+                                mdark = None
+                            else:
+                                mdark = dark_ext[n][0]
+
+                            if flat_ext == []:
+                                mflat = None
+                            else:
+                                mflat = flat_ext[n][0]
+
+                            if bpm_ext == []:
+                                mbpm = None
+                            else:
+                                mbpm = bpm_ext[n][0]
                             
                             l_out_dir = self.out_dir + "/Q%02d" % q_ext
                             if not os.path.isdir(l_out_dir):
                                 try:
                                     os.mkdir(l_out_dir)
                                 except OSError:
-                                    log.error("[reduceSeq] Cannot create output directory %s",l_out_dir)
-                            else: self.cleanUpFiles([l_out_dir])
+                                    log.error("[reduceSeq] Cannot create output directory %s", l_out_dir)
+                            else:
+                                self.cleanUpFiles([l_out_dir])
                             
                             # async call to procedure
                             #extension_outfilename = l_out_dir + "/" + os.path.basename(self.out_file.replace(".fits",".Q%02d.fits"% (n+1)))
-                            extension_outfilename = os.path.abspath(l_out_dir + "/" + "PANIC_SEQ_Q%02d.fits"% q_ext)
+                            extension_outfilename = os.path.abspath(l_out_dir + "/" + "PANIC_SEQ_Q%02d.fits" % q_ext)
                             ##calc( obj_ext[n], mdark, mflat, mbpm, self.red_mode, l_out_dir, extension_outfilename)
                             
                             red_parameters = (obj_ext[n], mdark, mflat, mbpm, 
                                               self.red_mode, l_out_dir, 
                                               extension_outfilename)
-                            log.debug("Calling parameters ---> %s"%(str(red_parameters)))
+                            log.debug("Calling parameters ---> %s" % (str(red_parameters)))
                             
                             # Notice that the results will probably not come out 
                             # of the output queue in the same in the same order 
@@ -2932,9 +2952,9 @@ class ReductionSet(object):
                             # in the original order then consider using `Pool.map()` 
                             # or `Pool.imap()` (which will save on the amount of 
                             # code needed anyway).
-                            #results += [pool.apply_async(self.reduceSingleObj, 
+                            # results += [pool.apply_async(self.reduceSingleObj,
                             #                             red_parameters)]
-                            #pool = multiprocessing.Pool(2) #  por que el 2 ???
+                            # pool = multiprocessing.Pool(2) #  por que el 2 ???
                             results += [pool.map_async(self.calc,
                                                       [red_parameters])]         
                         # Here is where we WAIT (BLOCKING) for the results 
@@ -2959,13 +2979,13 @@ class ReductionSet(object):
                         pool.join()
                         log.result("[reduceSeq] DONE PARALLEL REDUCTION ")
                     except Exception as e:
-                        log.error("[reduceSeq] Error while parallel data reduction ! --> %s",str(e))
+                        log.error("[reduceSeq] Error while parallel data reduction ! --> %s", str(e))
                         raise e
                     
                 else:
                     ######## Serial #########
                     for n in range(next):
-                        if next == 1 and q >=0 : # single detector processing
+                        if next == 1 and q >= 0:  # single detector processing
                             q_ext = q + 1
                         else:
                             q_ext = n + 1
@@ -3209,7 +3229,8 @@ class ReductionSet(object):
         log.info("#########################################")
         
         # if given, set the reduction mode, else use default mode.
-        if red_mode != None: self.red_mode = red_mode
+        if red_mode is not None:
+            self.red_mode = red_mode
         
         
         # Clean old files
@@ -3259,15 +3280,15 @@ class ReductionSet(object):
             # Check if we have an extended object; in that case, only 'quick' 
             # reduction modes are supported.
             if red_mode == 'lemon' and self.obs_mode != 'dither':
-                log.warning("Reduction mode 'lemon' not supported for extended"\
+                log.warning("Reduction mode 'lemon' not supported for extended"
                     "object sequences, 'quick-lemon' will be used.")
                 self.red_mode = 'quick-lemon'
         except:
             raise
         
-        log.info( "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
-        log.info( "OBSERVING SEQUENCE DETECTED. OBS_MODE= %s", self.obs_mode)
-        log.info( "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
+        log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        log.info("OBSERVING SEQUENCE DETECTED. OBS_MODE= %s", self.obs_mode)
+        log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         
         # keep a copy of the original file names
         self.m_rawFiles = self.m_LAST_FILES        
@@ -3315,7 +3336,7 @@ class ReductionSet(object):
         #      can come from the 'master_flat' provided by the user or from the 
         #      just created 'super_flat' with sci images 
         ########################################################################
-        if master_flat == None:
+        if master_flat is None:
             try:
                 # - Find out what kind of observing mode we have (dither, ext_dither, ...)
                 log.info('**** Computing Super-Sky Flat-Field (local_master_flat) ****')
