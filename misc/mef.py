@@ -265,7 +265,7 @@ class MEF (object):
                 log.error("Found a simple FITS file, not a MEF file")
                 raise MEF_Exception("File %s is not a MEF" % file)
             
-            for iSG in range (1, n_ext + 1):
+            for iSG in range(1, n_ext + 1):
                 if instrument.lower() == 'panic':
                     # Since GEIRS-r731M-18 version, new MEF extension naming:
                     #    EXTNAME = 'Qi'
@@ -281,7 +281,7 @@ class MEF (object):
                     extname = 'CHIP%i.INT1' %iSG 
                 suffix = out_filename_suffix % iSG # number from 1 to 4
                 new_filename = file.replace(".fits", suffix)
-                if out_dir != None: 
+                if out_dir is not None:
                     new_filename = new_filename.replace( 
                                     os.path.abspath(os.path.join(new_filename, os.pardir)), out_dir
                                     )
@@ -331,8 +331,8 @@ class MEF (object):
                 del out_hdulist
                 log.info("File %s created"%(out_filenames[n]))
                 n += 1
-                
-            
+
+        hdulist.close()
         log.info("End of SplitMEF. %d files created", n)
         return n_ext, out_filenames
                     

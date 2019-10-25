@@ -327,7 +327,6 @@ def main(arguments = None):
                 check_data=general_opts['check_data'],
                 config_dict = options )
     
-                    
         if init_options.print_seq:
             rs.getSequences(show=True, stype=init_options.seq_type)
         elif init_options.build_calibrations:

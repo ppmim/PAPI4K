@@ -56,50 +56,57 @@ def collapse(frame_list, out_dir="/tmp"):
         f = fits.open(frame_i)
         t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_coadd.fits")
         # First, we need to check if we have MEF files
-        if len(f)>1 and len(f[1].data.shape)==3:
+        if len(f) > 1 and len(f[1].data.shape) == 3:
             try:
-                log.info("Collapsing a MEF cube %s"%frame_i)
+                log.info("Collapsing a MEF cube %s" % frame_i)
                 out = collapse_mef_cube(frame_i, t_filename)
                 new_frame_list.append(out)
             except Exception as e:
-                log.error("Some error collapsing MEF cube: %s"%str(e))
+                log.error("Some error collapsing MEF cube: %s" % str(e))
+                f.close()
                 raise e
-        elif len(f)>1 and len(f[1].data.shape)==2:
+        elif len(f) > 1 and len(f[1].data.shape)==2:
             log.debug("MEF file has no cubes, no collapse required.")
-            #shutil.copyfile(frame_i, t_filename)
+            # shutil.copyfile(frame_i, t_filename)
             new_frame_list.append(frame_i)
         elif len(f[0].data.shape)!=3: # 2D !
             log.debug("It is not a FITS-cube image, no collapse required")
-            #shutil.copyfile(frame_i, t_filename)
+            # shutil.copyfile(frame_i, t_filename)
             new_frame_list.append(frame_i)
         else:            
             # Suppose we have single CUBE file ...
             out_hdulist = fits.HDUList()               
-            prihdu = fits.PrimaryHDU (data = f[0].data.sum(0), header = f[0].header)
+            prihdu = fits.PrimaryHDU (data=f[0].data.sum(0), header=f[0].header)
             prihdu.scale('float32') 
             # Updating PRIMARY header keywords...
             prihdu.header.set('NCOADDS', f[0].data.shape[0])
-            prihdu.header.set('EXPTIME', f[0].header['EXPTIME']*f[0].data.shape[0])
+            prihdu.header.set('EXPTIME', f[0].header['EXPTIME'] * f[0].data.shape[0])
             prihdu.header.set('PAPIVERS', __version__, "PANIC Pipeline version")
             # Weird case (OmegaCass), but it produce a fail with WCS lib
-            if 'CTYPE3' in prihdu.header: prihdu.header.remove("CTYPE3")
-            if 'CRPIX3' in prihdu.header: prihdu.header.remove("CRPIX3")
-            if 'CRVAL3' in prihdu.header: prihdu.header.remove("CRVAL3")
-            if 'CDELT3' in prihdu.header: prihdu.header.remove("CDELT3")
+            if 'CTYPE3' in prihdu.header:
+                prihdu.header.remove("CTYPE3")
+            if 'CRPIX3' in prihdu.header:
+                prihdu.header.remove("CRPIX3")
+            if 'CRVAL3' in prihdu.header:
+                prihdu.header.remove("CRVAL3")
+            if 'CDELT3' in prihdu.header:
+                prihdu.header.remove("CDELT3")
             
             out_hdulist.append(prihdu)    
-            #out_hdulist.verify ('ignore')
+            # out_hdulist.verify ('ignore')
             # Now, write the new collapsed file
-            out_hdulist.writeto(t_filename, output_verify = 'ignore', 
-                                 clobber=True)
+            out_hdulist.writeto(t_filename, output_verify='ignore',
+                                 overwrite=True)
             
-            out_hdulist.close(output_verify = 'ignore')
+            out_hdulist.close(output_verify='ignore')
             del out_hdulist
             new_frame_list.append(t_filename)
             log.info("FITS file %s created" % (new_frame_list[n]))
-            n+=1
+            n += 1
+            f.close()
      
     return new_frame_list
+
 
 def collapse_mef_cube(inputfile, out_filename=None):
     """
@@ -127,10 +134,9 @@ def collapse_mef_cube(inputfile, out_filename=None):
         outfile = inputfile.replace(".fits", "_coadd_%s.fits" % str(f[1].data.shape[0]).zfill(3))
     else:
         outfile = out_filename 
-    out_hdulist.writeto (outfile, output_verify = 'ignore', 
-                             clobber=True)
+    out_hdulist.writeto(outfile, output_verify='ignore', overwrite=True)
         
-    out_hdulist.close(output_verify = 'ignore')
+    out_hdulist.close(output_verify='ignore')
     del out_hdulist
     log.info("FITS file %s created" % (outfile))
 
@@ -193,9 +199,9 @@ def collapse_distinguish(frame_list, out_filename="/tmp/collapsed.fits"):
     out_hdulist.append(prihdu)    
     #out_hdulist.verify ('ignore')
     # Now, write the new single FITS file
-    out_hdulist.writeto(out_filename, output_verify = 'ignore', clobber=True)
+    out_hdulist.writeto(out_filename, output_verify='ignore', overwrite=True)
     
-    out_hdulist.close(output_verify = 'ignore')
+    out_hdulist.close(output_verify='ignore')
     del out_hdulist
     log.info("FITS file %s created" % (out_filename))
      
