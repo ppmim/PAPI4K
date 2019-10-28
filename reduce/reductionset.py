@@ -2617,8 +2617,7 @@ class ReductionSet(object):
                     pool.close()
                     pool.join()
                     
-                    
-                elif (r[0]==False and r[1]=="chk_expt"):
+                elif r[0] ==False and r[1] == "chk_expt":
                     log.info("Found a dark series of frames with different EXPTIME: Dark model will be created")
                     use_dark_model = True
                     if use_dark_model==True:# and self.red_mode !="quick":
@@ -2791,7 +2790,7 @@ class ReductionSet(object):
                 #
                 misc.utils.listToFile(sequence, self.temp_dir+"/focus.list")
                 pix_scale = self.config_dict['general']['pix_scale']
-                satur_level =  self.config_dict['skysub']['satur_level']
+                satur_level = self.config_dict['skysub']['satur_level']
                 detector = self.config_dict['general']['detector']
                 task = reduce.eval_focus_serie.FocusSerie(self.temp_dir+"/focus.list", 
                                                                    str(outfile),
@@ -3156,7 +3155,7 @@ class ReductionSet(object):
                 # input image (and weight map) is overwritten
                 misc.imtrim.imgTrim(file)
             if file is not None and os.path.splitext(file)[1] == '.fits':
-                log.debug("Inserting result in DB: %s",file)
+                log.debug("Inserting result in DB: %s", file)
                 self.db.insert(file)
         
         # not sure if is better to do here ??? 

@@ -108,17 +108,15 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
     
     ####### 1st loop (xmin) #############################
     i = start
-    print("PPPPPPPP1")
     while i <= nx:
-        print("loop....")
         if lasti == i:
             std = 1.0
         else:
-            print("FILE =", file + "["+str(int(i))+",*]")
+            # print("FILE =", file + "["+str(int(i))+",*]")
             std = float(iraf.imstat(
                 images=file+"["+str(int(i))+",*]",
                 fields='stddev', format='no', Stdout=1)[0])
-        print("PPPPPPPP2")
+
         if std != 0.0:
             if i == 1:
                 xmin = 1
@@ -140,8 +138,7 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
         log.error("No data in file %s"%file)
         raise Exception("No data in file %s"%file)
 
-    print("PPPPPPPP3")
-    #### 2nd loop (xmax) ###############################  
+    #### 2nd loop (xmax) ###############################
     
     lasti = 0
     start = nx
