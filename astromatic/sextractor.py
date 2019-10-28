@@ -91,7 +91,6 @@ Example of use:
 # ======================================================================
 
 
-import sys
 import os
 import subprocess
 import re
@@ -353,7 +352,8 @@ class SExtractor(object):
             dict([(k, copy.deepcopy(SExtractor._SE_config[k]["value"]))\
                   for k in SExtractor._SE_config.keys()]))
 
-        # Extra config parameters that will be added/updated to the current values of the config file (high priority)
+        # Extra config parameters that will be added/updated to the current
+        # values of the config file (high priority)
         self.ext_config = {}
               
         self.program = None
@@ -372,16 +372,16 @@ class SExtractor(object):
 
         candidates = ['sextractor', 'sex']
 
-        if (path):
+        if path:
             candidates = [path]
         
-        selected=None
+        selected = None
         for candidate in candidates:
             try:
                 p = subprocess.Popen(candidate, shell=True, bufsize=0,
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, close_fds=True)
-                versionline = p.communicate()[0]
+                versionline = (p.communicate()[0]).decode()
  
                 if versionline.find("SExtractor") != -1:
                     selected = candidate
@@ -413,8 +413,6 @@ class SExtractor(object):
 
         return _program, _version
 
-
-
     def update_config(self):
         """
         Update the configuration files according to the current
@@ -429,7 +427,7 @@ class SExtractor(object):
         rows = len(filter)
         cols = len(filter[0])   # May raise ValueError, OK
 
-        filter_f = open(self.config['FILTER_NAME'], 'w')
+        filter_f = open(self.config['FILTER_NAME'], mode='w')
         filter_f.write("CONV NORM\n")
         filter_f.write("# %dx%d Generated from sextractor.py module.\n" %
                        (rows, cols))
@@ -443,7 +441,7 @@ class SExtractor(object):
 
         parameters_f = open(self.config['PARAMETERS_NAME'], 'w')
         for parameter in self.config['PARAMETERS_LIST']:
-            parameters_f.write(parameter)
+            parameters_f.write(parameter+"\n")
 
         parameters_f.close()
 
@@ -467,7 +465,7 @@ class SExtractor(object):
             else:
                 value = str(self.config[key])
             
-            main_f.write("%-16s       %-16s # %s" %
+            main_f.write("%-16s       %-16s # %s\n" %
                              (key, value, SExtractor._SE_config[key]['comment']))
 
         main_f.close()
@@ -483,30 +481,37 @@ class SExtractor(object):
         (if any) will be deleted after SExtractor terminates.
 
         """
-
+        print("PASO 1")
         if updateconfig:
             self.update_config()
 
         # Try to find SExtractor program
         # This will raise an exception if it failed
 
+        print("PASO 2")
+
         self.program, self.version = self.setup(path)
 
         # Compound extra config command line args
         ext_args = ""
+        print("PASO 3")
+
         for key in self.ext_config.keys():
-            ext_args = ext_args + " -" + key+ " " + str(self.ext_config[key])
+            ext_args = ext_args + " -" + key + " " + str(self.ext_config[key])
 
         commandline = (
             self.program + " -c " + self.config['CONFIG_FILE'] + " " + ext_args + " " + file)
-        
+        print("PASO 4")
+
         # print commandline
         rcode = misc.utils.runCmd(commandline)
-        
+        print("PASO 5")
+
         if rcode == 0:
             raise SExtractorException(
                   "SExtractor command [%s] failed." % str(commandline))
-            
+        print("PASO 6")
+
         if clean:
             self.clean()
 
@@ -517,12 +522,11 @@ class SExtractor(object):
         each star: {'param1': value, 'param2': value, ...}.
         """
 
-        output_f = SExtractorfile(self.config['CATALOG_NAME'], 'r')
+        output_f = SExtractorfile(self.config['CATALOG_NAME'], mode='r')
         c = output_f.read()
         output_f.close()
 
         return c
-
 
     def clean(self, config=True, catalog=False, check=False):
         """
@@ -533,14 +537,14 @@ class SExtractor(object):
         """
 
         try:
-            if (config):
+            if config:
                 os.unlink(self.config['FILTER_NAME'])
                 os.unlink(self.config['PARAMETERS_NAME'])
                 os.unlink(self.config['STARNNW_NAME'])
                 os.unlink(self.config['CONFIG_FILE'])
-            if (catalog):
+            if catalog:
                 os.unlink(self.config['CATALOG_NAME'])
-            if (check):
+            if check:
                 os.unlink(self.config['CHECKIMAGE_NAME'])
                 
         except OSError:
@@ -549,3 +553,26 @@ class SExtractor(object):
 
 
 # ======================================================================
+
+
+import logging as log
+# main test
+if __name__ == "__main__":
+
+    myfile = "/tmp/Q01/M35_2015_11_30_0046_coadd.Q01.skysub.ast.fits"
+    sex = SExtractor()
+    # sex.config['CONFIG_FILE']="/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
+    # sex.ext_config['CHECKIMAGE_TYPE'] = "OBJECTS"
+    sex.config['CATALOG_TYPE'] = "FITS_LDAC"
+    sex.config['CATALOG_NAME'] = myfile + ".ldac"
+    sex.config['DETECT_THRESH'] = 3.0
+    sex.config['DETECT_MINAREA'] = 20
+
+    sex.config['SATUR_LEVEL'] = 10000
+
+    try:
+        log.debug("*** Calling SExtractor....")
+        sex.run(myfile, updateconfig=True, clean=False)
+    except Exception as e:
+        log.error("Error in SExtractor call: %s" % str(e))
+        raise e

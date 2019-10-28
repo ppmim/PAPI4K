@@ -398,7 +398,6 @@ class SCAMP:
         self.program = None
         self.version = None
 
-
     def setup(self, path=None):
         """
         Look for SCAMP program ('scamp').
@@ -412,25 +411,25 @@ class SCAMP:
 
         candidates = ['scamp']
 
-        if (path):
+        if path:
             candidates = [path]
         
-        selected=None
+        selected = None
         for candidate in candidates:
             try:
-                p = subprocess.Popen (candidate, shell = True, bufsize = 0,
-                    stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
-                    stderr = subprocess.STDOUT, close_fds = True)
+                p = subprocess.Popen(candidate, shell=True, bufsize=0,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT, close_fds=True)
                 
-                versionline = p.communicate()[0]
+                versionline = p.communicate()[0].decode()
  
-                if versionline.find("SCAMP" != -1):
-                    selected=candidate
+                if versionline.find("SCAMP") != -1:
+                    selected = candidate
                     break
-            except (IOError,OSError):
+            except (IOError, OSError):
                 continue
                 
-        if not(selected):
+        if not selected:
             raise SCAMP_Exception(
                   """
                   Cannot find SCAMP program. Check your PATH,
@@ -465,7 +464,7 @@ class SCAMP:
 
         # -- Write main configuration file
 
-        main_f = __builtin__.open(self.config['CONFIG_FILE'], 'w')
+        main_f = open(self.config['CONFIG_FILE'], 'w')
 
         for key in self.config.keys():
             if key in SCAMP._SC_config_special_keys:
@@ -519,18 +518,19 @@ class SCAMP:
         self.program, self.version = self.setup(path)
         
         # check how many files in the input
-        my_catalogs=""
-        if type(catalog_list) == types.ListType:
+        my_catalogs = ""
+        #if type(catalog_list) == types.ListType:
+        if isinstance(catalog_list, list):
             for file in catalog_list:
                my_catalogs = my_catalogs + " " + file
         else:
-            my_catalogs=catalog_list # a single file
+            my_catalogs = catalog_list  # a single file
         
             
         # Compound extra config command line args
-        ext_args=""
+        ext_args = ""
         for key in self.ext_config.keys():
-            ext_args=ext_args + " -" + key+ " " + str(self.ext_config[key])     
+            ext_args = ext_args + " -" + key+ " " + str(self.ext_config[key])
             
         commandline = (
             self.program + " -c " + self.config['CONFIG_FILE'] + " " + ext_args + " " + my_catalogs)
@@ -612,7 +612,7 @@ def runCmd( str_cmd, p_shell=True ):
     #blocking the child process.(Python Ref.doc)
 
     (stdoutdata, stderrdata) = p.communicate()
-    err = stdoutdata + " " + stderrdata
+    err = stdoutdata.decode() + " " + stderrdata.decode()
 
     # IMPORTANT: Next checking (only available when shell=True) not always detect all kind of errors !!
     if err.count('WARNING: Significant inaccuracy'):
@@ -635,14 +635,15 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Wrong number of arguments\n")
-        print("Usage: scamp.py file.fits\n")
+        print("Usage: scamp.py file.fits.ldac\n")
         sys.exit(0)
 
     scamp = SCAMP()
     # Using a specific config file (updateconfig=False)
-    scamp.config['CONFIG_FILE']="scamp.conf"
-    scamp.config['ASTREF_CATALOG']="2MASS"
-    cat_files = [line.replace( "\n", "") for line in fileinput.input(sys.argv[1])]
+    scamp.config['CONFIG_FILE'] = "scamp.conf"
+    scamp.config['ASTREF_CATALOG'] = "2MASS"
+    # cat_files = [line.replace("\n", "") for line in fileinput.input(sys.argv[1])]
+    cat_files = [sys.argv[1]]
     scamp.run(cat_files, updateconfig=False, clean=False)
     
     # Using and creating internal default config file (updateconfig=True)
