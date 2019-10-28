@@ -44,7 +44,6 @@ from misc.paLog import log
 from misc.version import __version__
 
 
-                
 def imgTrim(inputfile, outputfile=None, p_step=128):
     """
     Crop/cut the input image edges
@@ -70,7 +69,7 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
           
     """ 
 
-    if outputfile == None:
+    if outputfile is None:
         # inputfile name is overwritten        
         outputfile = inputfile
     elif os.path.exists(outputfile) and outputfile != inputfile:
@@ -109,14 +108,17 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
     
     ####### 1st loop (xmin) #############################
     i = start
-    while i<=nx:
-        if lasti==i:
+    print("PPPPPPPP1")
+    while i <= nx:
+        print("loop....")
+        if lasti == i:
             std = 1.0
         else:
-            #print "FILE =", file+"["+str(i)+",*]"
-            std = float(iraf.imstat (
-                images=file+"["+str(i)+",*]",
+            print("FILE =", file + "["+str(int(i))+",*]")
+            std = float(iraf.imstat(
+                images=file+"["+str(int(i))+",*]",
                 fields='stddev', format='no', Stdout=1)[0])
+        print("PPPPPPPP2")
         if std != 0.0:
             if i == 1:
                 xmin = 1
@@ -128,37 +130,37 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
                 else:
                     lasti = i
                     step = step/2
-                    i = i -2*step
+                    i = i - 2 * step
         else:
             pass
-        i+=step
+        i += step
         #print "DEBUG_xmin (i,std,lasti):" , i, std, lasti
          
     if xmin == 0:
         log.error("No data in file %s"%file)
         raise Exception("No data in file %s"%file)
-    
-    
+
+    print("PPPPPPPP3")
     #### 2nd loop (xmax) ###############################  
     
     lasti = 0
     start = nx
     step = int(p_step)
     i = start
-    while i>=1:
-        if (lasti==i):
+    while i >= 1:
+        if lasti == i:
             std = 1.0
         else:
-            std = float(iraf.imstat (
-                images=file+"["+str(i)+",*]",
+            std = float(iraf.imstat(
+                images=file+"["+str(int(i))+",*]",
                 fields='stddev',format='no',Stdout=1)[0])
-        
-        if (std!=0.0):
-            if (i==nx):
+
+        if std != 0.0:
+            if i == nx:
                 xmax = nx
                 break
             else:
-                if (step==1):
+                if step == 1:
                     xmax = i
                     break
                 else:
@@ -177,12 +179,12 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
     start = 1
     step = int(p_step)
     i = start
-    while i<=ny:
-        if (lasti==i):
+    while i <= ny:
+        if lasti == i:
             std = 1.0
         else:
-            std = float(iraf.imstat (
-                images=file+"[*,"+str(i)+"]",
+            std = float(iraf.imstat(
+                images=file+"[*,"+str(int(i))+"]",
                 fields='stddev',format='no',Stdout=1)[0])
         
         if (std!=0.0):
@@ -190,7 +192,7 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
                 ymin = 1
                 break
             else:
-                if (step==1):
+                if step ==1:
                     ymin = i
                     break
                 else:
@@ -210,19 +212,19 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
     step = int(p_step)
     i = start
     while i >= 1:
-        if (lasti == i):
+        if lasti == i:
             std = 1.0
         else:
-            std = float(iraf.imstat (
-                images=file+"[*,"+str(i)+"]",
-                fields='stddev',format='no',Stdout=1)[0])
+            std = float(iraf.imstat(
+                images=file+"[*,"+str(int(i))+"]",
+                fields='stddev', format='no', Stdout=1)[0])
         
-        if (std != 0.0):
-            if (i == ny):
+        if std != 0.0:
+            if i == ny:
                 ymax = ny
                 break
             else:
-                if (step == 1):
+                if step == 1:
                     ymax = i
                     break
                 else:
@@ -231,7 +233,7 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
                     i= i + 2 * step
         else:
             pass
-        i-=step
+        i -= step
         #print "DEBUG_ymax (i,std,lasti):" , i, std, lasti
     
     
@@ -248,8 +250,8 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
     # and modify WCS keywords on header (but not always as we'd wish, e.g.,
     # remove CDi_j values equal to 0)
     log.debug("Trimming image %s [ %d : %d, %d : %d ]" % (file.replace("//", "/"), xmin, xmax, ymin, ymax))
-    iraf.imcopy(input=file.replace("//", "/") + "[" + str(xmin) + ":" + str(xmax) + "," +
-            str(ymin) + ":" + str(ymax) + "]", output=outputfile)
+    iraf.imcopy(input=file.replace("//", "/") + "[" + str(int(xmin)) + ":" + str(int(xmax)) + "," +
+            str(int(ymin)) + ":" + str(int(ymax)) + "]", output=outputfile)
     
     fits.setval(outputfile, keyword='HISTORY', value='Image trimmed', ext=0)
     fits.setval(outputfile, keyword='PAPIVERS', value=__version__, 
@@ -262,13 +264,13 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
         ima_sec = file.replace(".fits", ".weight.fits").replace("//", "/")
         if os.path.exists(ima_sec):
             log.debug("Trimming image %s [ %d : %d, %d : %d ]" % (ima_sec, xmin, xmax, ymin, ymax))
-            iraf.imcopy(input=ima_sec + "[" + str(xmin) + ":" + str(xmax) + "," +
-                str(ymin) + ":" + str(ymax) + "]", output=ima_sec)
+            iraf.imcopy(input=ima_sec + "[" + str(int(xmin)) + ":" + str(int(xmax)) + "," +
+                str(int(ymin)) + ":" + str(int(ymax)) + "]", output=ima_sec)
         ima_objs = file.replace(".fits", "objs.fits").replace("//", "/")
         if os.path.exists( ima_objs ):
             log.debug("Trimming image %s [ %d : %d, %d : %d ]" % (ima_objs, xmin, xmax, ymin, ymax))
-            iraf.imcopy(input=ima_objs + "[" + str(xmin) + ":" + str(xmax) + "," +
-                str(ymin) + ":" + str(ymax) + "]", output=ima_objs)
+            iraf.imcopy(input=ima_objs + "[" + str(int(xmin)) + ":" + str(int(xmax)) + "," +
+                str(int(ymin)) + ":" + str(int(ymax)) + "]", output=ima_objs)
                 
     except Exception as e:
         log.debug("Some error trimming image %s . Probaby input image is wrong." % ima_sec)
@@ -314,7 +316,7 @@ image.
                     options.step)
         except Exception as e:
             log.error("Error while trimming image %s"%options.input_image)
-            log.error("%s"%e)
+            log.error("%s" % str(e))
             raise e
     else:
         parser.error("Input or output file does not exist.")

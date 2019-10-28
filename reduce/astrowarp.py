@@ -645,7 +645,7 @@ class AstroWarp(object):
         # Then, we solve sequentially.
         solved_files = []
         
-        # Check if input images have already been astrometically calibrated.
+        # Check if input images have already been astrometrically calibrated.
         for file in self.input_files:
             solved_msg = "--Start of Astrometry.net WCS solution--"
             if not solved_msg in fits.getheader(file)['COMMENT']:
@@ -684,8 +684,10 @@ class AstroWarp(object):
             sex.config['SATUR_LEVEL'] = int(nc) * int(self.config_dict['astrometry']['satur_level'])
             
             try:
+                log.debug("*** Calling SExtractor....")
                 sex.run(file, updateconfig=True, clean=False)
             except Exception as e:
+                log.error("Error in SExtractor call: %s" %str(e))
                 raise e
 
             
@@ -760,7 +762,7 @@ class AstroWarp(object):
             log.debug("Using default weight maps: %s " % (basename + ".weight" + extension))
             
         if not self.resample:
-            swarp.ext_config['RESAMPLE'] = 'N' # then, no field distortion removing is done
+            swarp.ext_config['RESAMPLE'] = 'N'  # then, no field distortion removing is done
   
         if not self.subtract_back:
             swarp.ext_config['SUBTRACT_BACK'] = 'N'
@@ -781,12 +783,13 @@ class AstroWarp(object):
         try:
             swarp.run(solved_files, updateconfig=False, clean=False)
         except Exception as e:
+            log.error("Error running SWARP : %s " % str(e))
             raise e
         
         ## STEP 4: Make again the final astrometric calibration (only 
         ## if we coadded more that one file) to the final coadd.
         ## TODO: I am not sure if it is needed to do again ?????
-        if (len(self.input_files) > 1):
+        if len(self.input_files) > 1:
             log.debug("*** Doing final astrometric calibration....")
             try:
                 solved = reduce.solveAstrometry.solveField(

@@ -354,15 +354,15 @@ class SWARP(object):
                     stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
                     stderr = subprocess.STDOUT, close_fds = True)
                 
-                versionline = p.communicate()[0]
+                versionline = p.communicate()[0].decode()
                 
-                if (versionline.find("SWarp") != -1):
-                    selected=candidate
+                if versionline.find("SWarp") != -1:
+                    selected = candidate
                     break
             except IOError:
                 continue
                 
-        if not(selected):
+        if not selected:
             raise SWARPException(
                   """
                   Cannot find SWARP program. Check your PATH,
@@ -397,7 +397,7 @@ class SWARP(object):
 
         # -- Write main configuration file
 
-        main_f = __builtin__.open(self.config['CONFIG_FILE'], 'w')
+        main_f = open(self.config['CONFIG_FILE'], 'w')
 
         for key in self.config.keys():
             if (key in SWARP._SW_config_special_keys):
@@ -446,8 +446,8 @@ class SWARP(object):
         self.program, self.version = self.setup(path)
         
         # check how many files in the input
-        if type(file_list) == types.ListType:
-            my_files=""
+        if isinstance(file_list,list):
+            my_files = ""
             for file in file_list:
                 my_files = my_files + " " + file
         else:

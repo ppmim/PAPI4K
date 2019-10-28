@@ -105,6 +105,7 @@ OVERFLOW_EXTRACT   = 128
 class WrongSExtractorfileException(Exception):
     pass
 
+
 class SExtractorfile:
     """
     A class to manipulate SExtractor ASCII catalogs.
@@ -595,7 +596,6 @@ class SExtractorfile:
                                   "unit": ""}
               }
     
-
     def __init__(self, name, mode='r'):
         self.name = name
         self.mode = mode
@@ -608,6 +608,7 @@ class SExtractorfile:
         self._firstline = True
         
         if self.mode != 'r':
+            print("------> MODE=%s" % self.mode)
             raise ValueError(
                   'only read-only access is now implemented.')
         
@@ -639,8 +640,7 @@ class SExtractorfile:
                 break
             self._line = self._file.readline()
 
-
-        if not(self._keys):
+        if not self._keys:
             raise WrongSExtractorfileException(
                   'not a SExtractor text catalog (empty header)')
             
@@ -719,7 +719,7 @@ class SExtractorfile:
 
 # ======================================================================
 
-def open(name, mode='r'):
+def sex_open(name, mode='r'):
     """
     Factory function.
     Open a SExtractor file and return a SExtractor file object.

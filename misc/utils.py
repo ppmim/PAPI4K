@@ -150,9 +150,9 @@ def runCmd(str_cmd, p_shell=True ):
     # blocking the child process.(Python Ref.doc)
 
     (stdoutdata, stderrdata) = p.communicate()
-    err = stdoutdata + " " + stderrdata
+    err = stdoutdata.decode() + " " + stderrdata.decode()
 
-    if len(err)>1:
+    if len(err) > 1:
         print("[runCmd]: STDOUT + STDERR = ", err)
     
     

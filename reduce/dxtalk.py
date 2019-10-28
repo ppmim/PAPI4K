@@ -294,7 +294,7 @@ def de_crosstalk_o2k(in_image, out_image=None, overwrite=False):
     hdu.header = hdr0
     
     try:
-        hdulist.writeto(out_file, output_verify='ignore', clobber=overwrite)
+        hdulist.writeto(out_file, output_verify='ignore', overwrite=overwrite)
         hdulist.close(output_verify='ignore')
     except Exception as e:
         raise e
@@ -467,7 +467,7 @@ def de_crosstalk_PANIC_full_detector(in_image, out_image=None, overwrite=False):
     hdu.header = hdr0
     
     try:
-        hdulist.writeto(out_file, output_verify='ignore', clobber=overwrite)
+        hdulist.writeto(out_file, output_verify='ignore', overwrite=overwrite)
         hdulist.close(output_verify='ignore')
     except Exception as  e:
         raise e
@@ -570,7 +570,7 @@ def de_crosstalk_PANIC(in_image, out_image=None, overwrite=False):
     hdu.header = hdr0
     
     try:
-        hdulist.writeto(out_file, output_verify='ignore', clobber=overwrite)
+        hdulist.writeto(out_file, output_verify='ignore', overwrite=overwrite)
         hdulist.close(output_verify='ignore')
     except Exception as e:
         raise e

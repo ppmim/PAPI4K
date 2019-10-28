@@ -176,7 +176,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         scale = pix_scale
     
     # Extension paramter
-    if extension > 0 :
+    if extension > 0:
         ext_str = "--extension %d" % int(extension)
     else:
         ext_str = ""
@@ -185,7 +185,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         logging.info("Frame %s is not a science frame"%filename)
         
     logging.debug("Starting to solve-field for: %s  Scale=%s  RA= %s Dec= %s \
-    INSTRUMENT= %s"%(filename, scale, ra , dec, instrument))
+    INSTRUMENT= %s" % (filename, scale, ra , dec, instrument))
     
     try:
         path_astrometry = os.path.dirname(spawn.find_executable("solve-field"))  
@@ -229,9 +229,9 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     
     logging.debug("CMD=" + str_cmd)
     print("CMD_Astrometry.net =", str_cmd)
-    
+
     try:
-        p = subprocess.Popen(str_cmd, bufsize=0, shell=True, 
+        p = subprocess.Popen(str_cmd, bufsize=0, shell=True,
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              close_fds=True)
@@ -246,12 +246,11 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     # blocking the child process.(Python Ref.doc)
 
     (stdoutdata, stderrdata) = p.communicate()
-    solve_out =  stdoutdata + "\n" + stderrdata
+    solve_out = stdoutdata.decode() + "\n" + stderrdata.decode()
 
-    
     if len(solve_out) > 1:
-        logging.info("Solve-field output:")
-        #print solve_out
+        logging.info("Solve-field output:" + solve_out)
+
     #
     # Look for filename.solved to know if field was solved
     #
@@ -540,5 +539,3 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     logging.info("Time : %s"%(toc-tic))
 
     sys.exit()
-        
-    

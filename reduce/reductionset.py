@@ -1027,7 +1027,6 @@ class ReductionSet(object):
             # If this point is reached, it means that no suitable file was found.
             return None
 
-
     def getDarkFrames(self):
         """
         Given a list of files (data set), return the files matching as dark frames
@@ -1116,14 +1115,15 @@ class ReductionSet(object):
             else:
                 seqs, seq_types = self.getOTSequences(show)
         elif self.group_by == 'filter':
-            if self.db == None: self.__initDB()
+            if self.db is None:
+                self.__initDB()
             seqs, seq_types = self.db.GetSequences(group_by='filter',
-               max_mjd_diff = self.config_dict['general']['max_mjd_diff']/86400.0,
-               max_ra_dec_diff = self.config_dict['general']['max_ra_dec_offset'],
-               max_nfiles = self.config_dict['general']['max_num_files'])
+               max_mjd_diff=self.config_dict['general']['max_mjd_diff']/86400.0,
+               max_ra_dec_diff=self.config_dict['general']['max_ra_dec_offset'],
+               max_nfiles=self.config_dict['general']['max_num_files'])
         else:
             log.error("[getSequences] Wrong data grouping criteria")
-            raise Exception("[getSequences] Found a not valid data grouping criteria %s"%(self.group_by))
+            raise Exception("[getSequences] Found a not valid data grouping criteria %s" % (self.group_by))
 
         # Print out the groups. It can be used to copy&paste the sequence files
         # because is a "clean" list of full path-names of files, instead of
@@ -1145,10 +1145,9 @@ class ReductionSet(object):
                     for file in seqs[k]:
                         #print file + " type= %s"%self.db.GetFileInfo(file)[2]
                         print(file)
-                k+=1
+                k += 1
             log.debug("Found %d groups of files", len(seq_types))
         
-
         # To print the sequences into the log file
         debug = 1
         if debug:    
@@ -1167,8 +1166,11 @@ class ReductionSet(object):
                     log.debug("-------------------------------------------------------------------")
                     for file in seqs[k]:
                         log.debug("%s type = %s" %(file, self.db.GetFileInfo(file)[2]))
-                k+=1
-            
+                k += 1
+        # very important to del the sqlite object, because
+        # we "can't pickle sqlite3.Connection objects" for multiprocessing
+        # I think it is new in Python3.6
+        del self.db
         return seqs, seq_types
     
     
@@ -2442,10 +2444,9 @@ class ReductionSet(object):
         # output directory.    
         shutil.copy(misc.paLog.file_hd.baseFilename, self.out_dir)
         
-
         return files_created
-   
-    def reorder_sequences (self, sequences, seq_types):
+
+    def reorder_sequences(self, sequences, seq_types):
         """
         Re-order the sequences by type: DARK, DOME_FLAT, TW_FLAT, SCIENCE
         This is required because some calibration sequence could be created 
@@ -2536,7 +2537,8 @@ class ReductionSet(object):
         # conversion to MEF if needed. 
         # Note2: NonLinearityCorrection() performs the NLC in parallel,
         # instead of processing the sequence file by file.
-        if self.non_linearity_apply == True:
+
+        if self.non_linearity_apply:
             master_nl = self.non_linearity_model # (lir or rrrmpia)
             try:
                 log.info("**** Applying Non-Linearity correction ****")
@@ -2572,8 +2574,7 @@ class ReductionSet(object):
         # TODO: I should use 'type' parameter of this method instead to read the
         # type of the first file. I did not found any reason to not use 'type' !
         cfits = datahandler.ClFits(sequence[0])
-        
-        
+
         if cfits.isDark():
             log.debug("[reduceSeq] A Dark sequence is going to be reduced: \n%s"%str(sequence))
             try:
@@ -2946,7 +2947,7 @@ class ReductionSet(object):
                             log.debug("Calling parameters ---> %s" % (str(red_parameters)))
                             
                             # Notice that the results will probably not come out 
-                            # of the output queue in the same in the same order 
+                            # of the output queue in the same order
                             # as the corresponding tasks were put on the input 
                             # Pool.  If it is important to get the results back
                             # in the original order then consider using `Pool.map()` 
@@ -2954,7 +2955,7 @@ class ReductionSet(object):
                             # code needed anyway).
                             # results += [pool.apply_async(self.reduceSingleObj,
                             #                             red_parameters)]
-                            # pool = multiprocessing.Pool(2) #  por que el 2 ???
+                            # pool = multiprocessing.Pool(2)
                             results += [pool.map_async(self.calc,
                                                       [red_parameters])]         
                         # Here is where we WAIT (BLOCKING) for the results 
@@ -3234,7 +3235,7 @@ class ReductionSet(object):
         
         
         # Clean old files
-        #self.cleanUpFiles()
+        # self.cleanUpFiles()
         
         # Change cwd to self.out_dir
         old_cwd = os.getcwd()
@@ -3548,7 +3549,7 @@ class ReductionSet(object):
                 # Run astrometric calibration
                 try:
                     solved = reduce.solveAstrometry.solveField(my_file, 
-                                out_dir, # self.temp_dir produces collision
+                                out_dir,  # self.temp_dir produces collision
                                 self.temp_dir,
                                 self.config_dict['general']['pix_scale'])
                 except Exception as e:
@@ -3640,7 +3641,7 @@ class ReductionSet(object):
             try:
                 aw.run(engine=self.config_dict['astrometry']['engine'])
             except Exception as e:
-                log.error("Some error while running Astrowarp: %s"%str(e))
+                log.error("Some error while running Astrowarp: %s" % str(e))
                 raise e
         else:
             log.info("**** Doing 1st Stack Coaddition (dithercubemean) ****")
