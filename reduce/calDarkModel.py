@@ -50,12 +50,10 @@ import misc.robust as robust
 import astropy.io.fits as fits
 import numpy
 
-#import scipy.stats.stats
-
-
 # Logging
 from misc.paLog import log
 from misc.version import __version__
+
 
 class MasterDarkModel(object):
     """
