@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2009-2012 IAA-CSIC  - All rights reserved. 
+# Copyright (c) 2009-2019 IAA-CSIC  - All rights reserved.
 # Author: Jose M. Ibanez. 
 # Instituto de Astrofisica de Andalucia, IAA-CSIC
 #
@@ -21,8 +21,6 @@
 
 ################################################################################
 #
-# PANICtool
-#
 # calDark.py
 #
 # Created    : 07/11/2008    jmiguel@iaa.es
@@ -38,6 +36,7 @@
 #              07/03/2011    jmiguel@iaa.es - Added Stats output and 
 #                            normalization (divide master dark by the TEXP to 
 #                            get a master dark in ADU/s units)
+#              29/10/2019    Migration to Astropy, removing PyRAF calls
 #
 # TODO
 #  - checking of ITIME ( and not only EXPTIME, NCOADDS )
@@ -62,9 +61,11 @@ from misc.version import __version__
 import datahandler
 import misc.collapse
 
-# Pyraf modules
-from pyraf import iraf
-from iraf import mscred
+from astropy.stats import mad_std
+from astropy.nddata import CCDData
+import ccdproc
+from ccdproc import Combiner
+from astropy.nddata import CCDData
 
 # Interact with FITS files
 import astropy.io.fits as fits
@@ -154,8 +155,7 @@ class MasterDark(object):
     
         # Change to the source directory
         base, infile = os.path.split(self.__output_filename)
-        iraf.chdir(base)
-    
+
         
         # STEP 1: Check the EXPTIME, TYPE(dark) of each frame
         f_expt = -1.0
@@ -172,19 +172,19 @@ class MasterDark(object):
             if not self.no_type_checking and not f.isDark():
                 log.error("Error: Task 'createMasterDark' finished. Frame %s is not 'DARK'",iframe)
                 raise Exception("Found a non DARK frame") 
-                #continue
-            else:        
+            else:
                 # Check EXPTIME, TYPE(dark) and READMODE
                 if (not self.m_texp_scale and f_expt != -1 and 
                      (int(f.expTime()) != int(f_expt) or  
                       f.getType() != f_type or 
                       f.getNcoadds() != f_ncoadds or 
                       f.getReadMode() != f_readmode)):
-                    log.error("Error: Task 'createMasterDark' finished. Found a DARK frame (%s)with different EXPTIME, NCOADDS or READMODE",iframe)
-                    #continue
-                    raise Exception("Found a DARK frame with different EXPTIME or NCOADDS or READMODE") 
+                    log.error("Error: Task 'createMasterDark' finished. Found"
+                    "a DARK frame (%s) with different EXPTIME, NCOADDS or READMODE",
+                              iframe)
+                    raise Exception("Found a DARK frame with different EXPTIME or NCOADDS or READMODE")
                 else: 
-                    f_expt  = f.expTime()
+                    f_expt = f.expTime()
                     f_ncoadds = f.getNcoadds()
                     f_type = f.getType()
                     f_readmode = f.getReadMode()
@@ -207,60 +207,33 @@ class MasterDark(object):
         if f_ncoadds == -1:
             f_ncoadds = 1
         self.__output_filename = self.__output_filename.replace(".fits",
-                                                                "_%d_%d.fits" % (f_expt, f_ncoadds))
+                                                                "_%d_%d.fits" %(f_expt, f_ncoadds))
         
     
         # STEP 1.2: Check if images are cubes, then collapse them.
         good_frames = misc.collapse.collapse(good_frames, out_dir=self.__temp_dir)
-        
-        # Write frames to txt file
-        misc.utils.listToFile(good_frames, self.__temp_dir + "/files.list")
-        
-        """
-        NOTE: I don't know how darkcombine does the scaling with EXPTIME, in
-        #fact --> see F.Vales email : 
-        #http://iraf.net/phpBB2/viewtopic.php?p=138721
-        http://iraf.net/phpBB2/viewtopic.php?p=86769&sid=65b3c9990c92749c317ab554a01c8da7
-        """
-        """
-        If we decide to scale the dark by exposure time, we will have to have 
-        the bias subtracted. (You can do this by turning the "process" option on.) 
-        Otherwise, the bias will end up being scaled, too. Once again, keep 
-        in mind that running ccdproc with the resultant darks will cause the 
-        bias to be subtracted again; you have to be very careful.
-        """
 
-        # Call the iraf.mscred.darkcombine task through PyRAF
-        iraf.mscred.darkcombine(input = "@"+(self.__temp_dir+"/files.list").replace('//','/'),
-                        output=tmp1.replace('//','/'),
-                        combine='average',
-                        ccdtype='',
-                        process='no',
-                        reject='minmax',
-                        nlow='0',
-                        nhigh='1',
-                        nkeep='1',
-                        scale=scale_str,
-                        #expname = 'EXPTIME'
-                        #ParList = _getparlistname('darkcombine')
+        dark_files = ccdproc.ImageFileCollection(filenames=good_frames)
+        combined_dark = ccdproc.combine(img_list=good_frames,
+                        method='average',
+                        sigma_clip=False,
+                        clip_extrema=True, nlow=1, nhigh=1,
+                        sigma_clip_func=numpy.ma.median,
+                        sigma_clip_low_thresh=5,
+                        sigma_clip_high_thresh=5,
+                        sigma_clip_dev_func=mad_std,
+                        mem_limit=3500e6
                         )
-         
-        if self.m_normalize:
-            log.debug("Normalizing master dark to 1 sec")
-            # divide master dark by the TEXP to get a master dark in ADU/s units
-            texp = datahandler.ClFits(tmp1).expTime()
-            iraf.mscred.mscarith(operand1 = tmp1,
-    				operand2 = texp,
-    				op = '/',
-    				result =self.__output_filename,
-    				verbose = 'no'
-    				)
-        else:
-            shutil.move(tmp1, self.__output_filename)
-    
+
+        log.debug("Images combined !")
+
+        combined_dark.meta['PAPITYPE'] = 'MASTER_DARK'
+
+        combined_dark.write(self.__output_filename)
+
         darkframe = fits.open(self.__output_filename,'update')
         #Add a new keyword-->PAPITYPE
-        darkframe[0].header.set('PAPITYPE','MASTER_DARK','TYPE of PANIC Pipeline generated file')
+        # darkframe[0].header.set('PAPITYPE','MASTER_DARK','TYPE of PANIC Pipeline generated file')
         darkframe[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
         darkframe[0].header.set('IMAGETYP','MASTER_DARK','TYPE of PANIC Pipeline generated file')
         if 'PAT_NEXP' in darkframe[0].header:
@@ -278,12 +251,13 @@ class MasterDark(object):
         log.debug("createMasterDark' finished %s", t.tac() )
         
         if self.show_stats:
+            imstats = lambda dat: (dat.min(), dat.max(), dat.mean(), dat.std())
             medians = []
             for i_frame in good_frames:
                 pf = fits.open(i_frame)
                 if len(pf) == 1:
                     #print "mean=",numpy.mean(pf[0].data[512:1536,512:1536])
-                    medians.append(robust.r_nanmedian(pf[0].data[512 : 1536, 512 : 1536]))
+                    medians.append(robust.r_nanmedian(pf[0].data[512:1536, 512:1536]))
                 else:
                     print("MEF files now is supported !")
                     for i_ext in range(1, len(pf)):
@@ -291,11 +265,11 @@ class MasterDark(object):
                 
                 # Get some stats from master dark (mean/median/rms)
                 print("I_FRAME=", i_frame)
-                values = (iraf.mscstat(images=i_frame,
-                                fields="image,mean,mode,midpt,stddev,min,max",
-                                format='yes',Stdout=1))
-                for line in values:
-                    print(line)
+                values = imstats(pf[1].data)
+                print("File: %s   min: %s   max: %s  mean: %s  std: %s"
+                      % (i_frame, values[0], values[1], values[2], values[3]))
+                pf.close()
+
             print("-----------------------------------")
             print("MEDIANS=", medians)
             print("QC DARK MEAN =", numpy.mean(medians))
@@ -303,18 +277,14 @@ class MasterDark(object):
             print("QC DARK STDEV =", numpy.std(medians))
             print("QC DARK MAD =", numpy.median(numpy.abs(medians - numpy.median(medians))))
             
-            #print "QC RONi",
-            #print "QC DARK NBADPIX =", 
-            
-                  
             # Get some stats from master dark (mean/median/rms)
             print("Master dark Stats:")
             print("------------------")
-            values = (iraf.mscstat (images=self.__output_filename,
-                                    fields="image,mean,mode,stddev,min,max",
-                                    format='yes',Stdout=1))
-            for line in values:
-                print(line)
+            pf = fits.open(self.__output_filename)
+            values = imstats(pf[0].data)
+            print("File: %s   min: %s   max: %s  mean: %s  std: %s"
+                  % (self.__output_filename, values[0], values[1], values[2], values[3]))
+
             
         return self.__output_filename
         
@@ -361,7 +331,7 @@ creates the master dark and computes several statistics.
     
     (options, args) = parser.parse_args()
    
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
