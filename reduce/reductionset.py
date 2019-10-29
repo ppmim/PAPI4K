@@ -38,8 +38,6 @@ import subprocess
 
 # IRAF packages
 import pyraf
-# from pyraf import iraf
-# from iraf import noao
 
 # Math module for efficient array processing
 import numpy
@@ -121,7 +119,7 @@ def _unpickle_method(func_name, obj, cls):
             break
     return func.__get__(obj, cls)        
 
-#import copyreg
+# import copyreg
 import types 
 
 #copyreg.pickle(types.MethodType,
@@ -1172,8 +1170,7 @@ class ReductionSet(object):
         # I think it is new in Python3.6
         del self.db
         return seqs, seq_types
-    
-    
+
     def getOTSequences(self, show=True, stype=None):
         """
         Look for sequences (calib, science) in the current data set and print
@@ -1218,7 +1215,7 @@ class ReductionSet(object):
         seq_list = [] # list of list of sequence filenames
         seq_types = [] # list of types of sequence (dark, dflat, sflat, focus, science, ....)
         
-        if self.db == None: 
+        if self.db is None:
             self.__initDB()
         
         seq_list, seq_types = self.db.GetSequences(group_by='ot', type=stype) # much more quick than read again the FITS files
@@ -1253,7 +1250,7 @@ class ReductionSet(object):
         seq_list = []
         seq_par = []
         
-        if self.group_by=="filter":
+        if self.group_by == "filter":
             # return a list of SCIENCE (or SKY) frames grouped by FILTER
             (seq_list, seq_par) = self.db.GetSequences(group_by='filter',
                                                        max_mjd_diff=self.config_dict['general']['max_mjd_diff']/86400.0,
@@ -2022,27 +2019,27 @@ class ReductionSet(object):
         l_gainmaps = []
         # 1. Look for master flat frames
         full_flat_list = []
-        if type=="all":
+        if type == "all":
             full_flat_list = self.db.GetFilesT(type="MASTER_SKY_FLAT", 
                                                texp=-1, filter="ANY")
-            full_flat_list+= self.db.GetFilesT(type="MASTER_TW_FLAT", 
+            full_flat_list += self.db.GetFilesT(type="MASTER_TW_FLAT",
                                                texp=-1, filter="ANY")
-            full_flat_list+= self.db.GetFilesT(type="MASTER_DOME_FLAT",
+            full_flat_list += self.db.GetFilesT(type="MASTER_DOME_FLAT",
                                                texp=-1, filter="ANY")
-        elif type=="sky":
+        elif type == "sky":
             full_flat_list = self.db.GetFilesT(type="MASTER_SKY_FLAT",
                                                texp=-1, filter="ANY")
-        elif type=="twlight":
+        elif type == "twlight":
             full_flat_list = self.db.GetFilesT(type="MASTER_TW_FLAT", 
                                                texp=-1, filter="ANY")
-        elif type=="dome":
+        elif type == "dome":
             full_flat_list = self.db.GetFilesT(type="MASTER_DOME_FLAT",
                                                texp=-1, filter="ANY")
         else:
             log.error("Wrong type of master flat specified")
             raise Exception("Wrong type of master flat specified")
         
-        if full_flat_list==None or len(full_flat_list)==0:
+        if full_flat_list == None or len(full_flat_list) == 0:
             log.warning("No master flat field found")
             return []
 
@@ -2062,8 +2059,8 @@ class ReductionSet(object):
         while k<len(sorted_list):
             while k<len(sorted_list) and sorted_list[k][1]==last_filter:
                 group.append(sorted_list[k][0])
-                k+=1
-            #create the new master
+                k += 1
+            # create the new master
             try:
                 #TODO: here we should check if we have more that one master flat, 
                 # and if have, then combine them ... 
@@ -2106,7 +2103,8 @@ class ReductionSet(object):
                 last_filter = sorted_list[k][1]
 
         # insert products (gainmaps) into DB
-        for f in l_gainmaps: self.db.insert(f)
+        for f in l_gainmaps:
+            self.db.insert(f)
         self.db.ListDataSet()  
         return l_gainmaps
     
@@ -2163,7 +2161,8 @@ class ReductionSet(object):
                 last_texp = full_dark_list[k][1]
                 
         # insert products (master darks) into DB
-        for f in l_mdarks: self.db.insert(f)
+        for f in l_mdarks:
+            self.db.insert(f)
         self.db.ListDataSet()         
         return l_mdarks        
         
@@ -2217,7 +2216,8 @@ class ReductionSet(object):
                 last_filter=full_flat_list[k][1]
                 
         # insert products (master dome flats) into DB
-        for f in l_mflats: self.db.insert(f)
+        for f in l_mflats:
+            self.db.insert(f)
         self.db.ListDataSet()  
         return l_mflats
     
@@ -2282,7 +2282,8 @@ class ReductionSet(object):
                 last_filter = full_flat_list[k][1]
                 
         # insert products (master twflats) into DB
-        for f in l_mflats: self.db.insert(f)
+        for f in l_mflats:
+            self.db.insert(f)
         self.db.ListDataSet()
           
         return l_mflats
@@ -2330,9 +2331,10 @@ class ReductionSet(object):
                     #raise e
                 
         # insert products (master SuperFlats) into DB
-        for f in l_mflats: self.db.insert(f)
+        for f in l_mflats:
+            self.db.insert(f)
         self.db.ListDataSet()  
-        return l_mflats # a list of master super flats created
+        return l_mflats  # a list of master super flats created
     
     def reduceSet(self, red_mode=None, seqs_to_reduce=None, 
                     types_to_reduce=['all']):
@@ -3154,16 +3156,17 @@ class ReductionSet(object):
             if cfits.isScience():
                 # input image (and weight map) is overwritten
                 misc.imtrim.imgTrim(file)
-            if file is not None and os.path.splitext(file)[1] == '.fits':
-                log.debug("Inserting result in DB: %s", file)
-                self.db.insert(file)
+            # Not sure if necessary; and SQLite object cannot be used in
+            # multiprocessing
+            # if file is not None and os.path.splitext(file)[1] == '.fits':
+            #    log.debug("Inserting result in DB: %s", file)
+            #    self.db.insert(file)
         
         # not sure if is better to do here ??? 
         #self.purgeOutput()
             
         # Only one file it is expected to be returned
         return files_created
- 
 
     def reduceSingleObj(self, obj_frames, master_dark, master_flat, master_bpm, 
                   red_mode, out_dir, output_file):

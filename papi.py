@@ -325,7 +325,7 @@ def main(arguments = None):
                 red_mode=general_opts['reduction_mode'],
                 group_by=general_opts['group_by'], 
                 check_data=general_opts['check_data'],
-                config_dict = options )
+                config_dict=options)
     
         if init_options.print_seq:
             rs.getSequences(show=True, stype=init_options.seq_type)
