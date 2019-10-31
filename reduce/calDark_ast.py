@@ -191,8 +191,7 @@ class MasterDark(object):
             scale_str = 'exposure'
         else:
             scale_str = 'none'
-        
-        
+
         # Cleanup : Remove old masterdark
         tmp1 = self.__temp_dir + "/dark_tmp.fits"
         misc.fileUtils.removefiles(tmp1)
