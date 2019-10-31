@@ -145,18 +145,13 @@ class MasterDark(object):
         if nframes < self.m_min_ndarks:
             log.error("Not enough number of dark frames (>%s) to compute master dark: %s",self.m_min_ndarks, framelist)
             raise Exception("Not enough number of dark frames (>=%s) to compute master dark" %(self.m_min_ndarks))
-            
-            
+
         if not os.path.exists(os.path.abspath(os.path.join(self.__output_filename, os.pardir))):
             raise NameError('Wrong output path')
         if not self.__output_filename:
             log.error("Combined DARK frame not defined")
             raise Exception("Wrong output filename")
     
-        # Change to the source directory
-        base, infile = os.path.split(self.__output_filename)
-
-        
         # STEP 1: Check the EXPTIME, TYPE(dark) of each frame
         f_expt = -1.0
         f_type = ''
@@ -199,7 +194,6 @@ class MasterDark(object):
         
         
         # Cleanup : Remove old masterdark
-        misc.fileUtils.removefiles(self.__output_filename)
         tmp1 = self.__temp_dir + "/dark_tmp.fits"
         misc.fileUtils.removefiles(tmp1)
         
@@ -208,13 +202,13 @@ class MasterDark(object):
             f_ncoadds = 1
         self.__output_filename = self.__output_filename.replace(".fits",
                                                                 "_%d_%d.fits" %(f_expt, f_ncoadds))
-        
-    
+        misc.fileUtils.removefiles(self.__output_filename)
+
         # STEP 1.2: Check if images are cubes, then collapse them.
         good_frames = misc.collapse.collapse(good_frames, out_dir=self.__temp_dir)
 
         dark_files = ccdproc.ImageFileCollection(filenames=good_frames)
-        combined_dark = ccdproc.combine(img_list=good_frames,
+        combined_dark = ccdproc.combine(img_list=dark_files.files,
                         method='average',
                         sigma_clip=False,
                         clip_extrema=True, nlow=1, nhigh=1,
@@ -222,7 +216,8 @@ class MasterDark(object):
                         sigma_clip_low_thresh=5,
                         sigma_clip_high_thresh=5,
                         sigma_clip_dev_func=mad_std,
-                        mem_limit=3500e6
+                        mem_limit=3500e6,
+                        dtype=numpy.float32
                         )
 
         log.debug("Images combined !")
@@ -231,23 +226,27 @@ class MasterDark(object):
 
         combined_dark.write(self.__output_filename)
 
-        darkframe = fits.open(self.__output_filename,'update')
-        #Add a new keyword-->PAPITYPE
-        # darkframe[0].header.set('PAPITYPE','MASTER_DARK','TYPE of PANIC Pipeline generated file')
-        darkframe[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
-        darkframe[0].header.set('IMAGETYP','MASTER_DARK','TYPE of PANIC Pipeline generated file')
+        darkframe = fits.open(self.__output_filename, 'update')
+        # Add a new keyword-->PAPITYPE
+        darkframe[0].header.set('PAPITYPE', 'MASTER_DARK',
+                                'TYPE of PANIC Pipeline generated file')
+        darkframe[0].header.set('PAPIVERS', __version__,
+                                'PANIC Pipeline version')
+        darkframe[0].header.set('IMAGETYP', 'MASTER_DARK',
+                                'TYPE of PANIC Pipeline generated file')
         if 'PAT_NEXP' in darkframe[0].header:
-            darkframe[0].header.set('PAT_NEXP',1,'Number of position into the current dither pattern')
+            darkframe[0].header.set('PAT_NEXP', 1,
+                                    'Number of position into the current dither pattern')
         if self.m_normalize:
-            darkframe[0].header.set('EXPTIME',1.0)
+            darkframe[0].header.set('EXPTIME', 1.0)
             darkframe[0].header.set('ITIME', 1.0)
-            darkframe[0].header.set('NCOADDS',1)
+            darkframe[0].header.set('NCOADDS', 1)
         
         # 'ignore' will ignore any FITS standard violation and allow 
         # write/update the FITS file
         darkframe.close(output_verify='ignore')     
         
-        log.debug('Saved master DARK to %s' , self.__output_filename)
+        log.debug('Saved master DARK to %s', self.__output_filename)
         log.debug("createMasterDark' finished %s", t.tac() )
         
         if self.show_stats:
@@ -285,7 +284,6 @@ class MasterDark(object):
             print("File: %s   min: %s   max: %s  mean: %s  std: %s"
                   % (self.__output_filename, values[0], values[1], values[2], values[3]))
 
-            
         return self.__output_filename
         
 
