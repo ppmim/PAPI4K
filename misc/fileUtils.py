@@ -17,7 +17,6 @@
 import os
 import fnmatch
 
-#import misc.paLog
 from misc.paLog import log
 import astropy.io.fits as fits
 import glob
@@ -25,6 +24,7 @@ import glob
 ################################################################################
 
 # log=logging.getLogger(__name__)
+
 
 def removefiles(*patterns):
 
@@ -40,7 +40,7 @@ def removefiles(*patterns):
     for pattern in patterns:
         # Split off the directory path
         (dirname, filepattern) = os.path.split(pattern)
-        #print "dirname= %(dirname)s, file= %(filepattern)s" %vars()
+        # print("dirname= %(dirname)s, file= %(filepattern)s" %vars())
         
         # Get a list of all files in the directory
         try:
@@ -57,9 +57,9 @@ def removefiles(*patterns):
                 # If yes, (try to) remove it from the system
                 #log.debug('Removing file : "%s"' % file)
                 try:
-                    #print "not removing...debug...."
+                    # print "not removing...debug...."
                     os.remove(os.path.join(dirname, file))
-                    #print "removefiles[DEBUG]: file %s removed"%os.path.join(dirname, file)
+                    # print "removefiles[DEBUG]: file %s removed"%os.path.join(dirname, file)
                 except OSError as errstr:
                     # Succeed even if there were no files (and put warning in log)
                     log.warning(errstr)
@@ -123,27 +123,28 @@ def splitMEF_deprecated(fnameMEF, out_filenames):
 
 ################################################################################
 def linkSourceFiles( source, dest ):
-    """Create a symbolic link to all the sources specified in 'source', which can be a file a dir"""
+    """Create a symbolic link to all the sources specified in 'source',
+    which can be a file a dir"""
 
-    if isinstance(source,list):
-        #we suppose is a list
+    if isinstance(source, list):
+        # we suppose is a list
         for file in source:
             #print "FILE=", file
             if not os.path.exists(dest + "/" + os.path.basename(file)):
                 os.symlink(file, dest + "/" + os.path.basename(file))
     elif os.path.isfile(source):
-        #We have a source-file with absolute path for the data files
-        file=open(source, 'r')
+        # We have a source-file with absolute path for the data files
+        file = open(source, 'r')
         for line in file:
-            #print "FILE=", line
+            # print "FILE=", line
             if line.endswith('\n'):
-                line=line.replace('\n','')
+                line = line.replace('\n', '')
             print
             #print "DEST=", dest+"/"+os.path.basename(line)
             if not os.path.exists(dest + "/" + os.path.basename(line)):
                 os.symlink(line, dest + "/" + os.path.basename(line))
     elif os.path.isdir(source):
-        #We have a source-directory as input data
+        # We have a source-directory as input data
         for file in glob.glob(source+"*.fits"):
             print("FILE=", file)
             if not os.path.exists(dest+"/"+os.path.basename(file)):

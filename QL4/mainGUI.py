@@ -3615,7 +3615,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             iraf_logfile = self.m_tempdir + "/starfocus.log"
             # copy the list and swap first and center position to show in the display the 
             # (supposed) image nearest to the best focus.
-            my_files[0], my_files[len(my_files) / 2] = my_files[len(my_files) / 2], my_files[0]    
+            my_files[0], my_files[int(len(my_files) / 2)] = my_files[int(len(my_files) / 2)], my_files[0]
             # copy list to file; if file exists, overwrite
             self.genFileList(my_files, text_file)
             try:
