@@ -100,7 +100,7 @@ class MasterDark(object):
         Whether true, the type of file (dark, flat, ...) will no be checked
         in the input files
     """
-    def __init__(self, file_list, temp_dir, output_filename="/tmp/mdark.fits", 
+    def __init__(self, file_list, temp_dir, output_filename="/tmp/mdark.fits",
                  texp_scale=False, bpm=None, normalize=False,
                  show_stats=False, no_type_checking=False):
         """
