@@ -43,19 +43,20 @@
 import sys
 import os
 import tempfile
-from optparse import OptionParser
-
+import argparse
 
 # Interact with FITS files
 import astropy.io.fits as fits
 import numpy as np
 import datahandler
 import reduce.calSuperFlat
+from numba import jit
 
 
 # Logging
 from misc.paLog import log
 from misc.version import __version__
+
 
 class SkyGainMap(object):
     """ Compute the gain map from a list of sky frames """
@@ -93,6 +94,7 @@ class SkyGainMap(object):
 
         os.remove(tmp_output_path)
         return self.output
+
 
 class TwlightGainMap(object):
     """ Compute the gain map from a list of twlight frames """
@@ -138,7 +140,6 @@ class TwlightGainMap(object):
         return self.output
 
 
-
 class DomeGainMap(object):
     """ Compute the gain map from a list of dome (lamp-on,lamp-off) frames """
 
@@ -174,6 +175,7 @@ class DomeGainMap(object):
             
         os.remove(tmp_output_path)
         return self.output
+
 
 class GainMap(object):
     """
@@ -229,23 +231,23 @@ class GainMap(object):
 
         """
 
-        self.flat = flatfield  # Flat-field image (normalized or not, because optionaly, normalization can be done here)
+        # Flat-field image (normalized or not, because optionally, normalization
+        # can be done here)
+        self.flat = flatfield
         self.output_file_dir = os.path.abspath(os.path.join(output_filename, os.pardir))
         self.output_filename = output_filename  # full filename (path+filename)
         self.bpm = bpm
         self.do_norm = do_normalization
 
         # Some default parameter values
-        self.m_MINGAIN = mingain #pixels with sensitivity < MINGAIN are assumed bad
-        self.m_MAXGAIN = maxgain #pixels with sensitivity > MAXGAIN are assumed bad
-        self.m_NXBLOCK = nxblock #image size should be multiple of block size
+        self.m_MINGAIN = mingain  # pixels with sensitivity < MINGAIN are assumed bad
+        self.m_MAXGAIN = maxgain  # pixels with sensitivity > MAXGAIN are assumed bad
+        self.m_NXBLOCK = nxblock  # image size should be multiple of block size
         self.m_NYBLOCK = nyblock
-        self.m_NSIG = nsigma  #badpix if sensitivity > NSIG sigma from local bkg
-        self.m_BPM = bpm   #external BadPixelMap to take into account (TODO)
-
+        self.m_NSIG = nsigma  # badpix if sensitivity > NSIG sigma from local bkg
+        self.m_BPM = bpm   # external BadPixelMap to take into account (TODO)
 
     def create(self):
-
         """
         Given a NOT normalized flat field, compute the gain map taking
         into account the input parameters and an optional Bad Pixel Map (bpm).
@@ -254,7 +256,6 @@ class GainMap(object):
         ------
         If success, return the output filename image of the Gain Map generated,
         where Bad Pixels = 0.0
-
         """
 
         log.debug("Start creating Gain Map for file: %s", self.flat)
@@ -262,10 +263,10 @@ class GainMap(object):
             os.remove(self.output_filename)
 
         # Check if we have a MEF file
-        f = datahandler.ClFits( self.flat )
+        f = datahandler.ClFits(self.flat)
         isMEF = f.mef
         
-        if (not isMEF): 
+        if not isMEF:
             nExt = 1
         else: 
             nExt = f.next
@@ -277,9 +278,10 @@ class GainMap(object):
         nbad = 0
 
         if f.getInstrument() == 'panic' and naxis1 == 4096 and naxis2 == 4096:
-            is_a_panic_full_frame = True # i.e., a single extension (GEIRS) full frame
-        else: is_a_panic_full_frame = False
-
+            # i.e., a single extension (GEIRS) full frame
+            is_a_panic_full_frame = True
+        else:
+            is_a_panic_full_frame = False
 
         gain = np.zeros([nExt, naxis1, naxis2], dtype=np.float32)
         myflat = fits.open(self.flat)
@@ -288,6 +290,7 @@ class GainMap(object):
         # done here
         if isMEF: extN = 1
         else: extN = 0
+        log.debug("STEP #1# - median computation")
         if np.median(myflat[extN].data) > 100:
             # ##############################################################################
             # Normalize the flat (if MEF, all extension are normalized wrt extension/chip SG1)#
@@ -309,17 +312,17 @@ class GainMap(object):
 
                 # Note that in Numpy, arrays are indexed as rows X columns (y, x),
                 # contrary to FITS standard (NAXIS1=columns, NAXIS2=rows).
-                median = np.median(myflat[ext_name].data[offset2 : naxis2 - offset2,
-                                                    offset1 : naxis1 - offset1])
+                median = np.median(myflat[ext_name].data[offset2: naxis2 - offset2,
+                                                    offset1: naxis1 - offset1])
                 msg = "Normalization of MEF master flat frame wrt chip %s. (MEDIAN=%f)" % (ext_name, median)
             elif is_a_panic_full_frame:
                 # It supposed to have a full frame of PANIC in one single
                 # extension (GEIRS default). Normalize wrt detector SG1_1
-                median = np.median(myflat[0].data[200 : 2048-200, 2048+200 : 4096-200 ])
+                median = np.median(myflat[0].data[200: 2048-200, 2048+200: 4096 - 200])
                 msg = "Normalization of (full) PANIC master flat frame wrt chip 1. (MEDIAN=%f)" % median
             else:
                 # Not MEF, not PANIC full-frame, but could be a PANIC subwindow
-                median = np.median(myflat[0].data[offset2 : naxis2 - offset2,
+                median = np.median(myflat[0].data[offset2: naxis2 - offset2,
                                              offset1 : naxis1 - offset1])
                 msg = "Normalization of master flat frame. (MEDIAN = %d)" % median
         else:
@@ -347,28 +350,34 @@ class GainMap(object):
                 flatM = flatM
 
             # Check for bad pixel
-            gain[chip] = np.where( (flatM < self.m_MINGAIN) | (flatM > self.m_MAXGAIN), 0.0, flatM)
-            m_bpm = np.where(gain[chip] == 0.0, 1, 0) # bad pixel set to 1
+            log.debug("STEP #2# - Search/Select for bad pixels")
+            gain[chip] = np.where((flatM < self.m_MINGAIN) | (flatM > self.m_MAXGAIN), 0.0, flatM)
+            m_bpm = np.where(gain[chip] == 0.0, 1, 0)  # bad pixel set to 1
             nbad = (m_bpm == 1).sum()
-            log.debug("Initial number of Bad Pixels : %d ", nbad)
+            log.debug("STEP #3# - Initial number of Bad Pixels : %d ", nbad)
 
             # local dev map to find out pixel deviating > NSIGMA from local median
             dev = np.zeros((naxis1, naxis2), dtype=np.float32)
             buf = np.zeros((self.m_NXBLOCK, self.m_NYBLOCK), dtype=np.float32)
 
+            log.debug("STEP #4# - Loop over Blocks")
+            dev = self.get_dev(gain, naxis1, naxis2, 0)
             # Foreach image block
-            for i in range(0, naxis1, self.m_NYBLOCK):
+            """for i in range(0, naxis1, self.m_NYBLOCK):
                 for j in range(0, naxis2, self.m_NXBLOCK):
-                    box = gain[chip][i : i + self.m_NXBLOCK, j : j + self.m_NYBLOCK]
+                    box = gain[chip][i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK]
                     p = np.where(box > 0.0)
                     buf = box[p]
                     if len(buf) > 0:
                         med = np.median(buf)
-                        #log.debug("Median=%f"%med)
+                        # log.debug("Median=%f"%med)
                     else:
-                        #log.warning("Median < 0 !")
+                        # log.warning("Median < 0 !")
                         med = 0.0
-                    dev[i : i + self.m_NXBLOCK, j : j + self.m_NYBLOCK] = np.where(box > 0, (box - med), 0)
+                    dev[i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK] = \
+                        np.where(box > 0, (box - med), 0)
+            """
+            log.debug("STEP #4b# - End Loop over Blocks")
 
             """
             # original code from gainmap.c
@@ -394,15 +403,15 @@ class GainMap(object):
             """
             med = np.median(dev)
             sig = np.median(np.abs(dev - med)) / 0.6745
-            lo  = med - self.m_NSIG * sig
-            hi  = med + self.m_NSIG * sig
+            lo = med - self.m_NSIG * sig
+            hi = med + self.m_NSIG * sig
 
             log.debug("MED=%f LO=%f HI=%f SIGMA=%f", med, lo, hi, sig)
 
             # Find more badpix by local dev
-            p = np.where( (dev < lo) | (dev > hi))
-            gain[chip][p] = 0.0 # badpix
-            #gain[chip][p] = np.nan # badpix
+            p = np.where((dev < lo) | (dev > hi))
+            gain[chip][p] = 0.0  # badpix
+            # gain[chip][p] = np.nan # badpix
 
             log.debug("Final number of Bad Pixels = %d", (gain[chip] == 0.0).sum())
 
@@ -434,8 +443,30 @@ class GainMap(object):
         fo.writeto(output, output_verify='ignore')
         fo.close(output_verify='ignore')
         del fo
+        myflat.close()
 
         return output
+
+    @jit(nopython=True)
+    def get_dev(self, gain, naxis1, naxis2, chip):
+
+        dev = np.zeros((naxis1, naxis2), dtype=np.float32)
+
+        # Foreach image block
+        for i in range(0, naxis1, self.m_NYBLOCK):
+            for j in range(0, naxis2, self.m_NXBLOCK):
+                box = gain[chip][i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK]
+                p = np.where(box > 0.0)
+                buf = box[p]
+                if len(buf) > 0:
+                    med = np.median(buf)
+                    # log.debug("Median=%f"%med)
+                else:
+                    # log.warning("Median < 0 !")
+                    med = 0.0
+                dev[i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK] = \
+                    np.where(box > 0, (box - med), 0)
+        return dev
 
 #############################################################################
 # main
@@ -443,66 +474,68 @@ class GainMap(object):
 if __name__ == "__main__":
     # Get and check command-line options
 
-    USAGE = "usage: %prog [options]"
-    DESC = """Creates a master gain map from a given master flat field (dome, twilight or superflat)
-optionally normalized. The bad pixels are set to 0"""
+    DESC = """Creates a master gain map from a given master flat field (dome,
+    twilight or superflat) optionally normalized. The bad pixels are set to 0"""
 
-    parser = OptionParser(USAGE, description=DESC)
+    parser = parser = argparse.ArgumentParser(description=DESC)
 
-    parser.add_option("-s", "--source", type="str",
+    parser.add_argument("-s", "--source", type=str,
                   action="store", dest="source_file",
-                  help="Flat Field image optionally normalized. It has to be a fullpath file name (required)")
+                  help="""Flat Field image optionally normalized. It has to be
+                  a fullpath file name (required)""")
 
-    parser.add_option("-o", "--output", type="str",
+    parser.add_argument("-o", "--output", type=str,
                   action="store", dest="output_filename",
                   help="output file to write the Gain Map")
 
-    #TODO
-    #parser.add_option("-b", "--bpm", type="str",
+    # TODO
+    # parser.add_argument("-b", "--bpm", type="str",
     #              action="store", dest="bpm",
     #              help="Input Bad pixel map file (optional)")
 
-    parser.add_option("-L", "--low", type="float", default=0.5,
+    parser.add_argument("-L", "--low", type=float, default=0.5,
                   action="store", dest="mingain",
                   help="pixel below this gain value  are considered bad (default=0.5)")
 
-    parser.add_option("-H", "--high", type="float", default=1.5,
+    parser.add_argument("-H", "--high", type=float, default=1.5,
                   action="store", dest="maxgain",
                   help="pixel above this gain value are considered bad (default=1.5)")
 
-    parser.add_option("-x", "--nx", type="int", default=16,
+    parser.add_argument("-x", "--nx", type=int, default=16,
                   action="store", dest="nxblock",
                   help="X dimen. (pixels) to compute local bkg (even) (default=16)")
 
-    parser.add_option("-y", "--ny", type="int", default=16,
+    parser.add_argument("-y", "--ny", type=int, default=16,
                   action="store", dest="nyblock",
                   help="Y dimen. (pixels) to compute local bkg (even) (default=16)")
 
-    parser.add_option("-n", "--nsigma", type="int", default=10,
+    parser.add_argument("-n", "--nsigma", type=int, default=10,
                   action="store", dest="nsigma",
                   help="number of (+|-)stddev from local bkg to be bad pixel (default=10)")
 
-    parser.add_option("-N", "--normal",  default=True,
+    parser.add_argument("-N", "--normal",  default=True,
                   action="store_true", dest="normal",
-                  help="if true, the input flat-field will be normalized before build the gainmap (default=True)")
+                  help="""if true, the input flat-field will be normalized
+                  before build the gainmap (default=True)""")
 
-    (options, args) = parser.parse_args()
+    args = parser.parse_args()
 
     if len(sys.argv[1:]) < 1:
         parser.print_help()
         sys.exit(0)
 
-    # args is the leftover positional arguments after all options have been processed
-    if not options.source_file or not options.output_filename or len(args)!=0:
+    # args is the leftover positional arguments after all options have been
+    # processed
+    if not args.source_file or not args.output_filename:
         parser.print_help()
-        parser.error("incorrect number of arguments " )
+        parser.error("incorrect number of arguments ")
 
     try:
-        gainmap = GainMap(options.source_file, options.output_filename, bpm=None,
-                      do_normalization=options.normal,
-                      mingain=options.mingain, maxgain=options.maxgain,
-                      nxblock=options.nxblock, nyblock=options.nyblock,
-                      nsigma=options.nsigma )
+        gainmap = GainMap(args.source_file, args.output_filename, bpm=None,
+                          do_normalization=args.normal,
+                          mingain=args.mingain, maxgain=args.maxgain,
+                          nxblock=args.nxblock, nyblock=args.nyblock,
+                          nsigma=args.nsigma)
 
         gainmap.create()
     except Exception as ex:

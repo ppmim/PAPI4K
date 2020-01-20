@@ -47,6 +47,7 @@ import os
 import fileinput
 import shutil
 from optparse import OptionParser
+import time
 
 import misc.fileUtils
 import misc.utils as utils
@@ -114,12 +115,14 @@ class SuperSkyFlat(object):
             Default = median
 
         """
-                    
-            
-        if type(filelist) == type(list()): 
-            self.filelist = filelist  # list of sources files to be used in sky-flat computation
+
+        self.start_time = time.time()
+
+        # list of sources files to be used in sky-flat computation
+        if isinstance(filelist, list):
+            self.filelist = filelist
         elif os.path.isfile(filelist):
-            self.filelist = [line.replace( "\n", "") for line in fileinput.input(filelist)]
+            self.filelist = [line.replace("\n", "") for line in fileinput.input(filelist)]
         else:
             raise Exception("Cannot read source files")
            
@@ -127,14 +130,12 @@ class SuperSkyFlat(object):
         self.temp_dir = os.path.abspath(os.path.join(output_filename, os.pardir)) 
         self.output_filename = output_filename  # full filename (path+filename)
         self.bpm = bpm
-        self.norm = norm # if true, the flat field will be normalized
+        self.norm = norm  # if true, the flat field will be normalized
         self.norm_value = norm_value
         self.__median_smooth = median_smooth
         self.check = check
 
-                    
     def create(self):
-      
         """
         Create the super sky flat using sigma-clipping algorithm (and supporting MEF)
         """
@@ -146,7 +147,7 @@ class SuperSkyFlat(object):
         
         # Check data integrity (all have the same properties)
         m_filelist = self.filelist
-        if self.check and not datahandler.checkDataProperties( m_filelist , c_ncoadds=False):
+        if self.check and not datahandler.checkDataProperties( m_filelist, c_ncoadds=False):
             log.error("Data integrity ERROR, some files not having same properties (FILTER, EXPTIME, NCOADDS or READMODE)")
             raise Exception("Found a data integrity error")
         
@@ -159,6 +160,7 @@ class SuperSkyFlat(object):
         # the input images are scaled to have the same median, the pixels containing 
         # objects are rejected by an algorithm based on the measured noise (sigclip),
         # and the flat-field is obtained by a median.
+        print("Time taken: %s\n" %(time.time()-self.start_time))
         iraf.mscred.combine(input=("'" + "@" + self.temp_dir + "/files.txt" + "'").replace('//','/'),
                     output=tmp1,
                     combine='median',
@@ -175,7 +177,7 @@ class SuperSkyFlat(object):
                     #expname='EXPTIME'
                     #ParList = _getparlistname ('flatcombine')
                 )
-        
+        print("Time taken: %s"%(time.time() - self.start_time))
         # Remove tmp file
         os.unlink(self.temp_dir + "/files.txt")
         

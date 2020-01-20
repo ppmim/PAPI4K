@@ -89,7 +89,7 @@ def readHeader(filename, extension=1):
         raise e
     else:
         if myfits.isMEF():
-            logging.info("Found a MEF file. Extension to use = %s"%extension)
+            logging.info("Found a MEF file. Extension to use = %s" % extension)
             m_wcs = wcs.WCS(fits.getheader(filename, ext=int(extension)))
             # No SIP or Paper IV table lookup distortion correction is applied.
             ra = m_wcs.wcs_pix2world([[myfits.naxis1/2, myfits.naxis2/2]], 1)[0][0]
@@ -339,7 +339,8 @@ def cleanUp(path):
             os.remove(fl)
         except Exception:
             pass
-            
+
+
 def calc(args):
     """
     Method used only to use with Pool.map_asycn() function
@@ -350,7 +351,8 @@ def calc(args):
 
     """
     return solveField(*args)
-        
+
+
 def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
     """
     Run a parallel proceesing to solve astrometry for the input files taking
