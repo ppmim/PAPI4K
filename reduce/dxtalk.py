@@ -133,19 +133,19 @@ def de_crosstalk_o2k(in_image, out_image=None, overwrite=False):
         out_file = in_image
     else:   
         if not out_image:
-            out_file = in_image.replace(".fits","_dx.fits")
+            out_file = in_image.replace(".fits", "_dx.fits")
         else:
             out_file = out_image
             
     try:
         f_in = fits.open(in_image)
-        if len(f_in)==1:
+        if len(f_in) == 1:
             data_in = f_in[0].data
         else:
             log.errro("MEF files currently not supported !")
             raise Exception("MEF files currently not supported !")
             
-        if f_in[0].header['INSTRUME'].lower()!='omega2000':
+        if f_in[0].header['INSTRUME'].lower() != 'omega2000':
             log.error("Only O2k instrument is supported !")
             raise Exception("Only O2k instrument is supported !")
     except Exception as e:
@@ -156,8 +156,9 @@ def de_crosstalk_o2k(in_image, out_image=None, overwrite=False):
     #print "Image background estimation = ", background
     
     #### Q1 #### left-bottom, horizontal stripes 
-    n_stripes = 8 # = no. channels
+    n_stripes = 8  # = no. channels
     width_st = 1024
+    # width_st = f_in[0].data.shape[0] / 2
     height_st = 128
     x_orig = 0
     y_orig = 0
@@ -187,7 +188,7 @@ def de_crosstalk_o2k(in_image, out_image=None, overwrite=False):
     n_stripes = 8
 
     for j in range (0, n_stripes):
-        cube [j] = data_in[x_orig+j*height_st:x_orig+(j+1)*height_st, 
+        cube[j] = data_in[x_orig+j*height_st:x_orig+(j+1)*height_st,
                            y_orig+0:y_orig+width_st]
 
     med_cube = robust.r_nanmedian(cube, 0)

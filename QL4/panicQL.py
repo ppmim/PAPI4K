@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'panicQL.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.2
+# Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_panicQL(object):
     def setupUi(self, panicQL):
@@ -1451,5 +1453,4 @@ class Ui_panicQL(object):
         self.actionAladin.setText(_translate("panicQL", "Aladin"))
         self.actionAladin.setToolTip(_translate("panicQL", "Open Aladin application"))
         self.actionAladin.setShortcut(_translate("panicQL", "Ctrl+A"))
-
 import panicQL_resources_rc

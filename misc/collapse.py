@@ -49,7 +49,7 @@ def collapse(frame_list, out_dir="/tmp"):
     new_frame_list = [] 
     n = 0
 
-    if frame_list == None or len(frame_list) == 0 or frame_list[0] == None:
+    if not frame_list or len(frame_list) == 0 or not frame_list[0]:
         return []
 
     for frame_i in frame_list:
@@ -69,7 +69,7 @@ def collapse(frame_list, out_dir="/tmp"):
             log.debug("MEF file has no cubes, no collapse required.")
             # shutil.copyfile(frame_i, t_filename)
             new_frame_list.append(frame_i)
-        elif len(f[0].data.shape)!=3: # 2D !
+        elif len(f[0].data.shape) != 3:  # 2D !
             log.debug("It is not a FITS-cube image, no collapse required")
             # shutil.copyfile(frame_i, t_filename)
             new_frame_list.append(frame_i)
@@ -103,7 +103,8 @@ def collapse(frame_list, out_dir="/tmp"):
             new_frame_list.append(t_filename)
             log.info("FITS file %s created" % (new_frame_list[n]))
             n += 1
-            f.close()
+        # always
+        f.close()
      
     return new_frame_list
 

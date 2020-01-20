@@ -927,7 +927,7 @@ class ClFits (object):
         #            
         try:
             myfits.close(output_verify='ignore')
-        except Exception as  e:
+        except Exception as e:
             log.error("Error while closing FITS file %s   : %s",
                       self.pathname, str(e))
         

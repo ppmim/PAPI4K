@@ -56,7 +56,6 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--scale', dest='scale',
                         help='scale factor for image scaling [0-5]')
 
-
     args = parser.parse_args()
     if not args.scale:
         parser.print_usage()
