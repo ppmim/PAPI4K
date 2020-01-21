@@ -41,7 +41,7 @@ import dateutil.parser
 import sys
 import os
 import fileinput
-from optparse import OptionParser
+import argparse
 import multiprocessing
 
 
@@ -146,14 +146,13 @@ class NonLinearityCorrection(object):
 
         """
 
-
         # First, checks model is a MASTER_LINEARITY
         if modelHeader['PAPITYPE'] != 'MASTER_LINEARITY':
             raise ValueError('Wrong type of nonlinearity correction file')
 
         # Check input files are non-integrated files (NCOADDS)
         # It is done on applyModel, where can be skipped.
-        #if dataHeader['NCOADDS']>1:
+        # if dataHeader['NCOADDS'] > 1:
         #    log.info("Found a wrong type of source file. Use -F to user ncoadd correction")
         #    raise ValueError('Wrong type of file. Only non-integrated files (NCOADDS=1) allowed.')
 
@@ -178,10 +177,9 @@ class NonLinearityCorrection(object):
                 raise ValueError('Mismatch in header data for keyword \'%s\'' %key)
         keys = ['B_EXT', 'B_DSUB', 'B_VREST', 'B_VBIAG']
         for key in keys:
-            for i in range (1, 5):
-                if dataHeader[key + '%i'%i] != modelHeader[key + '%i'%i]:
+            for i in range(1, 5):
+                if dataHeader[key + '%i' % i] != modelHeader[key + '%i' % i]:
                     raise ValueError('Mismatch in header data for keyword \'%s%i\'' %(key, i))
-
 
     def applyModel(self, data_file):
         """
@@ -368,9 +366,7 @@ class NonLinearityCorrection(object):
             except Exception as e:
                 log.error("Cannot process file \n" + str(e))
                 
-        
-
-        # Prevents any more tasks from being submitted to the pool. 
+        # Prevents any more tasks from being submitted to the pool.
         # Once all the tasks have been completed the worker 
         # processes will exit.
         pool.close()
@@ -415,67 +411,65 @@ class NonLinearityCorrection(object):
 if __name__ == "__main__":
     
     
-    usage = "usage: %prog [options]"
-    desc= """Performs the non-linearity correction of the PANIC raw data files
+    desc = """Performs the non-linearity correction of the PANIC raw data files
 using the proper NL-Model (FITS file). Raw data files must be MEF files; if 
 MEF-cubes, each plane is corrected individually.
 """
-    parser = OptionParser(usage, description=desc)
-
+    parser = argparse.ArgumentParser(description=desc)
     # Basic inputs
-    parser.add_option("-m", "--model",
+    parser.add_argument("-m", "--model",
                   action="store", dest="model",
                   help="FITS MEF-cube file of polinomial coeffs (c4, c3, c2, c1) of the NL model.")
-    
-    parser.add_option("-i", "--input_file",
+
+    parser.add_argument("-i", "--input_file",
                   action="store", dest="input_file",
                   help="FITS file to be corrected.")
-    
-    parser.add_option("-s", "--source",
+
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file list of FITS files to be corrected.")
-    
-    parser.add_option("-o", "--out_dir", type="str", dest="out_dir",
-                  action="store", default="/tmp",
-                  help="filename of out data file (default=%default)")
-    
-    parser.add_option("-S", "--suffix", type="str",
-                  action="store", dest="suffix", default="_NLC", 
-                  help="Suffix to use for new corrected files (default=%default)")
 
-    parser.add_option("-f", "--force",
+    parser.add_argument("-o", "--out_dir", type=str, dest="out_dir",
+                  action="store", default="/tmp",
+                  help="filename of out data file (default: %(default)s)")
+
+    parser.add_argument("-S", "--suffix", type=str,
+                  action="store", dest="suffix", default="_NLC", 
+                  help="Suffix to use for new corrected files (default: %(default)s)")
+
+    parser.add_argument("-f", "--force",
                   action="store_true", dest="force", default=False, 
                   help="Force Non-linearity correction with no check of header"
-                  "values (NCOADD, DATE-OBS, DETROT90, ...")
-    
-    parser.add_option("-c", "--coadd_correction",
+                       "values (NCOADD, DATE-OBS, DETROT90, ...")
+
+    parser.add_argument("-c", "--coadd_correction",
                   action="store_true", dest="coadd_correction", default=True, 
                   help="Force NCOADDS correction and apply NLC")
     
-    (options, args) = parser.parse_args()
+    args = parser.parse_args()
     
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
     # Check required parameters
-    if ((not options.source_file_list and not options.input_file) or not options.out_dir 
-        or not options.model  or len(args)!=0): # args is the leftover positional arguments after all options have been processed
+    if ((not args.source_file_list and not args.input_file) or not args.out_dir
+        or not args.model): # args is the leftover positional arguments after all options have been processed
         parser.print_help()
-        parser.error("incorrect number of arguments " )
+        parser.error("incorrect number of arguments ")
     
-    if options.input_file and os.path.isfile(options.input_file): 
-        filelist = [options.input_file]
-    elif options.source_file_list and os.path.isfile(options.source_file_list):
+    if args.input_file and os.path.isfile(args.input_file):
+        filelist = [args.input_file]
+    elif args.source_file_list and os.path.isfile(args.source_file_list):
         # Read the source file list     
-        filelist = [line.replace( "\n", "") for line in fileinput.input(options.source_file_list)]
+        filelist = [line.replace("\n", "") for line in fileinput.input(args.source_file_list)]
     else:
         parser.print_help()
         parser.error("incorrect number of arguments " )
 
-    NLC = NonLinearityCorrection(options.model, filelist, options.out_dir, 
-                                   options.suffix, options.force,
-                                   options.coadd_correction)
+    NLC = NonLinearityCorrection(args.model, filelist, args.out_dir,
+                                 args.suffix, args.force,
+                                 args.coadd_correction)
 
     try:
         corr = NLC.runMultiNLC()
@@ -492,5 +486,5 @@ MEF-cubes, each plane is corrected individually.
             NLC.applyModel(i_file)
         except Exception,e:
             log.error("Error applying NLC model to file '%s': %s"%(i_file, str(e)))
-    """ 
-    
+    """
+

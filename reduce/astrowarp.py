@@ -40,9 +40,6 @@ from misc.version import __version__
 import misc.config
 import reduce.solveAstrometry
 
-# for initWCS (fk5prec)
-#from PyWCSTools import wcscon
-
 def initWCS(input_image, pixel_scale):
     """
     Call this routine to write rough WCS into FITS header and update RA,DEC
@@ -57,7 +54,7 @@ def initWCS(input_image, pixel_scale):
     try:
         f = datahandler.ClFits(input_image, check_integrity=False)
     except Exception as e:
-        log.error("Error reading FITS %s : %s"%(f, str(e)))
+        log.error("Error reading FITS %s : %s" %(f, str(e)))
         raise e
     
     try:
@@ -71,7 +68,7 @@ def initWCS(input_image, pixel_scale):
         log.warning("MEF file detected !")
     
     for ext in range(0, len(fits_file)):
-        if len(fits_file)>1 and ext==0:
+        if len(fits_file) > 1 and ext == 0:
             continue
     #else:  # is a simple FITS
         header = fits_file[ext].header
@@ -157,19 +154,20 @@ def initWCS(input_image, pixel_scale):
         # Check whether CRPIXn need to be updated because of some kind of border
         # was added around the image during a previus coadd.
         try:
-            if 'CRPIX1' in header and header['NAXIS1']>2048:
+            if 'CRPIX1' in header and header['NAXIS1'] > 2048:
                 log.info("Updating CRPIX1 taking into account border pixels due to coadd")
                 log.debug("NAXIS1=%s  CRPIX1=%s"%(header['NAXIS1'],header['CRPIX1']))
                 value = header['CRPIX1'] + (header['NAXIS1']-2048)/2
-                header.set('CRPIX1', value )
-                log.debug("VALUE1=%s"%value)
-            if 'CRPIX2' in header and header['NAXIS2']>2048:
+                header.set('CRPIX1', value)
+                log.debug("VALUE1=%s" % value)
+
+            if 'CRPIX2' in header and header['NAXIS2'] > 2048:
                 log.info("Updating CRPIX2 taking into account border pixels due to coadd")
                 value = header['CRPIX2'] + (header['NAXIS2']-2048)/2            
-                header.set('CRPIX2', value )
-                log.debug("VALUE2=%s"%value)
+                header.set('CRPIX2', value)
+                log.debug("VALUE2=%s" % value)
         except Exception as e:
-            log.critial("[initWCS] Error updating header: %s"%str(e))
+            log.critial("[initWCS] Error updating header: %s" % str(e))
             raise e
 
     fits_file[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version') 
@@ -177,7 +175,7 @@ def initWCS(input_image, pixel_scale):
     try:        
         fits_file.close(output_verify='ignore')
     except Exception as e:
-        log.critical("ERROR !")
+        log.critical("ERROR: %s" % str(e))
         raise e
 
     log.debug("Right WCS info")
@@ -360,8 +358,8 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     # PAPI_HOME
     try:
         papi_home = os.environ['PAPI_HOME']
-        if papi_home[-1]!='/':
-            papi_home+='/'
+        if papi_home[-1] != '/':
+            papi_home += '/'
     except Exception as e:
         log.error("Error, variable PAPI_HOME not defined.")
         raise e
@@ -838,7 +836,7 @@ class AstroWarp(object):
         # initwcs also converts to J2000.0 EQUINOX
         log.debug("***Doing WCS-header initialization ...")
         for file in self.input_files:
-            log.debug("file: %s",file)
+            log.debug("file: %s", file)
             initWCS(file, self.pix_scale)
 
         ## STEP 1: Create SExtractor catalogs (.ldac)

@@ -46,7 +46,7 @@ import sys
 import os
 import fileinput
 import shutil
-from optparse import OptionParser
+import argparse
 import time
 
 import misc.fileUtils
@@ -257,17 +257,18 @@ class SuperSkyFlat(object):
                 
             # PANIC multi-chip full frame
             elif ('INSTRUME' in f[0].header and f[0].header['INSTRUME'].lower() == 'panic'
-                  and f[0].header['NAXIS1'] == 4096 and f[0].header['NAXIS2'] == 4096):
-                # It supposed to have a full frame of PANIC in one single 
+                  and f[0].header['NAXIS1'] == 4096 and f[0].header['NAXIS2'] == 4096
+                  and not 'H4RG' in f[0].header['CAMERA']):
+                # It supposed to have a full frame of old PANIC (h2rg) in one single
                 # extension (GEIRS default).
                 # Note that in Numpy, arrays are indexed as rows X columns (y, x),
                 # contrary to FITS standard (NAXIS1=columns, NAXIS2=rows).
                 #
-                median = robust.r_nanmedian(f[0].data[200 : 2048-200, 2048+200 : 4096-200])
+                median = robust.r_nanmedian(f[0].data[200: 2048-200, 2048+200: 4096-200])
                 #
-                mean = robust.r_nanmean(f[0].data[200 : 2048-200, 2048+200 : 4096-200])
+                mean = robust.r_nanmean(f[0].data[200: 2048-200, 2048+200: 4096-200])
                 #
-                rob_mean = robust.r_nanmean(f[0].data[200 : 2048-200, 2048+200 : 4096-200])
+                rob_mean = robust.r_nanmean(f[0].data[200: 2048-200, 2048+200: 4096-200])
 
                 mode = 3 * median - 2 * mean
                 log.debug("MEDIAN = %s" % median)
@@ -287,18 +288,19 @@ class SuperSkyFlat(object):
                 if norm_mean < 0.5 or norm_mean > 1.5:
                     log.warning("Suspicious normalized SuperFlat obtained. Mean value =%f" % norm_mean)
                     
-            # Single detector PANIC frame (2k x 2k) (or even O2000 frame)
+            # PANIC-H4RG, or single detector H2RG PANIC frame (2k x 2k),
+            # or O2000 frame
             else:
                 naxis1 = f[0].header['NAXIS1']
                 naxis2 = f[0].header['NAXIS2']
                 offset1 = int(naxis1 * 0.1)
                 offset2 = int(naxis2 * 0.1)
-                median = robust.r_nanmedian(f[0].data[offset1 : naxis1 - offset1,
-                                                    offset2 : naxis2 - offset2])
-                mean = robust.r_nanmean(f[0].data[offset1 : naxis1 - offset1,
-                                                  offset2 : naxis2 - offset2])
-                rob_mean = robust.r_nanmean(f[0].data[offset1 : naxis1 - offset1,
-                                                  offset2 : naxis2 - offset2])
+                median = robust.r_nanmedian(f[0].data[offset1: naxis1 - offset1,
+                                                    offset2: naxis2 - offset2])
+                mean = robust.r_nanmean(f[0].data[offset1: naxis1 - offset1,
+                                                  offset2: naxis2 - offset2])
+                rob_mean = robust.r_nanmean(f[0].data[offset1: naxis1 - offset1,
+                                                  offset2: naxis2 - offset2])
                 mode = 3 * median - 2 * mean
                 log.debug("MEDIAN = %f" % median)
                 log.debug("MEAN = %f" % mean)
@@ -346,58 +348,54 @@ class SuperSkyFlat(object):
 # main
 if __name__ == "__main__":
     # Get and check command-line options
-    
-    
-    usage = "usage: %prog [options]"
-    desc = """This module receives a series of FITS images (science)  and 
+
+    desc = """This module receives a series of FITS images (science)  and
 creates the master super flat-field median combining images using sigma-clip algorithm."""
 
-    parser = OptionParser(usage, description = desc)
-    
-    
-    parser.add_option("-s", "--source",
+    parser = argparse.ArgumentParser(description=desc)
+
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source text file with list of full path of images.")
-                  
-    parser.add_option("-o", "--output",
+
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
                   help="Output file to write SuperFlat")
     
     # Not yet implemented
-    #parser.add_option("-b", "--bpm",
+    #parser.add_argument("-b", "--bpm",
     #              action="store", dest="bpm", 
     #              help="Bad pixel map file [default=%default]", 
     #              default=None)
-    
-    parser.add_option("-k", "--check",
+
+    parser.add_argument("-k", "--check",
                   action="store_true", dest="check", 
                   help="Check image properties (FILTER, EXPTIME, NCOADDS or READMODE)"
-                  "[default=%default]", default=False)
-    
-    parser.add_option("-N", "--norm",
+                  "[default: %(default)s]", default=False)
+
+    parser.add_argument("-N", "--norm",
                   action="store_true", dest="norm", 
                   help="Normalize the output SuperFlat. If image is multi-chip"
-                  ", normalization wrt chip 1 is done [default=%default]", 
+                  ", normalization wrt chip 1 is done (default: %(default)s)",
                     default=False)
 
-    parser.add_option("-n", "--norm_estimator",
+    parser.add_argument("-n", "--norm_estimator",
                   action="store", dest="norm_estimator", 
-                  help="Robust estimator for normalization (median|robust_mean) [default=%default]", 
+                  help="Robust estimator for normalization (median|robust_mean) (default: %(default)s)",
                   default="median")
 
-    
-    parser.add_option("-m", "--median_smooth",
+    parser.add_argument("-m", "--median_smooth",
                   action="store_true", dest="median_smooth", default=False,
-                  help="Median smooth the combined flat-field [default=%default]")
+                  help="Median smooth the combined flat-field (default: %(default)s)")
                   
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
        
-    if not options.source_file_list or not options.output_filename or len(args) != 0: 
+    if not options.source_file_list or not options.output_filename:
         # args is the leftover positional arguments after all options have been 
         # processed
         parser.print_help()
@@ -411,5 +409,5 @@ creates the master super flat-field median combining images using sigma-clip alg
                              options.check)
         superflat.create()
     except Exception as e:
-        log.error("Error: %s"%str(e))
-          
+        log.error("Error: %s" % str(e))
+
