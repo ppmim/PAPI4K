@@ -277,19 +277,22 @@ class GainMap(object):
         offset2 = int(naxis2 * 0.1)
         nbad = 0
 
-        if f.getInstrument() == 'panic' and naxis1 == 4096 and naxis2 == 4096:
+        if (f.getInstrument() == 'panic' and naxis1 == 4096 and naxis2 == 4096
+            and not f.is_panic_h4rg):
             # i.e., a single extension (GEIRS) full frame
-            is_a_panic_full_frame = True
+            is_a_panic_full_frame_h2rg = True
         else:
-            is_a_panic_full_frame = False
+            is_a_panic_full_frame_h2rg = False
 
         gain = np.zeros([nExt, naxis1, naxis2], dtype=np.float32)
         myflat = fits.open(self.flat)
 
         # Check if normalization is already done to FF or otherwise it must be
         # done here
-        if isMEF: extN = 1
-        else: extN = 0
+        if isMEF:
+            extN = 1
+        else:
+            extN = 0
         log.debug("STEP #1# - median computation")
         if np.median(myflat[extN].data) > 100:
             # ##############################################################################
@@ -298,7 +301,7 @@ class GainMap(object):
             self.do_norm = True
             log.info("Normalization need to be done !")
             if isMEF:
-                ##chip = 1 # normalize wrt to mode of chip SG1_1
+                ## chip = 1 # normalize wrt to mode of chip SG1_1
                 if f.getInstrument() == 'panic':
                     ext_name = 'SG1_1'
                     try:
@@ -315,13 +318,14 @@ class GainMap(object):
                 median = np.median(myflat[ext_name].data[offset2: naxis2 - offset2,
                                                     offset1: naxis1 - offset1])
                 msg = "Normalization of MEF master flat frame wrt chip %s. (MEDIAN=%f)" % (ext_name, median)
-            elif is_a_panic_full_frame:
-                # It supposed to have a full frame of PANIC in one single
+            elif is_a_panic_full_frame_h2rg:
+                # It supposed to have a full frame of PANIC (old H2RG) in one single
                 # extension (GEIRS default). Normalize wrt detector SG1_1
                 median = np.median(myflat[0].data[200: 2048-200, 2048+200: 4096 - 200])
                 msg = "Normalization of (full) PANIC master flat frame wrt chip 1. (MEDIAN=%f)" % median
             else:
-                # Not MEF, not PANIC full-frame, but could be a PANIC subwindow
+                # Not MEF, not PANIC full-frame, but could be a PANIC H4RG or a
+                # subwindow
                 median = np.median(myflat[0].data[offset2: naxis2 - offset2,
                                              offset1 : naxis1 - offset1])
                 msg = "Normalization of master flat frame. (MEDIAN = %d)" % median

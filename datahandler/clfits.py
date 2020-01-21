@@ -966,7 +966,8 @@ class ClFits (object):
         print("NoExp     : ", self.getNoExp())
         print("ExpNo     : ",self.getExpNo())
         print("---------------------------------")
-      
+
+
 ################################################################################            
 #  Useful function to check data integrity
 ################################################################################
@@ -1007,7 +1008,7 @@ def checkDataProperties( file_list, c_type=True, c_filter=True, c_texp=True,
                 print('NCOADDS=', f.getNcoadds())
                 print('READMODE=', f.getReadMode())
             
-            if (  (c_type and m_type!=f.getType()) or 
+            if ((c_type and m_type!=f.getType()) or
                   (c_filter and m_filter!=f.getFilter()) or 
                   (c_texp and m_texp!=f.expTime()) or 
                   (c_ncoadds and m_ncoadds!=f.getNcoadds()) or 
@@ -1023,6 +1024,7 @@ def checkDataProperties( file_list, c_type=True, c_filter=True, c_texp=True,
 ################################################################################
 ####### fits tools #############################################################
 ################################################################################
+
 
 def isaFITS(filepath):
     """

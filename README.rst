@@ -22,15 +22,16 @@ Installation
 
 PAPI has the following strict requirements:
  
- - Python 2.7
- - Numpy 1.6 or later 
+ - Python 3.7
+ - Numpy 1.18.x or later
+ - Anaconda 3.18.9 o later
 
 and also depends on next packages:
 
  - `SciPy <http://www.scipy.org>`_ (> v0.12.2)
- - `Astropy <http://www.astropy.org/>`_ (> v0.3.1)
+ - `Astropy <http://www.astropy.org/>`_ (> v4.x)
  - `Matplotlib <http://matplotlib.org/>`_ (> v1.3.0)
- - `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+ - `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
  - `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
  - `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
  - `stsci_python <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
@@ -41,7 +42,7 @@ and also depends on next packages:
  - `Astrometry.net <http://astrometry.net/>`_ with `42xx index files <http://broiler.astrometry.net/~dstn/4200/>`_
  - `SAO DS9 and XPA <http://hea-www.harvard.edu/RD/ds9>`_ (> v7.3b5)
  - `Montage <http://montage.ipac.caltech.edu/download/Montage_v3.3.tar.gz>`_ (v3.3)
- - `montage_wrapper <https://pypi.python.org/pypi/montage-wrapper>`_ (0.9.8)
+ - `montage_wrapper <https://pypi.python.org/pypi/montage-wrapper>`_ (0.9.9)
 
 
 Note that, for PyRAF_ you have to install IRAF_ (v2.16 or later), what can be a 
@@ -105,7 +106,7 @@ Maintainer: jmiguel@iaa.es
 .. _SciPy: http://www.scipy.org
 .. _PyFITS: http://www.stsci.edu/resources/software_hardware/pyfits
 .. _PyRAF: http://www.stsci.edu/institute/software_hardware/pyraf
-.. _PyQt4: http://www.riverbankcomputing.co.uk/software/pyqt/download
+.. _PyQt5: http://www.riverbankcomputing.co.uk/software/pyqt/download
 .. _Astropy: http://www.astropy.org/
 .. _Astrometry.net: http://astrometry.net/
 .. _Astromatic: http://www.astromatic.net/
