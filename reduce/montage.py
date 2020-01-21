@@ -37,6 +37,7 @@ import montage_wrapper as montage
 # Interface to Montage wrapper
 #
 
+
 def mosaic(files_to_mosaic, raw_dir, output_dir, tmp_dir,
                    background_match=True, out_mosaic=None):
     

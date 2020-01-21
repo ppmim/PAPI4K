@@ -1747,9 +1747,10 @@ class ReductionSet(object):
             log.error("Error making object mask")
             raise e
         
-        # STEP 2: Compute dither offsets (in pixles) using cross-correlation technique ==> offsets
-        #>mosaic objfiles.nip $off_err > offsets1.nip
-        search_box = 50 # half_width of search box in arcsec (default 10)
+        # STEP 2: Compute dither offsets (in pixles) using cross-correlation
+        # technique ==> offsets
+        # >mosaic objfiles.nip $off_err > offsets1.nip
+        search_box = 50  # half_width of search box in arcsec (default 10)
         offsets_cmd = self.m_irdr_path+'/offsets '+ output_list_file + '  ' + str(search_box) + ' >' + p_offsets_file
         if misc.utils.runCmd( offsets_cmd )==0:
             log.critical("Some error while computing dither offsets")
@@ -1797,16 +1798,16 @@ class ReductionSet(object):
         log.info("Start coaddStackImages ...")                                          
         # STEP 1: Define parameters                                          
         input_file = input
-        if input_file == None:
+        if not input_file:
             log.error("Bad input file provided !")
             return
         
-        if gain == None:
+        if not gain:
             gain_file = self.out_dir + "/gain_" + self.m_filter + ".fits"
         else:
             gain_file = gain
         
-        if output == None:
+        if not output:
             output_file = self.out_dir + "/coadd_" + self.m_filter + ".fits"     
         else:
             output_file = output
@@ -1814,10 +1815,10 @@ class ReductionSet(object):
         weight_file = output_file.replace(".fits",".weight.fits")
         
         # STEP 2: Run the coadd                                           
-        if type_comb=='average': # (use IRDR::dithercubemean)
+        if type_comb == 'average': # (use IRDR::dithercubemean)
             prog = self.m_irdr_path + "/dithercubemean "
-            cmd  = prog + " " + input_file + " " + gain_file + " " + output_file + " " + weight_file 
-        elif type_comb=='sum':
+            cmd = prog + " " + input_file + " " + gain_file + " " + output_file + " " + weight_file
+        elif type_comb == 'sum':
             # actually, weight_file is not used
             prog = self.m_irdr_path + "/dithercubemean "
             cmd  = prog + " " + input_file + " " + gain_file + " " + output_file + " " + weight_file + " sum " 
@@ -3101,12 +3102,12 @@ class ReductionSet(object):
                     log.debug("Building final mosaic using Montage")
                     try:
                         montage.mosaic(out_ext, 
-                                raw_dir=self.temp_dir, 
-                                output_dir=self.temp_dir,
-                                tmp_dir=self.temp_dir,
-                                background_match=True,
-                                out_mosaic=seq_result_outfile)
-                    except Exception as  ex:
+                                       raw_dir=self.temp_dir,
+                                       output_dir=self.temp_dir,
+                                       tmp_dir=self.temp_dir,
+                                       background_match=True,
+                                       out_mosaic=seq_result_outfile)
+                    except Exception as ex:
                         log.error("Some error while building final Mosaic (Montage)")
                         raise ex
                 else:

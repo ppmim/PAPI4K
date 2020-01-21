@@ -102,8 +102,10 @@ def readHeader(filename, extension=1):
         scale = myfits.pix_scale
         instrument = myfits.getInstrument()
         is_science = myfits.isScience()
-        
-        return (scale, ra, dec, instrument, is_science)
+        naxis1 = myfits.naxis1
+        naxis2 = myfits.naxis2
+
+        return scale, ra, dec, instrument, is_science, naxis1, naxis2
         
     
 def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
@@ -169,10 +171,10 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     #
     # Read header parameters
     #    
-    (scale, ra, dec, instrument, is_science) = readHeader(filename, extension)
+    (scale, ra, dec, instrument, is_science, nx1, nx2) = readHeader(filename, extension)
 
     # Whether no scale was found out and some was given as default, we use it
-    if scale == -1 and pix_scale != None:
+    if scale == -1 and pix_scale:
         scale = pix_scale
     
     # Extension paramter
@@ -182,14 +184,14 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         ext_str = ""
         
     if not is_science:
-        logging.info("Frame %s is not a science frame"%filename)
+        logging.info("Frame %s is not a science frame" % filename)
         
     logging.debug("Starting to solve-field for: %s  Scale=%s  RA= %s Dec= %s \
-    INSTRUMENT= %s" % (filename, scale, ra , dec, instrument))
+    INSTRUMENT= %s" % (filename, scale, ra, dec, instrument))
     
     try:
         path_astrometry = os.path.dirname(spawn.find_executable("solve-field"))  
-    except Exception as e:
+    except Exception:
         msg = "Cannot find the pathname for solve-field"
         logging.error(msg)
         raise Exception(msg)
@@ -198,14 +200,15 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         raise Exception("[solveAstrometry] Error, cannot find Astrometry.net binaries in %s" % path_astrometry)
 
 
+    # To optimize the finding and CPU time required
+    if nx1 == 4096 and nx2 == 4096:
+        downsample = 2
+    else:
+        downsample = 2
+
     #
     # We must distinguish different cases
     #
-    
-    # I do not way, but sometimes it only solve a field with no coordinates !
-    #ra = -1
-    #dec = -1
-    
     # 1) RA, Dec and Scale are known
     if ra != -1 and dec != -1 and scale != -1:
         logging.debug("RA, Dec and Scale are known")
@@ -213,19 +216,19 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
         # radius is used (0.5 degrees)
         # Although --downsample is used, scale does not need to be modified
         str_cmd = "%s/solve-field -O -p --scale-units arcsecperpix --scale-low %s \
-        --scale-high %s --ra %s --dec %s --radius 0.5 -D %s --temp-dir %s %s --downsample 2 %s\
-        "%(path_astrometry, scale-0.05, scale+0.05, ra, dec, out_dir, tmp_dir, filename, ext_str)
+        --scale-high %s --ra %s --dec %s --radius 0.5 -D %s --temp-dir %s %s %s --downsample %s\
+        "%(path_astrometry, scale-0.05, scale+0.05, ra, dec, out_dir, tmp_dir, filename, ext_str, downsample)
     # 2) RA, Dec are unknown but scale is
-    elif ra == -1 or dec ==-1 :
+    elif ra == -1 or dec == -1:
         logging.debug("RA, Dec are unknown but scale is")
         str_cmd = "%s/solve-field -O -p --scale-units arcsecperpix --scale-low %s \
-        --scale-high %s -D %s --temp-dir %s %s %s --downsample 2\
-        "%(path_astrometry, scale - 0.1, scale + 0.1, out_dir, tmp_dir, filename, ext_str)
+        --scale-high %s -D %s --temp-dir %s %s %s --downsample %s\
+        "%(path_astrometry, scale - 0.1, scale + 0.1, out_dir, tmp_dir, filename, ext_str, downsample)
     # 3) None is known -- blind calibration
     if (ra == -1 or dec ==- 1) and scale == -1:
         logging.debug("Nothing is known")
-        str_cmd = "%s/solve-field -O -p -D %s --temp-dir %s %s %s --downsample 2\
-        "%(path_astrometry, out_dir, tmp_dir, filename, ext_str)
+        str_cmd = "%s/solve-field -O -p -D %s --temp-dir %s %s %s --downsample %s\
+        " % (path_astrometry, out_dir, tmp_dir, filename, ext_str, downsample)
     
     logging.debug("CMD=" + str_cmd)
     print("CMD_Astrometry.net =", str_cmd)
