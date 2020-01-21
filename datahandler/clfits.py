@@ -169,6 +169,8 @@ class ClFits (object):
         self.binning = 1
         self.telescope = "unknown"
         self._softwareVer = ''
+        # Next variable is to identify the new PANIC detector H4RG
+        self._is_panic_h4rg = False
 
         self.recognize()
 
@@ -274,7 +276,11 @@ class ClFits (object):
         # Raw PANIC full frame
         return (self.instrument == 'panic' and self.naxis1 == 4096
                 and self.naxis2 == 4096)
-                
+
+    @property
+    def is_panic_h4rg(self):
+        return self._is_panic_h4rg
+
     def expTime(self):
         return self.exptime
     
@@ -420,12 +426,12 @@ class ClFits (object):
         # Check if is a MEF file 
         if len(myfits) > 1:
             self.mef = True
-            self.next = len(myfits)-1
-            ###log.debug("Found a MEF file with %d extensions", self.next)
+            self.next = len(myfits) - 1
+            ### log.debug("Found a MEF file with %d extensions", self.next)
         else:
             self.mef = False
             self.next = 1
-            ###log.debug("Found a simple FITS file")
+            ### log.debug("Found a simple FITS file")
         
         # If file is a MEF, some values will be read from the header extensions      
         if self.mef:
@@ -478,7 +484,6 @@ class ClFits (object):
         if 'CREATOR' in myfits[0].header:
             self._softwareVer = myfits[0].header['CREATOR']
         
-        
         # IMAGE TYPE
         try:
             if self.instrument == 'omega2000' and 'PAPITYPE' in myfits[0].header:
@@ -496,13 +501,13 @@ class ClFits (object):
                 keyword_with_frame_type = 'IMAGETYP'    
             elif self.instrument == 'omegacass_mpia' and 'OBJECT' in myfits[0].header:
                 keyword_with_frame_type = 'OBJECT'
-            elif self.instrument == 'panic': # current ID in GEIRS for PANIC
+            elif self.instrument == 'panic':  # current ID in GEIRS for PANIC
                 if self.obs_tool:
                     keyword_with_frame_type = 'IMAGETYP'
-                    #keyword_with_frame_type = 'OBJECT'
                 else:
                     keyword_with_frame_type = 'OBJECT'
-            else: keyword_with_frame_type = 'IMAGETYP' #default, even for Roper    
+            else:
+                keyword_with_frame_type = 'IMAGETYP'  # default, even for Roper
         except KeyError:
             log.warning('IMAGETYP or OBJECT keywords not found')
             keyword_with_frame_type = 'IMAGETYP' #default
@@ -512,7 +517,7 @@ class ClFits (object):
         # IMAGETYP = [BIAS, DARK, LAMP_ON_FLAT, LAMP_OFF_FLAT, TW_FLAT_DUSK, 
         #               TW_FLAT_DAWN, SKY_FLAT, SCIENCE, SKY, STD, FOCUS ]
         # FIELDTYP = [POINTLIKE, SPARSE_FIELD, CROWDED_FIELD, EXT_OBJECT ]
-        if self.instrument =='panic':
+        if self.instrument == 'panic':
             try:
                 # Self-typed file, created by PAPI
                 if 'PAPITYPE' in myfits[0].header:
@@ -524,7 +529,7 @@ class ClFits (object):
                     else:
                         ltype = myfits[0].header[keyword_with_frame_type].lower()
                         
-                    if ltype.count('dark') :
+                    if ltype.count('dark'):
                         self.type = "DARK"
                     elif ltype.count('lamp_off'):
                         self.type = "DOME_FLAT_LAMP_OFF"
@@ -550,6 +555,16 @@ class ClFits (object):
             except KeyError:
                 log.warning('PAPITYPE/OBJECT/IMAGETYP keyword not found')
                 self.type = 'UNKNOW'
+            # Find out whether is PANICv2 (H4RG detector)
+            try:
+                self._is_panic_h4rg = False
+                if ('CAMERA' in myfits[0].header and
+                    'H4RG' in myfits[0].header['CAMERA']):
+                    self._is_panic_h4rg = True
+                    log.info("Found H4RG detector")
+            except KeyError:
+                log.warning("CAMERA keyword not found")
+
         elif self.instrument == 'hawki':
             try:
                 # Self-typed file, created by PAPI (master calibrations)
@@ -626,7 +641,7 @@ class ClFits (object):
         
         # FILTER
         try:
-            if self.instrument=='hawki':
+            if self.instrument == 'hawki':
                 if 'HIERARCH ESO INS FILT1 NAME' in myfits[0].header: 
                     self.filter = myfits[0].header['HIERARCH ESO INS FILT1 NAME']
                 elif 'HIERARCH ESO INS FILT2 NAME' in myfits[0].header: 

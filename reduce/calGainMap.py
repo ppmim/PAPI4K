@@ -50,7 +50,7 @@ import astropy.io.fits as fits
 import numpy as np
 import datahandler
 import reduce.calSuperFlat
-from numba import jit
+# from numba import jit
 
 
 # Logging
@@ -361,9 +361,9 @@ class GainMap(object):
             buf = np.zeros((self.m_NXBLOCK, self.m_NYBLOCK), dtype=np.float32)
 
             log.debug("STEP #4# - Loop over Blocks")
-            dev = self.get_dev(gain, naxis1, naxis2, 0)
+            #dev = get_dev(gain, naxis1, naxis2, 0, self.m_NXBLOCK, self.m_NYBLOCK)
             # Foreach image block
-            """for i in range(0, naxis1, self.m_NYBLOCK):
+            for i in range(0, naxis1, self.m_NYBLOCK):
                 for j in range(0, naxis2, self.m_NXBLOCK):
                     box = gain[chip][i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK]
                     p = np.where(box > 0.0)
@@ -376,7 +376,7 @@ class GainMap(object):
                         med = 0.0
                     dev[i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK] = \
                         np.where(box > 0, (box - med), 0)
-            """
+
             log.debug("STEP #4b# - End Loop over Blocks")
 
             """
@@ -447,26 +447,27 @@ class GainMap(object):
 
         return output
 
-    @jit(nopython=True)
-    def get_dev(self, gain, naxis1, naxis2, chip):
 
-        dev = np.zeros((naxis1, naxis2), dtype=np.float32)
+#@jit(nopython=True)
+def get_dev(gain, naxis1, naxis2, chip, nx, ny):
 
-        # Foreach image block
-        for i in range(0, naxis1, self.m_NYBLOCK):
-            for j in range(0, naxis2, self.m_NXBLOCK):
-                box = gain[chip][i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK]
-                p = np.where(box > 0.0)
-                buf = box[p]
-                if len(buf) > 0:
-                    med = np.median(buf)
-                    # log.debug("Median=%f"%med)
-                else:
-                    # log.warning("Median < 0 !")
-                    med = 0.0
-                dev[i: i + self.m_NXBLOCK, j: j + self.m_NYBLOCK] = \
-                    np.where(box > 0, (box - med), 0)
-        return dev
+    dev = np.zeros((naxis1, naxis2), dtype=np.float32)
+
+    # Foreach image block
+    for i in range(0, naxis1, ny):
+        for j in range(0, naxis2, nx):
+            box = gain[chip][i: i + nx, j: j + ny]
+            p = np.where(box > 0.0)
+            buf = box[p]
+            if len(buf) > 0:
+                med = np.median(buf)
+                # log.debug("Median=%f"%med)
+            else:
+                # log.warning("Median < 0 !")
+                med = 0.0
+            dev[i: i + nx, j: j + ny] = \
+                np.where(box > 0, (box - med), 0)
+    return dev
 
 #############################################################################
 # main
