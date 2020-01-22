@@ -1,0 +1,101 @@
+# Sample .bashrc for SuSE Linux
+# Copyright (c) SuSE GmbH Nuernberg
+
+# There are 3 different types of shells in bash: the login shell, normal shell
+# and interactive shell. Login shells read ~/.profile and interactive shells
+# read ~/.bashrc; in our setup, /etc/profile sources ~/.bashrc - thus all
+# settings made here will also take effect in a login shell.
+#
+# NOTE: It is recommended to make language settings in ~/.profile rather than
+# here, since multilingual X sessions would not work properly if LANG is over-
+# ridden in every subshell.
+
+# Some applications read the EDITOR variable to determine your favourite text
+# editor. So uncomment the line below and enter the editor of your choice :-)
+#export EDITOR=/usr/bin/vim
+#export EDITOR=/usr/bin/mcedit
+
+# For some news readers it makes sense to specify the NEWSSERVER variable here
+#export NEWSSERVER=your.news.server
+
+# If you want to use a Palm device with Linux, uncomment the two lines below.
+# For some (older) Palm Pilots, you might need to set a lower baud rate
+# e.g. 57600 or 38400; lowest is 9600 (very slow!)
+#
+#export PILOTPORT=/dev/pilot
+#export PILOTRATE=115200
+
+test -s ~/.alias && . ~/.alias || true
+
+export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\] \[\033[33;1m\]\w\[\033[m\] (\$(git branch 2>/dev/null | grep '^*' | colrm 1 2)) \$ "
+
+alias ls='ls --color'
+alias mima='cd /home/jmiguel/DEVELOP/OSN/SATI.git'
+alias py3_env='source /home/jmiguel/DEVELOP/py3_env/bin/activate'
+
+alias panic='cd ${PAPI_HOME}'
+alias panic2='cd /home/jmiguel/DEVELOP/PAPI_v2/papi'
+alias data='cd /data1/'
+alias osn='cd /home/jmiguel/DEVELOP/OSN/GITs'
+### GEIRS environment ###
+###
+# In case the operator has already set TELESCOPE in the shell,
+# GEIRS accept this. Otherwise, the operator must select on the
+# GEIRS init window the right telescope. 
+# Note: It does not move the cold stop.
+if [[ $HOST =~ panic22 ]] ; then
+    export TELESCOPE="CA2.2m"
+elif [[ $HOST =~ panic35 ]] ; then
+    export TELESCOPE="CA3.5m"
+fi
+
+export CAMHOME=${HOME}/GEIRS
+TECS_SCRIPT=$HOME/TECS/scripts
+
+### PAPI environment ###
+##
+PAPI_PROD=/data2/out
+export QT_GRAPHICSSYSTEM=native
+export PYTHONPATH PAPI_HOME PAPI_CONFIG http_proxy
+ASTROMETRY=/usr/local/astrometry/bin
+# Proxy required for cdsclient at MPIA
+#http_proxy=derfel.caha.es:3128
+
+
+PATH=$PATH:$HOME/GEIRS/scripts:$HOME/GEIRS/binrjm:$ASTROMETRY:$HOME/bin:$HOME/TECS/scripts:/usr/local/bin
+export GEIRSLSTABORT CA_FFLTEST AUPLAY GEIRS_DIR FLAT_COMMAND TECS_SCRIPT PANIC_UTIL PANIC_SCI
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
+export LD_LIBRARY_PATH
+export QT_GRAPHICSSYSTEM=native
+
+### OT environment ###
+#export _JAVA_OPTIONS='-Dhttp.proxyHost=derfel.caha.es -Dhttp.proxyPort=3128'
+export TELE_REL_MAX_OFFSET='10000'
+### end OT environment ###
+
+### Para enviar el sonido al SOR (terminal) del 2.2m/3.5m
+if [[ $HOST =~ panic22 ]] ; then
+    export AUDIOSERVER="xt22:0"
+elif [[ $HOST =~ panic35 ]] ; then
+    export AUDIOSERVER="xt32:0"
+fi
+###
+
+
+export JAVA=/usr/local/jdk1.8.0_91/bin/java
+export JAVA_HOME=/usr/local/jdk1.8.0_91/
+export JRE_HOME=//usr/local/jdk1.8.0_91//jre
+export CATALINA_HOME=/home/jmiguel/SOFTWARE/apache-tomcat-8.5.11
+
+PATH="$JAVA_HOME:$JRE_HOME/bin:$PATH"
+
+if [ -f ~/.papirc ]; then . ~/.papirc; fi
+
+#if [ -f "/home/jmiguel/.bash_ps1" ]; then
+# . "/home/jmiguel/.bash_ps1"
+# fi
+
+
+# added by Anaconda3 installer
+export PATH="/home/jmiguel/anaconda3/bin:$PATH"

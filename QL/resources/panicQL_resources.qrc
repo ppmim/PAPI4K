@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="my_icon">
+    <file>ds9.png</file>
+    <file>logo_PANIC_100.jpg</file>
+  </qresource>
+</RCC>
