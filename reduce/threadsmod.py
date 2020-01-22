@@ -22,11 +22,12 @@
 # Import requered modules
 
 import threading
-import misc.display as display
+import papi.misc.display as display
 
 
 #######################################
 lock = threading.Lock()
+
 
 class ExecTaskThread(threading.Thread):
     """ 

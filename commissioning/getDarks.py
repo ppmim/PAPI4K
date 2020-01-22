@@ -9,15 +9,15 @@
 # Email: jmiguel@iaa.es
 # License: GNU GPLv3
 
-from optparse import OptionParser
+import argparse
 import sys
 import os
 import shutil
 import glob
+import fileinput
 import astropy.io.fits as fits
 
 
-  
 def getItimesNcoadds(path, output_file, recursive=False):
     """
     Read all the FITS file of the given path and create a 
@@ -45,7 +45,7 @@ def getItimesNcoadds(path, output_file, recursive=False):
                 hdulist = fits.open(path)
                 filelist = [path]
             except:
-                filelist = [line.replace( "\n", "") 
+                filelist = [line.replace("\n", "")
                             for line in fileinput.input(path)]
         elif os.path.isdir(path):
             filelist = glob.glob(path + "/*.fit*")
@@ -125,26 +125,26 @@ if __name__ == "__main__":
     desc = """Get the unique values of [read_mode, itime, ncoadd, save_mode]
 for the files of a given directory to know the DARKs required for them."""
 
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file",
                   help="Source directory or txt file listing the filenames of input images to read.")
     
-    parser.add_option("-o", "--output_file",
-                  action="store", dest="output_file",default="filetypes.txt", 
-                  help="Output file to be generated [default: %default]")
+    parser.add_argument("-o", "--output_file",
+                  action="store", dest="output_file", default="filetypes.txt",
+                  help="Output file to be generated [default: %(default)s]")
     
-    parser.add_option("-r", "--recursive",
+    parser.add_argument("-r", "--recursive",
                   action="store_true", dest="recursive", default=False,
                   help="Recursive subdirectories if source is a directory name (only first level)")
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
-    if len(sys.argv[1:])<1:
-       parser.print_help()
-       sys.exit(0)
+    if len(sys.argv[1:]) < 1:
+        parser.print_help()
+        sys.exit(0)
 
     if not options.source_file or not options.output_file:
         parser.print_help()

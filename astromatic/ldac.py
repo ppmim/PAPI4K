@@ -30,8 +30,6 @@ except ImportError:
     sys.stderr.write("and/or http://numpy.scipy.org/\n")
     sys.exit(1)
 
-#from __future__ import with_statement
-
 class LDACCat(object):
 
     def __init__(self, hdu):

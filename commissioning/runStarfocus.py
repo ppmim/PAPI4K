@@ -8,7 +8,7 @@
 
 import os
 import re
-from optparse import OptionParser
+import argparse
 import sys
 import fileinput
 import locale
@@ -22,8 +22,7 @@ except Exception as e:
     print("Error, cannot delete ~/iraf/focus_seq.txt")
 
     
-
-import astropy.io.fits as fits
+from astropy.io import fits
 import numpy as np
 import matplotlib
 # Next is needed in order to avoid a crash/deadlock when running 
@@ -34,11 +33,12 @@ matplotlib.use('QT5Agg')
 
 import matplotlib.pyplot as plt
 from pyraf import iraf
-import misc.display as display
+import papi.misc.display as display
 
 
 # Global variable !
 telescope = ""
+
 
 class IrafError(Exception):
     """ Raised if some IRAF error happens """
@@ -238,7 +238,6 @@ def writeDataFile(best_focus, min_fwhm, avg_x, avg_y,
     else:
         print('Error, no data file given')
 
-        
 def readStarfocusLog(log_file):
     """
     Read the results from the iraf.starfocus log file and compute
@@ -284,6 +283,7 @@ def readStarfocusLog(log_file):
                     data.append(line.split()[0:8])
      
     return data
+
 
 def getBestFocus(data, output_file):
     """
@@ -451,32 +451,32 @@ if __name__ == "__main__":
     usage = "usage: %prog [options] "
     desc = """Run IRAF.starfocus for a focus sequecen and return the best focus"""
 
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file",
                   help="Source file listing the filenames of input images.")
     
-    parser.add_option("-c", "--coordiantes",
+    parser.add_argument("-c", "--coordiantes",
                   action="store", dest="coord_file",
                   help="Coordinates file listing the x,y coordiantes "
                   "of stars in input images")
     
-    parser.add_option("-o", "--output_log",
+    parser.add_argument("-o", "--output_log",
                   action="store", dest="log_file", default="starfocus.log", 
-                  help="Output log file generated [default: %default]")
+                  help="Output log file generated [default: %(default)s]")
     
-    parser.add_option("-d", "--data_file",
+    parser.add_argument("-d", "--data_file",
                   action="store", dest="data_file",
                   help="Output data file for analysis")
     
-    parser.add_option("-t", "--target",
+    parser.add_argument("-t", "--target",
                   action="store", dest="target",
                   help="Object name for output data")
 
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     if len(sys.argv[1:])<1:
        parser.print_help()

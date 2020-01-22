@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2008-2019 IAA-CSIC  - All rights reserved. 
+# Copyright (c) 2008-2020 IAA-CSIC  - All rights reserved.
 # Author: Jose M. Ibanez. 
 # Instituto de Astrofisica de Andalucia, IAA-CSIC
 #
@@ -41,13 +41,13 @@ locale.setlocale(locale.LC_ALL, '')
 locale.setlocale(locale.LC_NUMERIC, 'C')
 # print "LC_NUMERIC =", locale.getlocale(locale.LC_NUMERIC)
 
-#import matplotlib
+# import matplotlib
 # Next is needed in order to avoid a crash/deadlock when running 
 # pyraf graphs and matplotlib.pyplot graphs
 # For 'TkAgg' backend (default) produces the crash.
 # It looks like the only 'thread-safe' backend is 'Agg'
-#matplotlib.use('QT4Agg')
-#matplotlib.use('Agg')
+# matplotlib.use('QT4Agg')
+# matplotlib.use('Agg')
 
 
 import sys
@@ -57,7 +57,6 @@ import fnmatch
 import time
 import math
 import tempfile
-from optparse import OptionParser
 import datetime
 
 # Tell PyRAF to skip all graphics initialization and run in terminal-only mode (=1).
@@ -71,27 +70,36 @@ import datetime
 # os.environ['PYRAF_NO_DISPLAY'] = '0'
 
 # PANIC modules
-import papi.reduce
+from papi.reduce import ExecTaskThread
+from papi.reduce.calDark import MasterDark
 from papi.reduce.calTwFlat import MasterTwilightFlat
-import papi.reduce.calBPM_2
-import papi.reduce.calBPM
-import papi.reduce.applyDarkFlat
-import papi.reduce.checkQuality
-import reduce.astrowarp
-import reduce.reductionset as RS
-import misc.fileUtils
-import misc.utils as utils
-import misc.mef
-import datahandler
-import misc.display as display
-import astromatic
-import photo.photometry
-import reduce.correctNonLinearity
-import misc.createDataSeq
+from papi.reduce.calGainMap import DomeGainMap, TwlightGainMap, SkyGainMap
+from papi.reduce.calDomeFlat import MasterDomeFlat
+from papi.reduce.calBPM_2 import BadPixelMask
+from papi.reduce.applyDarkFlat import ApplyDarkFlat
+from papi.reduce.checkQuality import CheckQuality
+from papi.reduce.astrowarp import doAstrometry
+from papi.reduce.reductionset import ReductionSet
+from papi.reduce.solveAstrometry import solveField
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import listToFile
+from papi.misc.mef import MEF
+from papi.datahandler.clfits import ClFits
+from papi.datahandler.datacollector import DataCollector
+from papi.datahandler.dataset import DataSet
+import papi.misc.display as display
+from papi.misc.collapse import collapse
+from papi.reduce.eval_focus_serie import FocusSerie
+from papi.astromatic.sextractor import SExtractor
+from papi.photo.photometry import doPhotometry
+from papi.reduce.correctNonLinearity import NonLinearityCorrection
+from papi.misc.createDataSeq import createDataSeq
+from papi.commissioning.getImageOffsets import getWCSPointingOffsets, draw_offsets
+from papi.misc.version import __version__
 
-#Log
-import misc.paLog
-from misc.paLog import log
+# Log
+from papi.misc.paLog import log
+
 # Fits
 import astropy.io.fits as fits
 from astropy import coordinates as coord
@@ -111,9 +119,7 @@ from pyraf import iraf
 # Multiprocessing
 from multiprocessing import Process, Queue
 
-#from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
-#from PyQt4.QtCore import QString, QSize
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QFileDialog, QInputDialog, QMenu, QAction
@@ -125,8 +131,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox
 
-import commissioning.getImageOffsets as off
-from misc.version import __version__
 
 
 # ------------------------------------------------------------------------------
@@ -140,7 +144,8 @@ from misc.version import __version__
 # http://stackoverflow.com/questions/5429584/handling-the-classmethod-pickling-issue-with-copy-reg
 # but it does not work (at least for me!) 
 #
-        
+
+
 def _pickle_method(method):
     
     # Pickle methods properly, including class methods.
@@ -340,45 +345,36 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             s_mode = 'dir'
         
         self.dc = None
-        self.dc = datahandler.DataCollector(s_mode, self.m_sourcedir, 
-                                            self.file_pattern , 
-                                            self.new_file_func)
+        self.dc = DataCollector(s_mode, self.m_sourcedir,
+                                self.file_pattern ,
+                                self.new_file_func)
         # Data collector for output files
         self.dc_outdir = None # Initialized in checkOutDir_slot()
-        #datahandler.DataCollector("dir", self.m_outputdir, self.file_pattern, self.new_file_func_out)
-        
-        ## Task management using Threads (ExecTaskThread)
-        ## ----------------------------------------------
-        self._task = None                       # Pointer to task/thread that is running 
-        #self._task_event = threading.Event()    # Event to synchronize ExecTaskThread and ExecTaskThread
+
+        # Task management using Threads (ExecTaskThread)
+        # ----------------------------------------------
+        self._task = None             # Pointer to task/thread that is running
         self._task_info = None
-        self._task_info_list = []               # Queue-list where task status is saved
+        self._task_info_list = []     # Queue-list where task status is saved
         
         self._task_timer = QTimer(self)
         self._task_timer.timeout.connect(self.checkLastTask)
-        # self.connect(self._task_timer, QtCore.SIGNAL("timeout()"), self.checkLastTask )
         self._task_timer.start(1000)    # 1 second continuous timer
         
-        
-        ## Task management using Processing Queue management
-        ## -------------------------------------------------
+        # Task management using Processing Queue management
+        # -------------------------------------------------
         # Create queues
-        #freeze_support()
         self._task_queue = Queue()
         self._done_queue = Queue()
         
         # Timer for DoneQueue (tasks already done)
         self._queue_timer_done = QTimer(self)
         self._queue_timer_done.timeout.connect(self.checkDoneQueue)
-        #self.connect(self._queue_timer_done, QtCore.SIGNAL("timeout()"),
-        #              self.checkDoneQueue)
         self._queue_timer_done.start(1000)    # 1 second continuous timer
         
         # Timer for TaskQueue (pending tasks)
         self._queue_timer_todo = QTimer(self)
         self._queue_timer_todo.timeout.connect(self.taskRunner)
-        #self.connect(self._queue_timer_todo, QtCore.SIGNAL("timeout()"),
-        #              self.taskRunner)
         self._queue_timer_todo.start(1000)    # 1 second continuous timer
         
     def __initializeGUI(self):
@@ -428,7 +424,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         # Create Inputs-DB
         try:
-            self.inputsDB = datahandler.dataset.DataSet(None, instrument)
+            self.inputsDB = DataSet(None, instrument)
             self.inputsDB.createDB()
         except Exception as e:
             log.error("Error while INPUT data base initialization: \n %s"%str(e))
@@ -436,7 +432,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         # Create Outputs-DB
         try:
-            self.outputsDB = datahandler.dataset.DataSet(None, instrument)
+            self.outputsDB = DataSet(None, instrument)
             self.outputsDB.createDB()
             # Insert/load the external calibration files
             self.load_external_calibs(self.ext_calib_dir)
@@ -611,7 +607,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 # Both master_dark and master_flat are optional
                 if mDark or mFlat:
                     # Put into the queue the task to be done
-                    func_to_run = reduce.ApplyDarkFlat([filename], mDark, mFlat, 
+                    func_to_run = ApplyDarkFlat([filename], mDark, mFlat,
                                                      mBPM, self.m_outputdir,
                                                      bpm_action='grab') # fix is a heavy process for QL
                     params = ()
@@ -689,7 +685,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         master_flat = [] # we'll get a list of master flat candidates
         master_bpm = []
         
-        obj_frame = datahandler.ClFits(sci_obj_list[0])
+        obj_frame = ClFits(sci_obj_list[0])
         # We take as sample, the first frame in the list, but all frames must
         # have the same features (expT,filter,ncoadd, readout-mode, ...)
         expTime = obj_frame.expTime()
@@ -786,7 +782,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         # calibrations (framelist) can be used anyway.
                         elif ifd[0].data.shape == src_fd[0].shape[1:]:
                             return iframe
-                        elif datahandler.ClFits(iframe).isMasterDarkModel():
+                        elif ClFits(iframe).isMasterDarkModel():
                             # Exception,  DarkModel will have always 2 layers 
                             # per extension.
                             return iframe
@@ -802,7 +798,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         # calibrations (framelist) can be used anyway.
                         elif ifd[1].data.shape == src_fd[1].shape[1:]:
                             return iframe
-                        elif datahandler.ClFits(iframe).isMasterDarkModel():
+                        elif ClFits(iframe).isMasterDarkModel():
                             # Exception, DarkModel will have always 2 layers 
                             # per extension
                             return iframe
@@ -861,15 +857,15 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 self.file_pattern = str(self.lineEdit_filename_filter.text())
                 if self.dc != None: del self.dc
                 if os.path.isfile(dir) and os.path.basename(dir)=="save_CA2.2m.log":
-                    self.dc = datahandler.DataCollector("geirs-file", str(dir), 
+                    self.dc = DataCollector("geirs-file", str(dir),
                                                         self.file_pattern , 
                                                         self.new_file_func)  
                 elif os.path.isfile(dir) and os.path.basename(dir)=="fitsfiles.corrected":
-                    self.dc = datahandler.DataCollector("geirs-file2", str(dir), 
+                    self.dc = DataCollector("geirs-file2", str(dir),
                                                         self.file_pattern , 
                                                         self.new_file_func)  
                 elif os.path.isdir(dir):
-                    self.dc = datahandler.DataCollector("dir", str(dir), 
+                    self.dc = DataCollector("dir", str(dir),
                                                         self.file_pattern , 
                                                         self.new_file_func)
                 # Activate the autochecking of new files
@@ -909,7 +905,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             self.m_sourcedir = self._fitsGeirsWritten_
             if self.dc is not None:
                 del self.dc
-            self.dc = datahandler.DataCollector("geirs-file2", self.m_sourcedir, 
+            self.dc = DataCollector("geirs-file2", self.m_sourcedir,
                                                  self.file_pattern , 
                                                  self.new_file_func)
         else:
@@ -942,9 +938,9 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             
             if self.dc != None: 
                 del self.dc
-            self.dc = datahandler.DataCollector("dir", self.m_sourcedir,
-                                                 self.file_pattern,
-                                                 self.new_file_func)
+            self.dc = DataCollector("dir", self.m_sourcedir,
+                                    self.file_pattern,
+                                    self.new_file_func)
            
             # Set default output dir also with current DATE
             self.m_outputdir = "/data2/out/" + currentDate
@@ -990,10 +986,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         ## Activate or deactivate the autochecking of new files
         if self.checkBox_outDir_autocheck.isChecked():
             if self.dc_outdir is None:
-                self.dc_outdir = datahandler.DataCollector("dir", 
-                                                           self.m_outputdir, 
-                                                           self.file_pattern, 
-                                                           self.new_file_func_out)
+                self.dc_outdir = DataCollector("dir",
+                                               self.m_outputdir,
+                                               self.file_pattern,
+                                               self.new_file_func_out)
             # Source dir check is required 
             if not self.checkBox_autocheck.isChecked():
                 self.checkBox_autocheck.setChecked(True)
@@ -1020,8 +1016,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                             self.logConsole.info("No value returned")
                         else:
                             str_list = ""
-                            #print "FILES CREATED=",self._task_info._return
-                            #display.showFrame(r) #_return is a file list
+                            # print "FILES CREATED=",self._task_info._return
+                            # display.showFrame(r) #_return is a file list
                             for i_file in r:
                                 if i_file.endswith(".fits"):
                                     if self.getDisplayMode() >= 2: 
@@ -1039,8 +1035,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                     msg = "Cannot display file; file format not supported yet"
                                     self.logConsole.error(msg)
                                     log.error(msg)
-                                #display.showFrame(file)
-                                str_list+=" +File: " + str(i_file) + "\n"
+                                # display.showFrame(file)
+                                str_list += " +File: " + str(i_file) + "\n"
                                 #!!! keep up-date the out DB for future calibrations !!!
                                 # Because some science sequences could need the
                                 # master calibration created by a former reduction,
@@ -1124,7 +1120,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                 if self.getDisplayMode() >= 2: 
                                     display.showFrame(self._task_info._return) #_return is a file list
                                 for file in self._task_info._return:
-                                    #display.showFrame(file)
+                                    # display.showFrame(file)
                                     str_list+=str(file)+"\n"
                                     #!!! keep up-date the out DB for future calibrations !!!
                                     # Because some science sequences could need the
@@ -1290,27 +1286,30 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         typeSeq = ''
         
         # Read the FITS file
-        fits = datahandler.ClFits(filename, check_integrity=False)
-        #only for debug !!
+        fits = ClFits(filename, check_integrity=False)
+        # only for debug !!
         log.info("Current_FILTER= %s, Last_FILTER=%s, Current_OB_ID=%s, Last_OB_ID=%s",
                  fits.getFilter(), self.last_filter, fits.getOBId(), self.last_ob_id )
+
         #############################################
         # Based on the meta-data provided by the OT
         # Option based on number of expositions (NOEXP) in the pattern and the 
         # exposition number (EXPNO) of the current frame; It even works for 
         # calibration frames sequences (dark, flats, ...)
         # Added checking of type mismatch of sequence files
+
         log.info("EXPNO= %s, NOEXPO= %s", fits.getExpNo(), fits.getNoExp())
+
         if fits.isFromOT():
             log.debug("Checking OT keywords...")
             self.curr_sequence.append(filename)
             # General case for OT observations
             if fits.getExpNo()==1:
-                #Start of sequence
+                # Start of sequence
                 self.curr_sequence = [filename]
                 endSeq, retSeq, typeSeq = False, self.curr_sequence, fits.getType()
-                #due to start of a new sequnece, we need to update 'last_' values here
-                #because some values (last_img_type) are checked below
+                # due to start of a new sequnece, we need to update 'last_' values here
+                # because some values (last_img_type) are checked below
                 self.last_ra = fits.ra
                 self.last_dec = fits.dec
                 self.last_filter = fits.getFilter()
@@ -1470,10 +1469,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             ## Create DataCollector for a path     
             self.file_pattern = str(self.lineEdit_filename_filter.text())
             if os.path.isdir(self.m_outputdir):
-                self.dc_outdir = datahandler.DataCollector("dir", 
-                                                           self.m_outputdir, 
-                                                           self.file_pattern , 
-                                                           self.new_file_func_out)
+                self.dc_outdir = DataCollector("dir",
+                                                self.m_outputdir,
+                                                self.file_pattern ,
+                                                self.new_file_func_out)
             
             ## Activate the autochecking of new files
             self.checkBox_outDir_autocheck.setChecked(True)
@@ -2320,7 +2319,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         # The sort out of the files by MJD is done 
         # in getWCSPointingOffsets().
         try:    
-            offsets = off.getWCSPointingOffsets(self.m_popup_l_sel, "/dev/null")
+            offsets = getWCSPointingOffsets(self.m_popup_l_sel, "/dev/null")
         except Exception as e:
             msg = "Error, cannot find out the image offsets. %s"%str(e)
             log.error(msg)
@@ -2334,7 +2333,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     pix_scale = self.config_opts['general']['pix_scale']
             
             # Draw plot with dither pathern
-            off.draw_offsets(offsets, pix_scale, 1.0)
+            draw_offsets(offsets, pix_scale, 1.0)
 
     def MEF2Single_slot(self):
         """
@@ -2345,13 +2344,15 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         for file in self.m_popup_l_sel:
             try:
-                mef = misc.mef.MEF([file])
+                mef = MEF([file])
                 res = mef.doJoin(".join.fits", output_dir=self.m_outputdir)[1]
             except Exception as e:
-                log.debug("Cannot convert MEF to Single file %s. Maybe it's not a MEF file", str(e))
-                QMessageBox.critical(self, "Error", "Cannot convert MEF to Single file : %s \n Maybe it's not a MEF file" % (file))
+                log.debug("Cannot convert MEF to Single file %s. Maybe it's "
+                          "not a MEF file", str(e))
+                QMessageBox.critical(self, "Error", "Cannot convert MEF to "
+                    "Single file : %s \n Maybe it's not a MEF file" % (file))
             else:
-                line = "File generated: %s"%res
+                line = "File generated: %s" % res
                 self.logConsole.info(str(line))
         
         QApplication.restoreOverrideCursor()
@@ -2366,7 +2367,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         for file in self.m_popup_l_sel:
             try:
-                mef = misc.mef.MEF([file])
+                mef = MEF([file])
                 res = mef.convertGEIRSToMEF(out_dir=self.m_outputdir)[1]
             except Exception as e:
                 log.debug("Cannot convert Single to MEF file %s. Maybe it's not a single file", file)
@@ -2387,7 +2388,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         for file in self.m_popup_l_sel:
             try:
-                mef = misc.mef.MEF([file])
+                mef = MEF([file])
                 res = mef.doSplit(".Q%02d.fits", out_dir=self.m_outputdir)[1]
             except Exception as e:
                 log.debug("Cannot split file %s. Maybe it's not a MEF file.", file)
@@ -2410,7 +2411,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         for file in self.m_popup_l_sel:
             try:
-                mef = misc.mef.MEF([file])
+                mef = MEF([file])
                 res = mef.splitGEIRSToSimple(out_dir=self.m_outputdir)[1]
             except Exception as e:
                 msg = "Cannot split file %s. Maybe it's not a 4kx4k Single file. %s" % (file, str(e))
@@ -2472,10 +2473,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
         
         try:
-            new_files = misc.createDataSeq.createDataSeq(self.m_popup_l_sel, 
-                                                         seq_type, 
-                                                         overwrite=overwrite, 
-                                                         output_dir=self.m_outputdir)
+            new_files = createDataSeq(self.m_popup_l_sel,
+                                      seq_type,
+                                      overwrite=overwrite,
+                                      output_dir=self.m_outputdir)
         except Exception as e:
             msg = "Cannot create Data Sequece of type [%s]: %s"%(seq_type, str(e))
             log.debug(msg)
@@ -2498,7 +2499,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         for file in self.m_popup_l_sel:
             try:
-                new_file = misc.collapse.collapse([file], out_dir=self.m_outputdir)[0]
+                new_file = collapse([file], out_dir=self.m_outputdir)[0]
             except Exception as e:
                 msg = "Cannot split file %s. Maybe it's not a Cube file"%(file, str(e))
                 log.debug(msg)
@@ -2530,7 +2531,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         try:
             #self.m_processing = False    # Pause autochecking coming files - ANY MORE REQUIRED ?, now using a mutex in thread !!!!
-            thread = reduce.ExecTaskThread(self.run_imexam, 
+            thread = ExecTaskThread(self.run_imexam,
                                            self._task_info_list, 
                                            self.m_popup_l_sel[0] )
             thread.start()
@@ -2653,7 +2654,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                               "(*.fit*")
 
         if str(source):
-            fits = datahandler.ClFits(str(source))
+            fits = ClFits(str(source))
             if fits.getType()!='MASTER_DARK' or \
                 fits.getType()!='MASTER_DARK_MODEL':
                 res = QMessageBox.information(self, "Info", 
@@ -2676,7 +2677,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                               "(*.fit*)")
 
         if str(source):
-            fits = datahandler.ClFits(str(source))
+            fits = ClFits(str(source))
             if fits.getType()!='MASTER_SKY_FLAT' or \
                 fits.getType()!='MASTER_DOME_FLAT' or \
                 fits.getType()!='MASTER_TW_FLAT':
@@ -2783,10 +2784,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     # Pause autochecking coming files - ANY MORE REQUIRED ?, 
                     # now using a mutex in thread !!!!
                     self.m_processing = False    
-                    thread = reduce.ExecTaskThread(mathOp, 
-                                                   self._task_info_list, 
-                                                   self.m_popup_l_sel,'-', 
-                                                   str(outFilename))
+                    thread = ExecTaskThread(mathOp,
+                                            self._task_info_list,
+                                            self.m_popup_l_sel,'-',
+                                            str(outFilename))
                     thread.start()
                 except:
                     QMessageBox.critical(self, "Error", 
@@ -2817,7 +2818,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     self.m_processing = False    
                     # Pause autochecking coming files - ANY MORE REQUIRED ?, 
                     # now using a mutex in thread !!!!
-                    thread = reduce.ExecTaskThread(mathOp, 
+                    thread = ExecTaskThread(mathOp,
                                                    self._task_info_list, 
                                                    self.m_popup_l_sel,
                                                    'combine', str(outFilename))
@@ -2848,7 +2849,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     self.m_processing = False    
                     # Pause autochecking coming files - ANY MORE REQUIRED ?, 
                     # now using a mutex in thread !!!!
-                    thread = reduce.ExecTaskThread(mathOp, 
+                    thread = ExecTaskThread(mathOp,
                                                    self._task_info_list, 
                                                    self.m_popup_l_sel,
                                                    '+', str(outFilename))
@@ -2877,7 +2878,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     # Pause autochecking coming files - ANY MORE REQUIRED ?, 
                     # now using a mutex in thread !!!!
                     self.m_processing = False
-                    thread = reduce.ExecTaskThread(mathOp, 
+                    thread = ExecTaskThread(mathOp,
                                                  self._task_info_list, 
                                                  self.m_popup_l_sel, 
                                                  '/',  str(outFilename))
@@ -2904,11 +2905,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             try:
                 texp_scale = False
                 QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                self._task = reduce.calDark.MasterDark(self.m_popup_l_sel, 
+                self._task = MasterDark(self.m_popup_l_sel,
                                                        self.m_tempdir, 
                                                        str(outfileName), 
                                                        texp_scale)
-                thread = reduce.ExecTaskThread(self._task.createMaster, 
+                thread = ExecTaskThread(self._task.createMaster,
                                                 self._task_info_list)
                 thread.start()
             except Exception as e:
@@ -2952,11 +2953,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             if outfileName:
                 try:
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                    self._task = reduce.calDomeFlat.MasterDomeFlat(
+                    self._task = MasterDomeFlat(
                                         self.m_popup_l_sel, 
                                         self.m_tempdir, 
                                         str(outfileName))
-                    thread = reduce.ExecTaskThread(self._task.createMaster, 
+                    thread = ExecTaskThread(self._task.createMaster,
                                                  self._task_info_list)
                     thread.start()
                 except:
@@ -3002,7 +3003,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         master_dark_list=darks,
                         output_filename=str(outfileName))
                     
-                    thread = reduce.ExecTaskThread(self._task.createMaster, 
+                    thread = ExecTaskThread(self._task.createMaster,
                                                  self._task_info_list)
                     thread.start()
                 except Exception as e:
@@ -3037,10 +3038,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             if flat_type.count("SCIENCE"):
                 try:
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                    self._task = reduce.calGainMap.SkyGainMap(self.m_popup_l_sel, 
+                    self._task = SkyGainMap(self.m_popup_l_sel,
                                                               str(outfileName), 
                                                               None, self.m_tempdir)
-                    thread = reduce.ExecTaskThread(self._task.create, self._task_info_list)
+                    thread = ExecTaskThread(self._task.create, self._task_info_list)
                     thread.start()
                 except Exception as e:
                     QApplication.restoreOverrideCursor()
@@ -3049,10 +3050,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             elif flat_type.count("DOME_FLAT"):
                 try:
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                    self._task = reduce.calGainMap.DomeGainMap(self.m_popup_l_sel, 
+                    self._task = DomeGainMap(self.m_popup_l_sel,
                                                               str(outfileName), 
                                                               None)
-                    thread = reduce.ExecTaskThread(self._task.create, self._task_info_list)
+                    thread = ExecTaskThread(self._task.create, self._task_info_list)
                     thread.start()
                 except Exception as e:
                     QApplication.restoreOverrideCursor()
@@ -3062,11 +3063,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 try:
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
                     darks = self.outputsDB.GetFilesT('MASTER_DARK', -1)
-                    self._task = reduce.calGainMap.TwlightGainMap(self.m_popup_l_sel,
+                    self._task = TwlightGainMap(self.m_popup_l_sel,
                                                               darks, 
                                                               str(outfileName), 
                                                               None, self.m_tempdir)
-                    thread = reduce.ExecTaskThread(self._task.create, self._task_info_list)
+                    thread = ExecTaskThread(self._task.create, self._task_info_list)
                     thread.start()
                 except Exception as e:
                     QApplication.restoreOverrideCursor()
@@ -3088,7 +3089,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         if not self.m_listView_item_selected:
             return
 
-        fits = datahandler.ClFits(self.m_listView_item_selected)
+        fits = ClFits(self.m_listView_item_selected)
         if fits.getType() == 'SCIENCE':
             sex_config = self.papi_home + self.config_opts['config_files']['sextractor_conf']
             sex_param = self.papi_home + self.config_opts['config_files']['sextractor_param']
@@ -3112,10 +3113,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             #
             input_file = self.m_listView_item_selected
             # Check if it is a cube, then collapse.
-            input_file  = misc.collapse.collapse([input_file], out_dir=self.m_tempdir)[0]
+            input_file = collapse([input_file], out_dir=self.m_tempdir)[0]
             
             out_file = self.m_outputdir + "/" + os.path.basename(input_file.replace(".fits",".skysub.fits"))
-            sex = astromatic.SExtractor()
+            sex = SExtractor()
             #sex.config['CONFIG_FILE']="/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
             #sex.ext_config['CHECKIMAGE_TYPE'] = "OBJECTS"
             sex.config['CATALOG_TYPE'] = "NONE"
@@ -3171,7 +3172,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
           
             # Look for NEAREST science files
             if self.m_listView_item_selected:
-                fits = datahandler.ClFits(self.m_listView_item_selected)
+                fits = ClFits(self.m_listView_item_selected)
                 if fits.getType() == 'SCIENCE':
                     near_list = self.inputsDB.GetFiles('ANY', 'SCIENCE', -1, 
                                                        fits.filter, fits.mjd, 
@@ -3234,7 +3235,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
         # Create working thread that compute sky-frame
         try:
-            self._task = RS.ReductionSet( [str(item) for item in near_list], 
+            self._task = ReductionSet( [str(item) for item in near_list],
                                           self.m_outputdir,
                                           out_file=self.m_outputdir + "/skysub.fits",
                                           obs_mode="dither", dark=None, 
@@ -3244,7 +3245,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                           check_data=True, 
                                           config_dict=self.config_opts)
             
-            thread = reduce.ExecTaskThread(self._task.subtractNearSky, 
+            thread = ExecTaskThread(self._task.subtractNearSky,
                                            self._task_info_list, 
                                            self._task.rs_filelist, 
                                            file_n # range used by subtractNearSky is [1-N]
@@ -3276,18 +3277,18 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             if outfileName:
                 try:
                     self.genFileList(self.m_popup_l_sel, self.m_tempdir + "/flat.list")
-                    expTime = datahandler.ClFits(self.m_popup_l_sel[0]).expTime()
+                    expTime = ClFits(self.m_popup_l_sel[0]).expTime()
                     dark = self.outputsDB.GetFilesT('MASTER_DARK', expTime)[-1]
                     lsig = 10
                     hsig = 10
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                    self._task = reduce.calBPM_2.BadPixelMask( self.m_tempdir + "/flat.list", 
+                    self._task = BadPixelMask( self.m_tempdir + "/flat.list",
                                                                dark, 
                                                                str(outfileName), 
                                                                lsig, hsig, 
                                                                self.m_tempdir)
                     
-                    thread = reduce.ExecTaskThread(self._task.create, 
+                    thread = ExecTaskThread(self._task.create,
                                                    self._task_info_list)
                     thread.start()
                 except:
@@ -3431,7 +3432,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     # Note that both master_dark and master_flat and BPM are OPTIONAL
                     if mDark or mFlat or mBPM:
                         # Put into the queue the task to be done
-                        func_to_run = reduce.ApplyDarkFlat([filename], 
+                        func_to_run = ApplyDarkFlat([filename],
                                                          mDark, mFlat, mBPM, 
                                                          self.m_outputdir,
                                                          bpm_action=bpm_mode, # fix is a heavy process for QL
@@ -3488,11 +3489,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             try:
                 master_bpm =  self.config_opts['bpm']['bpm_file']
                 if os.path.isfile(master_bpm):
-                    task = reduce.ApplyDarkFlat(self.m_popup_l_sel, 
-                                            None, None, 
-                                            master_bpm, 
-                                            self.m_outputdir,
-                                            bpm_action=bpm_mode)
+                    task = ApplyDarkFlat(self.m_popup_l_sel,
+                                        None, None,
+                                        master_bpm,
+                                        self.m_outputdir,
+                                        bpm_action=bpm_mode)
                     result = task.apply()
                     #result = reduce.calBPM.applyBPM(
                     #                self.m_popup_l_sel[0],
@@ -3537,7 +3538,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         msg = "NLC Model to apply: %s"%master_nlc
                         log.info(msg)
                         self.logConsole.info(msg)
-                        nl_task = reduce.correctNonLinearity.NonLinearityCorrection(master_nlc, 
+                        nl_task = NonLinearityCorrection(master_nlc,
                             self.m_popup_l_sel, out_dir=self.m_outputdir, suffix='_LC')
                         
                         # Submit task
@@ -3558,8 +3559,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 raise e
             finally:
                 QApplication.restoreOverrideCursor()
-                
-                
+
     def focus_eval(self):
         """
         Ask what method is prefered, iraf.starfocus or SExtractor based.
@@ -3593,12 +3593,13 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         if len(self.m_popup_l_sel) > 3:
             with fits.open(self.m_popup_l_sel[0]) as myfits:
                 if len(myfits) > 1:
-                    # Convert MEF-files to join-files (iraf.starfocus only support that kind of files)
+                    # Convert MEF-files to join-files (iraf.starfocus only
+                    # support that kind of files)
                     try:
                         msg = "Converting MEF files to SEF format..."
                         self.logConsole.info(msg)
                         log.debug(msg)
-                        mef = misc.mef.MEF(self.m_popup_l_sel)
+                        mef = MEF(self.m_popup_l_sel)
                         my_files = mef.doJoin(".join.fits", output_dir=self.m_outputdir)[1]
                     except Exception as e:
                         self.logConsole.error("Error convering MEF to SEF format")
@@ -3690,14 +3691,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     self.genFileList(self.m_popup_l_sel, "/tmp/focus.list")
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
                     pix_scale = self.config_opts['general']['pix_scale']
-                    satur_level =  self.config_opts['skysub']['satur_level']
+                    satur_level = self.config_opts['skysub']['satur_level']
                     # detector = self.config_opts['general']['detector']
-                    self._task = reduce.eval_focus_serie.FocusSerie("/tmp/focus.list", 
-                                                               str(outfileName),
-                                                               pix_scale, 
-                                                               satur_level,
-                                                               show=True,
-                                                               window=detector)
+                    self._task = FocusSerie("/tmp/focus.list",
+                                            str(outfileName),
+                                            pix_scale,
+                                            satur_level,
+                                            show=True,
+                                            window=detector)
 
                     best_focus, outfile = self._task.eval_serie()
                     self.logConsole.info("Best Focus (mm)= %s --> File = %s" % (
@@ -3705,13 +3706,13 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                             os.path.basename(outfile)))
                     QApplication.restoreOverrideCursor()
                     
-                    #thread = reduce.ExecTaskThread(self._task.eval_serie, 
+                    #thread = ExecTaskThread(self._task.eval_serie,
                     #                                  self._task_info_list)
                     #thread.start()
                 except Exception as e:
                     # Restore the cursor
                     QApplication.restoreOverrideCursor()
-                    msg = "Cannot evaluate focus series: %s"%(str(e))
+                    msg = "Cannot evaluate focus series: %s" % (str(e))
                     self.logConsole.error(msg)
                     QMessageBox.critical(self, "Error", msg)
                     raise e
@@ -3725,7 +3726,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         msg = "FILE" + (length_fn+25) * " " + "MEAN     MODE       STDDEV      MIN        MAX"
         self.logConsole.info(msg)
         for file in self.m_popup_l_sel:
-            values = (iraf.mscstat (images=file,
+            values = (iraf.mscstat(images=file,
             fields="image,mean,mode,stddev,min,max",format='no',Stdout=1))
             for line in values:
                 #line=os.path.basename(values[0])
@@ -3742,7 +3743,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
         
         pix_scale = self.config_opts['general']['pix_scale']
-        cq = reduce.checkQuality.CheckQuality(self.m_popup_l_sel[0],
+        cq = CheckQuality(self.m_popup_l_sel[0],
                                               pixsize=pix_scale)
         try:     
             img = cq.estimateBackground(self.m_outputdir + "/bckg.fits")
@@ -3797,14 +3798,15 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             
             pix_scale = self.config_opts['general']['pix_scale']
             satur_level = self.config_opts['skysub']['satur_level']
-            # However, satur_level is re-computed in CheckQuality routine based on NCOADDS
+            # However, satur_level is re-computed in CheckQuality routine based
+            # on NCOADDS
             iso_min_size = self.config_opts['skysub']['mask_minarea']
-            cq = reduce.checkQuality.CheckQuality(ifile,
-                                                  sat_level=satur_level, 
-                                                  isomin=iso_min_size,
-                                                  ellipmax=0.9, # basically, no limit !
-                                                  pixsize=pix_scale,
-                                                  window=detector)
+            cq = CheckQuality(ifile,
+                              sat_level=satur_level,
+                              isomin=iso_min_size,
+                              ellipmax=0.9,  # basically, no limit !
+                              pixsize=pix_scale,
+                              window=detector)
             try:
                 fwhm, std, k, k = cq.estimateFWHM()
                 if fwhm > 0:
@@ -3837,7 +3839,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         # CASE 1: Automatic search for nearest frames (ra, dec, mjd) 
         if len(self.m_popup_l_sel) == 1:
             QMessageBox.information(self, "Info", "Only one file was selected, automatic file grouping will be done.")
-            fits = datahandler.ClFits(self.m_listView_item_selected)
+            fits = ClFits(self.m_listView_item_selected)
             if fits.getType() == 'SCIENCE':
                 near_list = self.inputsDB.GetFiles('ANY', 'SCIENCE', -1, 
                                                    fits.filter, 
@@ -3861,7 +3863,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     file_n = i
                 else: 
                     i = i + 1
-                if (datahandler.ClFits(file).getType()!='SCIENCE'):
+                if (ClFits(file).getType()!='SCIENCE'):
                     QMessageBox.critical(self, "Error", 
                                          "File %s is not a science frame" % file)
                 else:
@@ -3882,7 +3884,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         elif len(self.m_popup_l_sel) >= 5:
             # Create file list from current selected science files
             for file in self.m_popup_l_sel:
-                f_type = datahandler.ClFits(file).getType()
+                f_type = ClFits(file).getType()
                 if f_type != 'SCIENCE' and f_type != 'SKY':
                     QMessageBox.critical(self, "Error", "File %s is not a science frame" % file)
                     return
@@ -3936,8 +3938,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             
             file_to_calib = self.m_popup_l_sel[0]
             # Check if it is a cube, then collapse (sum up) the layers.
-            file_to_calib = misc.collapse.collapse([file_to_calib], out_dir=self.m_outputdir)[0]
-            fits = datahandler.ClFits(file_to_calib)
+            file_to_calib = collapse([file_to_calib], out_dir=self.m_outputdir)[0]
+            fits = ClFits(file_to_calib)
             if fits.isMEF() or fits.isPANICFullFrame():
                 # Ask for detector to be used 
                 msgBox = QMessageBox()
@@ -3958,7 +3960,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 
                 if fits.isMEF():
                     try:
-                        mef = misc.mef.MEF([file_to_calib])
+                        mef = MEF([file_to_calib])
                         res = mef.doSplit(".Q%02d.fits", out_dir=self.m_outputdir)[1][detector]
                     except Exception as e:
                         log.debug("Cannot split file %s. Maybe it's not a MEF file", str(e))
@@ -3966,7 +3968,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         raise e
                 elif fits.isPANICFullFrame():
                     try:
-                        mef = misc.mef.MEF([file_to_calib])
+                        mef = MEF([file_to_calib])
                         res = mef.splitGEIRSToSimple(out_dir=self.m_outputdir)[1][detector]
                     except Exception as e:
                         msg = "Cannot split file %s. Maybe it's not a 4kx4k Single file"%(file_to_calib, str(e))
@@ -3998,7 +4000,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     self.logConsole.info("Starting Astrometric calibration (%s)" % catalog)
                     if self.comboBox_AstromEngine.currentText() == "SCAMP":
                         self.logConsole.info(" +Engine: SCAMP")
-                        thread = reduce.ExecTaskThread(reduce.astrowarp.doAstrometry, 
+                        thread = ExecTaskThread(doAstrometry,
                                                        self._task_info_list,
                                                        #args of the doAstrometry function
                                                        file_to_calib, 
@@ -4006,7 +4008,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                                        self.config_opts)
                     else: # Astrometry.net
                         self.logConsole.info(" +Engine: Astrometry.net")
-                        thread = reduce.ExecTaskThread(reduce.solveAstrometry.solveField,
+                        thread = ExecTaskThread(solveField,
                                                     self._task_info_list,
                                                     # args of the solveAstrometry
                                                     file_to_calib, 
@@ -4045,7 +4047,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             if resp == QMessageBox.Cancel:
                 return
             
-            fits = datahandler.ClFits(self.m_listView_item_selected)
+            fits = ClFits(self.m_listView_item_selected)
             if fits.getType() == 'SCIENCE': 
                 ## Run photometry parameters
                 out_file = self.m_outputdir + "/" + \
@@ -4069,20 +4071,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     snr = 10.0
                     zero_point = 0.0
                     self.logConsole.info("Starting Photometric calibration (%s)" % catalog)
-                    #
-                    #thread = reduce.ExecTaskThread(photo.photometry.doPhotometry,
-                    #                               self._task_info_list,
-                    #                               #args of the doPhotometry function
-                    #                               self.m_listView_item_selected,
-                    #                               self.config_opts['general']['pix_scale'],
-                    #                               catalog,
-                    #                               out_file,
-                    #                               snr,
-                    #                               zero_point)
-                    #thread.start()
-                    #
-                    ###
-                    func_to_run = photo.photometry.doPhotometry
+                    func_to_run = doPhotometry
                     params = (self.m_listView_item_selected,
                               self.config_opts['general']['pix_scale'],
                               catalog,
@@ -4093,7 +4082,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     self._task_queue.put([(func_to_run, params)])
                     return
                     
-                    res = photo.photometry.doPhotometry(self.m_listView_item_selected,
+                    res = doPhotometry(self.m_listView_item_selected,
                               self.config_opts['general']['pix_scale'],
                               catalog,
                               out_file,
@@ -4101,8 +4090,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                               zero_point,
                               False)
                     
-                    #QApplication.restoreOverrideCursor()
-                    #return
+                    # QApplication.restoreOverrideCursor()
+                    # return
                 except Exception as e:
                     QApplication.restoreOverrideCursor()
                     QMessageBox.critical(self,
@@ -4143,7 +4132,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         calib_db_files, None)]
             
                 log.debug("Let's create Calibrations ...")
-                func_to_run = RS.ReductionSet(*(params[0])).buildCalibrations
+                func_to_run = ReductionSet(*(params[0])).buildCalibrations
                 log.debug("ReductionSet created !")
                 self._task_queue.put([(func_to_run,())])
                 log.debug("New task queued")
@@ -4261,7 +4250,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         for func, args in iter(input.get, 'STOP'):
             #result = calculate(func, args)
             print("ARGS=", args)
-            output.put(RS.ReductionSet(args).func())
+            output.put(ReductionSet(args).func())
             
     def processFiles(self, files=None, group_by=None, outfilename=None,
                      interactive=False, red_mode='quick'):
@@ -4322,7 +4311,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         # Create working thread that process the files
         try:
     
-            ###self._task = RS.ReductionSet(files, self.m_outputdir, out_file=outfilename,
+            ###self._task = ReductionSet(files, self.m_outputdir, out_file=outfilename,
             ###                                obs_mode="dither", dark=None, 
             ###                                flat=None, bpm=None, red_mode="quick",
             ###                                group_by=self.group_by, check_data=True,
@@ -4422,7 +4411,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             else:
                 self.logConsole.info("No calibrations used.")
 
-            func_to_run = RS.ReductionSet(*(params[0])).reduceSet
+            func_to_run = ReductionSet(*(params[0])).reduceSet
             log.debug("ReductionSet created !")
             self._task_queue.put([(func_to_run,())])
             log.debug("New task queued") 
@@ -4479,7 +4468,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         print("ARGS=",args)
         
         try:
-            output.put(RS.ReductionSet(*(args[0])).reduceSet())
+            output.put(ReductionSet(*(args[0])).reduceSet())
             log.info("[workerd] task done !")
         except Exception as e:
             log.error("[worker] Error while processing task")
@@ -4673,11 +4662,11 @@ def mathOp(files, operator, outputFile=None, tempDir=None):
 
     try:
         # Remove an old output file (might it happen ?)
-        misc.fileUtils.removefiles(outputFile)
+        removefiles(outputFile)
         ## MATH operation '+'
         if operator == 'combine' and len(files) > 1:
             log.debug("Files to combine = [%s]", files )
-            misc.utils.listToFile(files, t_dir+"/files.tmp") 
+            listToFile(files, t_dir+"/files.tmp")
             # Very important to not scale the frames, because it could 
             # produce wrong combined images due to outliers (bad pixels)
             iraf.mscred.combine(input=("@" + (t_dir+"/files.tmp").replace('//','/')),
@@ -4697,7 +4686,7 @@ def mathOp(files, operator, outputFile=None, tempDir=None):
                      )
         elif operator == '+' and len(files) > 1:
             log.debug("Files to sum = [%s]", files)
-            misc.utils.listToFile(files, t_dir+"/files.tmp") 
+            listToFile(files, t_dir+"/files.tmp")
             # Very important to not scale the frames, because it could 
             # produce wrong combined images due to outliers (bad pixels)
             iraf.mscred.combine(input=("@"+(t_dir+"/files.tmp").replace('//','/')),

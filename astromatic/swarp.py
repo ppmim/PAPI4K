@@ -49,11 +49,10 @@ import subprocess
 import re
 import copy
 import fileinput
-import types
 
 
-#PAPI 
-import misc.utils
+# PAPI
+import papi.misc.utils
 
 # ======================================================================
 
@@ -467,7 +466,7 @@ class SWARP(object):
         #print commandline
 
         #rcode = os.system(commandline)
-        rcode = misc.utils.runCmd(commandline)
+        rcode = papi.misc.utils.runCmd(commandline)
         
         if rcode == 0:
             raise SWARPException(
