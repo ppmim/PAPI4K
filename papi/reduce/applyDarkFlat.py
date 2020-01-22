@@ -67,6 +67,7 @@ class ExError (Exception):
     """ Next class if for a general execution Exception """
     pass
 
+
 class ApplyDarkFlat(object):
     """
     Class used to subtract a master dark (or dark model), divide 

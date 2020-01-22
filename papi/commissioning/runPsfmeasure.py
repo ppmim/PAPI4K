@@ -7,8 +7,6 @@
 # License: GNU GPLv3
 
 from pyraf import iraf
-#import pyraf.iraf as iraf
-#from iraf import obsutil
 import re
 
 from optparse import OptionParser
@@ -18,7 +16,8 @@ import sys
 class IrafError(Exception):
     """ Raised if some IRAF error happens """
     pass
-  
+
+
 def getAverageFWHMfromPsfmeasure(images, coord_file, log_file):
     """
     Calculate the average Full Width Half Max for the objects in image

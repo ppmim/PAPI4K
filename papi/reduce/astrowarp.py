@@ -30,15 +30,18 @@ import astropy.io.fits as fits
 
 
 # PAPI modules
-import astromatic
-import astromatic.ldac
-import datahandler
+from papi.astromatic.sextractor import SExtractor
+from papi.datahandler.clfits import ClFits
+from papi.astromatic.scamp import SCAMP
+from papi.astromatic.swarp import SWARP
+from papi.datahandler.clfits import fits_simple_verify
 
 # Logging
-from misc.paLog import log
-from misc.version import __version__
-import misc.config
-import reduce.solveAstrometry
+from papi.misc.paLog import log
+from papi.misc.version import __version__
+from papi.misc.config import read_config_file
+from papi.reduce.solveAstrometry import solveField
+
 
 def initWCS(input_image, pixel_scale):
     """
@@ -52,7 +55,7 @@ def initWCS(input_image, pixel_scale):
     log.debug("Entering in initWCS!")
     
     try:
-        f = datahandler.ClFits(input_image, check_integrity=False)
+        f = ClFits(input_image, check_integrity=False)
     except Exception as e:
         log.error("Error reading FITS %s : %s" %(f, str(e)))
         raise e
@@ -239,7 +242,6 @@ def checkWCS( header ):
                 raise Exception("Couldn't find a complete set of CDi_j matrix or CDELT")
              
 
-    
 def doAstrometry(input_image, output_image=None, catalog='2MASS', 
                   config_dict=None, do_votable=False,
                   resample=True, subtract_back=True):
@@ -327,7 +329,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
 
     ## STEP 1: Create SExtractor catalog (.ldac)
     log.debug("*** Creating SExtractor catalog ....")
-    sex = astromatic.SExtractor()
+    sex = SExtractor()
     #sex.config['CONFIG_FILE']="/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
     #sex.ext_config['CHECKIMAGE_TYPE'] = "OBJECTS"
     sex.config['CATALOG_TYPE'] = "FITS_LDAC"
@@ -337,7 +339,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     
     # SATUR_LEVEL and NCOADD
     try:
-        dh = datahandler.ClFits(input_image, check_integrity=False)
+        dh = ClFits(input_image, check_integrity=False)
         nc = dh.getNcoadds()
     except Exception as e:
         log.warning("Cannot read NCOADDS. Default value (=1) taken")
@@ -366,7 +368,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
 
     ## STEP 2: Make astrometric calibration 
     log.debug("Doing astrometric calibration....")
-    scamp = astromatic.SCAMP()
+    scamp = SCAMP()
     scamp.config['CONFIG_FILE'] = papi_home + config_dict['config_files']['scamp_conf']
     #"/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/scamp.conf"
     scamp.ext_config['ASTREF_CATALOG'] = catalog
@@ -393,7 +395,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     ## SWARP, and using .head files created by SCAMP. Therefore, a field distortion
     ## correction is done if resample is YES.
     log.debug("Merging astrometric calibration parameters and re-sampling ...")
-    swarp = astromatic.SWARP()
+    swarp = SWARP()
     swarp.config['CONFIG_FILE'] = papi_home + config_dict['config_files']['swarp_conf']
     swarp.ext_config['IMAGEOUT_NAME'] = output_image
     swarp.ext_config['COPY_KEYWORDS'] = 'OBJECT,INSTRUME,TELESCOPE,IMAGETYP,FILTER,FILTER1,FILTER2,SCALE,MJD-OBS,RA,DEC,HISTORY,NCOADDS,NDIT'
@@ -446,7 +448,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     ## STEP 4: Create SExtractor catalog (ascii.votable)
     if do_votable:
         log.debug("*** Creating SExtractor VOTable catalog ....")
-        sex = astromatic.SExtractor()
+        sex = SExtractor()
         #sex.config['CONFIG_FILE']="/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
         #sex.ext_config['CHECKIMAGE_TYPE'] = "OBJECTS"
         sex.config['CATALOG_TYPE'] = "ASCII_VOTABLE"
@@ -455,7 +457,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
         sex.config['DETECT_MINAREA'] = config_dict['skysub']['mask_minarea']
         # SATUR_LEVEL and NCOADD
         try:
-            dh = datahandler.ClFits(input_image, check_integrity=False)
+            dh = ClFits(input_image, check_integrity=False)
             nc = dh.getNcoadds()
         except:
             log.warning("Cannot read NCOADDS. Taken default (=1)")
@@ -648,13 +650,13 @@ class AstroWarp(object):
             solved_msg = "--Start of Astrometry.net WCS solution--"
             if not solved_msg in fits.getheader(file)['COMMENT']:
                 try:
-                    solved = reduce.solveAstrometry.solveField( 
-                                            file,
-                                            self.output_dir,
-                                            self.temp_dir,
-                                            self.config_dict['general']['pix_scale'])
+                    solved = solveField(file,
+                                        self.output_dir,
+                                        self.temp_dir,
+                                        self.config_dict['general']['pix_scale'])
                 except Exception as e:
-                    raise Exception("[runWithAstrometryNet] Cannot solve Astrometry for file: %s"%(file,str(e)))
+                    raise Exception("[runWithAstrometryNet] Cannot solve "
+                                    "Astrometry for file: %s" % (file, str(e)))
                 else:
                     solved_files.append(solved)
             else:
@@ -664,7 +666,7 @@ class AstroWarp(object):
         ## STEP 1: Create SExtractor catalogs (.ldac)
         log.debug("*** Creating objects catalog (SExtractor)....")
         for file in solved_files:
-            sex = astromatic.SExtractor()
+            sex = SExtractor()
             #sex.config['CONFIG_FILE']="/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
             #sex.ext_config['CHECKIMAGE_TYPE'] = "OBJECTS"
             sex.config['CATALOG_TYPE'] = "FITS_LDAC"
@@ -673,7 +675,7 @@ class AstroWarp(object):
             sex.config['DETECT_MINAREA'] = self.config_dict['astrometry']['mask_minarea']
             # SATUR_LEVEL and NCOADD
             try:
-                dh = datahandler.ClFits(file, check_integrity=False)
+                dh = ClFits(file, check_integrity=False)
                 nc = dh.getNcoadds()
             except:
                 log.warning("Cannot read NCOADDS. Taken default (=1)")
@@ -693,7 +695,7 @@ class AstroWarp(object):
                         
         ## STEP 2: Make the multi-astrometric calibration for each file (all overlapped-files together)
         log.debug("*** Doing multi-astrometric calibration (SCAMP)....")
-        scamp = astromatic.SCAMP()
+        scamp = SCAMP()
         scamp.config['CONFIG_FILE'] = self.papi_home + self.config_dict['config_files']['scamp_conf']
         scamp.ext_config['ASTREF_CATALOG'] = self.catalog
         scamp.ext_config['SOLVE_PHOTOM'] = "N"
@@ -722,7 +724,7 @@ class AstroWarp(object):
         with tempfile.NamedTemporaryFile(**kwargs) as fd:
             output_path = fd.name
         
-        swarp = astromatic.SWARP()
+        swarp = SWARP()
         swarp.config['CONFIG_FILE'] = self.papi_home + self.config_dict['config_files']['swarp_conf']
         basename, extension = os.path.splitext(solved_files[0])
         swarp.ext_config['HEADER_SUFFIX'] = extension + ".head"  # very important !
@@ -790,7 +792,7 @@ class AstroWarp(object):
         if len(self.input_files) > 1:
             log.debug("*** Doing final astrometric calibration....")
             try:
-                solved = reduce.solveAstrometry.solveField(
+                solved = solveField(
                             output_path,
                             self.output_dir,
                             self.temp_dir,
@@ -842,7 +844,7 @@ class AstroWarp(object):
         ## STEP 1: Create SExtractor catalogs (.ldac)
         log.debug("*** Creating objects catalog (SExtractor)....")
         for file in self.input_files:
-            sex = astromatic.SExtractor()
+            sex = SExtractor()
             sex.config['CATALOG_TYPE'] = "FITS_LDAC"
             sex.config['CATALOG_NAME'] = file + ".ldac"
             sex.config['DETECT_THRESH'] = self.config_dict['astrometry']['mask_thresh']
@@ -855,7 +857,7 @@ class AstroWarp(object):
             
             # SATUR_LEVEL and NCOADD
             try:
-                dh = datahandler.ClFits(file, check_integrity=False)
+                dh = ClFits(file, check_integrity=False)
                 nc = dh.getNcoadds()
             except:
                 log.warning("Cannot read NCOADDS. Taken default (=1)")
@@ -874,7 +876,7 @@ class AstroWarp(object):
                         
         ## STEP 2: Make the multi-astrometric calibration for each file (all overlapped-files together)
         log.debug("*** Doing multi-astrometric calibration (SCAMP)....")
-        scamp = astromatic.SCAMP()
+        scamp = SCAMP()
         scamp.config['CONFIG_FILE'] = self.papi_home + self.config_dict['config_files']['scamp_conf']
         scamp.ext_config['ASTREF_CATALOG'] = self.catalog
         scamp.ext_config['SOLVE_PHOTOM'] = "N"
@@ -898,7 +900,7 @@ class AstroWarp(object):
         with tempfile.NamedTemporaryFile(**kwargs) as fd:
             output_path = fd.name
         
-        swarp = astromatic.SWARP()
+        swarp = SWARP()
         swarp.config['CONFIG_FILE'] = self.papi_home + self.config_dict['config_files']['swarp_conf']
         basename, extension = os.path.splitext(self.input_files[0])
         swarp.ext_config['HEADER_SUFFIX'] = extension + ".head"  # very important !
@@ -1035,7 +1037,7 @@ in principle previously reduced, but not mandatory.
     
     log.info('Using config file: %s' % config_file)
         
-    cfg_options = misc.config.read_config_file(config_file)
+    cfg_options = read_config_file(config_file)
     
     # args is the leftover positional arguments after all options have been
     # processed
@@ -1046,7 +1048,7 @@ in principle previously reduced, but not mandatory.
     # Check if source_file is a FITS file or a text file listing a set of files
     if os.path.exists(options.source_file):
         try:
-            datahandler.fits_simple_verify(options.source_file)
+            fits_simple_verify(options.source_file)
             filelist = [options.source_file]
         except:
             filelist = [line.replace( "\n", "") 
@@ -1067,7 +1069,7 @@ in principle previously reduced, but not mandatory.
             else: 
                 try:
                     log.debug("[Astrowarp] Solving with Astrometry.Net engine")
-                    solved = reduce.solveAstrometry.solveField( 
+                    solved = solveField(
                                         filelist[0],
                                         cfg_options['general']['output_dir'],
                                         cfg_options['general']['temp_dir'],

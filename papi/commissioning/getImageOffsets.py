@@ -25,7 +25,7 @@ import sys
 import os
 import logging as log
 import fileinput
-from optparse import OptionParser
+import argparse
 
 
 import numpy
@@ -34,7 +34,7 @@ import astropy.io.fits as fits
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-import datahandler
+from papi.datahandler.clfits import ClFits
 
 
 def draw_offsets(offsets, pix_scale = 0.45, scale_factor=1.0):
@@ -168,7 +168,7 @@ def getWCSPointingOffsets(images_in,
       # Reference image
       ref_image = sorted_files[0]
       try:
-            ref = datahandler.ClFits(ref_image)
+            ref = ClFits(ref_image)
             # If present, pix_scale in header is prefered
             pix_scale = 0.233 # ref.pixScale
             print("-->PIXSCALE = ", pix_scale)
@@ -182,7 +182,7 @@ def getWCSPointingOffsets(images_in,
       offset_txt_file = open(p_offsets_file, "w")
       for my_image in sorted_files:
             try:
-                ref = datahandler.ClFits(my_image)
+                ref = ClFits(my_image)
                 ra = ref.ra
                 dec = ref.dec
                 log.debug("Image: %s RA[%d]= %s DEC[%d]= %s"%(my_image, i, ra, i, dec))
@@ -230,26 +230,26 @@ if __name__ == "__main__":
     usage = "usage: %prog [options]"
     desc = """Gives the image offsets (arcsecs) based on the WCS of the image headers.""" 
     """ A plot of the dither pattern is also saved as offsets.png"""
+
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser = OptionParser(usage, description=desc)
-    
-    parser.add_option("-s", "--source", type="str",
+    parser.add_argument("-s", "--source", type="str",
                   action="store", dest="source_file",
                   help="Input text file with the list of FITS file to be analized.")
                   
-    parser.add_option("-o", "--output", type="str",
+    parser.add_argument("-o", "--output", type=str,
                   action="store", dest="output_filename", default="offsets.txt",
                   help="Output file to write the offset matrix")
     
-    parser.add_option("-p", "--pix_scale", type=float,
+    parser.add_argument("-p", "--pix_scale", type=float,
                   action="store", dest="pix_scale", default=0.45,
                   help="Pixel scale")
     
-    parser.add_option("-d", "--draw_scale", type=float,
+    parser.add_argument("-d", "--draw_scale", type=float,
                   action="store", dest="draw_scale", default=1.0,
-                  help="Draw scale of detector (0.0-1.0) [default=%default]")
-    
-    (options, args) = parser.parse_args()
+                  help="Draw scale of detector (0.0-1.0) [default=%(default)s]")
+
+    parser.parse_args(args=arguments)
     
     if len(sys.argv[1:]) < 1:
        parser.print_help()
