@@ -24,7 +24,7 @@
 #
 # runQL.py
 #
-# Last update 09/Sep/2019
+# Last update 22/Jan/2020
 #
 ################################################################################
 
@@ -39,10 +39,10 @@
 
 import sys
 import os.path
-from optparse import OptionParser
+import argparse
 
 # Log
-from misc.paLog import log
+from papi.misc.paLog import log
 
 # PAPI packages
 # from PyQt4 import QtCore, QtGui
@@ -55,8 +55,8 @@ try:
 except Exception as e:
     log.warning("Cannot delete ~/iraf/focus_seq.txt")
 
-import QL.mainGUI as mainGUI
-import misc.config
+import papi.QL.mainGUI as mainGUI
+import papi.misc.config
 
 ################################################################################
 # main
@@ -73,54 +73,44 @@ def main(arguments=None):
     description = ("This module in the main application for the PANIC"
                    "Quick Look (PQL) data reduction system")
 
-    parser = OptionParser(description=description,
-                          usage="%prog [OPTION]... DIRECTORY...",
-                          version="%prog 1.0")
+    parser = argparse.ArgumentParser(description=description)
     # general options
     
-    parser.add_option("-c", "--config", type="str",
-                      action="store", dest="config_file",
-                      help="config file for the PANIC Pipeline application. If not specified, '%s' is used" \
-                      % misc.config.default_config_file())
+    parser.add_argument("-c", "--config", type=str,
+                        action="store", dest="config_file",
+                        help="config file for the PANIC Pipeline application. "
+                           "If not specified, '%s' is used" \
+                        % papi.misc.config.default_config_file())
     
-    parser.add_option("-v", "--verbose",
+    parser.add_argument("-v", "--verbose",
                   action="store_true", dest="verbose", default=True,
                   help="verbose mode [default]")
     
-    parser.add_option("-s", "--source", type="str",
+    parser.add_argument("-s", "--source", type=str,
                   action="store", dest="source",
                   help="Source directory of data frames. It has to be a fullpath file name")
     
-    parser.add_option("-o", "--output_dir", type="str",
-                  action="store", dest="output_dir", help="output directory to write products")
+    parser.add_argument("-o", "--output_dir", type=str,
+                  action="store", dest="output_dir",
+                        help="output directory to write products")
     
-    parser.add_option("-t", "--temp_dir", type="str",
-                  action="store", dest="temp_dir", help="temporary directory to write")
-    
-    # parser.add_option("-c", "--config",
-    #                action="store", dest="config_file", help="Quick Look config file")
-              
-        
-    
-    (init_options, i_args) = parser.parse_args(args=arguments)
+    parser.add_argument("-t", "--temp_dir", type=str,
+                  action="store", dest="temp_dir",
+                        help="temporary directory to write")
+
+    init_options = parser.parse_args(args=arguments)
     
     # Read the default configuration file if none was specified by the user
     if not init_options.config_file:
-        config_file = misc.config.default_config_file()
+        config_file = papi.misc.config.default_config_file()
     else:
         config_file = init_options.config_file
     
     # now, we "mix" the invokation parameter values with the values in the
     # config file having priority the invokation values over config file values
     # note: only values of the 'quicklook' section can be invoked
-    options = misc.config.read_options(init_options, 'quicklook', config_file)
+    options = papi.misc.config.read_options(init_options, 'quicklook', config_file)
 
-    # i_args is the leftover positional arguments after all options have been
-    # processed
-    if i_args:
-        parser.print_help()
-        sys.exit(2) 
-    
     ql_opts = options['quicklook']
     
     if not ql_opts['source'] or not ql_opts['output_dir'] or not ql_opts['temp_dir']: 

@@ -202,9 +202,8 @@ def main(arguments = None):
                       action="store_true", dest="check_modules",
                       help="Check if versions of PAPI modules are right.",
                       default=False)
-    
         
-    init_options = parser.parse_args(args = arguments)
+    init_options = parser.parse_args(args=arguments)
     
     # If no arguments, print help
     if len(arguments) < 1:

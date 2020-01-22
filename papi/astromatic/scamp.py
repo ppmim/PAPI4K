@@ -46,13 +46,10 @@ import sys
 import os
 import re
 import copy
-import fileinput
-import types
 import subprocess
 
-
 # PAPI modules
-from misc.paLog import log
+from papi.misc.paLog import log
 
 
 # ======================================================================
@@ -63,8 +60,10 @@ __version__ = "0.1 (2010-06-08)"
 
 class SCAMP_Exception(Exception):
     pass
+
 class SCAMP_AccuracyException(Exception):
     pass
+
 # ======================================================================
 
 class SCAMP:
