@@ -23,7 +23,7 @@ pattern = "/data2/out/Q%02d/NorthA_H_%04d.Q%02d_D_F.skysub.ast.fits"
 #pattern = "/data2/out/Q%02d/NorthA_J_%04d_coadd.Q%02d_D_F.skysub.ast.fits"
 #pattern = "/data2/out/Q%02d/NorthA_Sky_J_%04d_coadd.Q%02d_F.skysub.ast.fits"
 
-import misc.mef
+from papi.misc.mef import MEF
 
 def createMEFs(input_pattern, start, end):
     """
@@ -35,7 +35,7 @@ def createMEFs(input_pattern, start, end):
         for det in range(1, 5):
             frame_list.append(input_pattern %(det, i, det))
         
-        mef = misc.mef.MEF(frame_list)
+        mef = MEF(frame_list)
         output_file = "mef_%04d.fits" % i
         mef.createMEF(output_file, out_dir="/data2/out/")
         

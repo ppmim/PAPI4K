@@ -48,10 +48,10 @@ import fileinput
 from optparse import OptionParser
 import astropy.io.fits as fits
 
-from misc.paLog import log
-import astromatic.sextractor
-import astromatic.ldac
-import datahandler
+from papi.misc.paLog import log
+import papi.astromatic.sextractor
+import papi.astromatic.ldac
+from papi.datahandler.clfits import ClFits, isaFITS
 
 
 #-----------------------------------------------------------------------
@@ -91,7 +91,7 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
     
     files = []       
     # Check if inputfile is FITS file 
-    if datahandler.isaFITS(inputfile)==True:
+    if isaFITS(inputfile)==True:
         files = [inputfile]
     # or a text file having the list of files to be masked
     elif os.path.isfile(inputfile):
@@ -104,13 +104,13 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
     
     f_out = open(outputfile, "w")
     
-    sex = astromatic.SExtractor()
+    sex = papi.astromatic.SExtractor()
     n = 0
     
     for fn in files:
         if not os.path.exists(fn):      # check whether input file exists
-            log.error( 'File %s does not exist', fn)
-            raise Exception ("File %s does not exist"%fn) 
+            log.error('File %s does not exist', fn)
+            raise Exception("File %s does not exist" % fn)
      
         log.debug("*** Creating SExtractor object mask for file %s....", fn)
         #sex.config['CONFIG_FILE']=sex_config
@@ -135,7 +135,7 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
         
         # Check an output file was generated, otherwise an error happened !
         if not os.path.exists(fn + ".objs"):
-            log.error("Some error while running SExtractor, no object mask file found and expected %s"%(fn+".objs"))
+            log.error("Some error while running SExtractor, no object mask file found and expected %s" %(fn+".objs"))
             raise Exception("Some error while running SExtractor, no object mask file found")
 
         # Reduce the object mask to a single point mask, in which each object
@@ -164,7 +164,7 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
                 y_size = len(data)
                 #stars = read_stars(fn + ".ldac")
                 try:
-                    cat = astromatic.ldac.openObjectFile(fn + ".ldac", 
+                    cat = papi.astromatic.ldac.openObjectFile(fn + ".ldac",
                                                          table='LDAC_OBJECTS')
                     if len(cat)<=0:
                       log.warning("No object found in catalog %s"%(fn + ".ldac")) 
@@ -190,7 +190,7 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
             log.debug("Object mask file created for file : %s",fn)    
 
         n+=1
-        log.debug("Adding file: %s"%fn)
+        log.debug("Adding file: %s" % fn)
         f_out.write(fn + ".objs" + "\n")
             
     sex.clean(config=False, catalog=True, check=False)

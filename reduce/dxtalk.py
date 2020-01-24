@@ -64,11 +64,12 @@ import sys
 
 import astropy.io.fits as fits
 import numpy
-import misc.robust as robust
 
-# Logging
-from misc.paLog import log
-from misc.version import __version__
+# papi
+import papi.misc.robust as robust
+from papi.misc.paLog import log
+from papi.misc.version import __version__
+
 
 def remove_crosstalk(in_image, out_image=None, overwrite=False):
     """

@@ -17,7 +17,7 @@
 import os
 import fnmatch
 
-from misc.paLog import log
+from papi.misc.paLog import log
 import astropy.io.fits as fits
 import glob
 
@@ -48,14 +48,14 @@ def removefiles(*patterns):
         except OSError as errstr:
             # Succeed even if the directory was not there (and put warning in log)
             log.warning(errstr)
-            #raise Exception('Cannot list dir %s' % dirname)
+            # raise Exception('Cannot list dir %s' % dirname)
         
         # Check each file in the directory list
         for file in filelist:
             # And see if it's name matches the pattern
             if fnmatch.fnmatch(file, filepattern):
                 # If yes, (try to) remove it from the system
-                #log.debug('Removing file : "%s"' % file)
+                # log.debug('Removing file : "%s"' % file)
                 try:
                     # print "not removing...debug...."
                     os.remove(os.path.join(dirname, file))

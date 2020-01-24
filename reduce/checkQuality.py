@@ -42,13 +42,13 @@ import numpy.ma as ma
 import os
 import astropy.io.fits as fits
 import sys
-
-from pyraf import iraf
 import re
 
-import astromatic
+from pyraf import iraf
 
-from misc.paLog import log
+import papi.astromatic as astromatic
+from papi.misc.paLog import log
+
 
 class CheckQuality(object):
     """

@@ -49,16 +49,13 @@ import numpy
 import matplotlib.pyplot as plt
 import pylab
             
-import photo.catalog_query as catalog_query
-import photo.coords as coords
+import papi.photo.catalog_query as catalog_query
+import papi.photo.coords as coords
+from papi.misc.paLog import log
+from papi.misc.utils import runCmd
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.astromatic.sextractor import SExtractor
 
-
-# Logging
-from misc.paLog import log
-import misc.utils
-import astromatic
-import datahandler
-import misc.robust as robust
 
 class CmdException(Exception): 
     pass
@@ -116,13 +113,14 @@ def catalog_xmatch( cat1, cat2, out_filename, out_format='votable', error=2.0 ):
          " in1=" + in1 + " in2=" + in2 + " out=" + out + \
          " error=" + s_error
           
-    rcode = misc.utils.runCmd(command_line)
+    rcode = runCmd(command_line)
     
-    if rcode==0 or not os.path.exists(out):
+    if rcode == 0 or not os.path.exists(out):
         log.error("Some error while running command: %s", command_line)
         raise CmdException("XMatch failed")
     else:
         return out
+
 
 def catalog_xmatch2( cat1, cat2, filter_column, error=2.0, min_snr=10):
     """
@@ -295,7 +293,7 @@ def generate_phot_comp_plot( input_catalog, filter, expt = 1.0 ,
                     " cmd='addcol Inst_Mag \"-2.5*log10(FLUX_BEST/%f)\"'" % expt + \
                     " omode=out" + " in=" + input + " out=" + output_1
 
-    rcode = misc.utils.runCmd(command_line)
+    rcode = runCmd(command_line)
     
     if rcode == 0 or not os.path.exists(output_1):
         log.error("Some error while running command: %s", command_line)
@@ -319,15 +317,17 @@ def generate_phot_comp_plot( input_catalog, filter, expt = 1.0 ,
     if out_filename :
         command_line += " ofmt=" + out_format + " out=" + out_filename
                     
-    rcode = misc.utils.runCmd(command_line)
+    rcode = runCmd(command_line)
     
-    if rcode==0:
+    if rcode == 0:
         log.error("Some error while running command: %s", command_line)
         raise CmdException("STILTS command failed !")
     
     else:
         if out_filename: return out_filename
-        else: return 'stdout'
+        else:
+            return 'stdout'
+
 
 def compute_regresion2( column_x, column_y , filter_name,
                         output_filename="/tmp/linear_fit.pdf",
@@ -778,9 +778,9 @@ class STILTSwrapper (object):
              " in1=" + in1 + " in2=" + in2 + " out=" + out + \
              " error=" + error
               
-        rcode = misc.utils.runCmd(command_line)
+        rcode = runCmd(command_line)
         
-        if rcode==0:
+        if rcode ==0:
             log.error("Some error while running command: %s", command_line)
         else:
             return out_filename    
@@ -790,6 +790,7 @@ class STILTSwrapper (object):
         ./stilts tpipe  ifmt=votable cmd='addcol MyMag_K "-2.5*log10(FLUX_BEST/46.0)"' omode=out in=/home/panic/SOFTWARE/STILTS/match_double.vot out=match_D_b.vot
         ./stilts plot2d in=match_S_b.vot subsetNS='j_k<=1.0 & k_snr>10' lineNS=LinearRegression xdata=k_m ydata=MyMag_k xlabel="2MASS k_m / mag" ylabel="PAPI k_m / mag"
         """
+
 
 def doPhotometry(input_image, pixel_scale, catalog, output_filename, 
                  snr=10.0, zero_point=0.0, show=False):
@@ -829,8 +830,8 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
     ## 0.1 - Read the RA,Dec and TEXP values from the input image
     log.debug("Reading FITS file EXPT, RA, Dec & FILTER values ...")
     try:
-        my_fits = datahandler.ClFits(input_image)
-        exptime  = my_fits.expTime()
+        my_fits = ClFits(input_image)
+        exptime = my_fits.expTime()
         ra = my_fits.ra
         dec = my_fits.dec
         filter = my_fits.getFilter()
@@ -843,7 +844,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
         log.info("Pixel scale = %s"%pixel_scale)
         log.info("SNR filter = %s"%snr)
         
-        if ra<0 or exptime<0:
+        if ra < 0 or exptime < 0:
             log.debug("Found wrong RA,DEC,EXPTIME or FILTER value")
             raise Exception("Found wrong RA,Dec,EXPTIME or FILTER value.")
         
@@ -872,7 +873,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
     #os.close(tmp_fd)
     image_catalog = os.path.splitext(input_image)[0]  + ".xml"
     
-    sex = astromatic.SExtractor()
+    sex = SExtractor()
     # The .param file is created automatically on sextractor.py, and
     # includes the MAG_AUTO, FLUX_AUTO, etc.. 
     sex.ext_config['CHECKIMAGE_TYPE'] = "NONE"
@@ -943,7 +944,7 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
     log.info("*** Creating SExtractor VOTable catalog (ZP=%f)...."%(est_zp_err+zero_point))
     image_catalog = os.path.splitext(input_image)[0]  + ".xml"
     
-    sex = astromatic.SExtractor()
+    sex = SExtractor()
     sex.ext_config['CHECKIMAGE_TYPE'] = "NONE"
     sex.config['CATALOG_TYPE'] = "ASCII_VOTABLE"
     sex.config['CATALOG_NAME'] = image_catalog

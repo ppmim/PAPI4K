@@ -57,8 +57,8 @@ import astropy.io.fits as fits
 from ccdproc import cosmicray_lacosmic
 
 # Logging
-from misc.paLog import log
-from misc.version import __version__
+from papi.misc.paLog import log
+from papi.misc.version import __version__
 
 
 def remove_cr(in_image, out_image=None, overwrite=False, want_mask=False):

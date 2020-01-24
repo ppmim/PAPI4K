@@ -6,12 +6,12 @@
 #__version__ = 2.0 # Updated for Numpy 5/15/08 not tested yet
 #__author__ = "H. C. Ferguson"
 
-from numpy import *
+from numpy import searchsorted, argsort, array, compress, char
 from . import angsep
 import copy
 
 
-def matchsorted(ra,dec,ra1,dec1,tol):
+def matchsorted(ra, dec, ra1, dec1, tol):
     """ Find closest ra,dec within tol to a target in an ra-sorted list of ra,dec.
         Parameters
         ----------
@@ -25,13 +25,13 @@ def matchsorted(ra,dec,ra1,dec1,tol):
           ibest - index of the best match within tol; -1 if no match within tol
           sep - separation (defaults to tol if no match within tol)
     """
-    i1 = searchsorted(ra,ra1-tol)-1
-    i2 = searchsorted(ra,ra1+tol)+1
+    i1 = searchsorted(ra, ra1-tol)-1
+    i2 = searchsorted(ra, ra1+tol)+1
     if i1 < 0:
         i1 = 0
-    sep = angsep.angsep(ra[i1:i2],dec[i1:i2],ra1,dec1)
+    sep = angsep.angsep(ra[i1:i2], dec[i1:i2], ra1, dec1)
     # print "tolerance ",tol
-    indices=argsort(sep)
+    indices = argsort(sep)
     # print sep
     if sep[indices[0]] > tol:
         return -1, tol
@@ -64,7 +64,7 @@ def matchpos(ra1, dec1, ra2, dec2, tol):
         else:
             ibest += [indices[j]]
         sep += [s]
-    return array(ibest),array(sep)
+    return array(ibest), array(sep)
 
 def matchjoin(si1,si2,ibest,sep=[],dict1={},dict2={}):
     """ Keep only elements that match in both catalogs. 
@@ -105,9 +105,10 @@ def matchjoin(si1,si2,ibest,sep=[],dict1={},dict2={}):
         s2.__dict__[k] = compress(flag,s2.__dict__[k])
     if len(sep) > 0:
         s2.separation = compress(flag,sep)
-    return s1,s2
+    return s1, s2
 
-def matchids(id1,id2):
+
+def matchids(id1, id2):
     """ Match two sets of ids. 
         Returns: 
           ibest -- array of indices of i1 that match i2; -1 if no match
@@ -123,8 +124,10 @@ def matchids(id1,id2):
             ibest += [indices[j]]
     return array(ibest)
 
+
 def matchidsorted(ids,targetid):
-    """ Find id matches, return index in i1 that matches targetid; -1 if no match. """
+    """ Find id matches, return index in i1 that matches targetid;
+    -1 if no match. """
     i1 = searchsorted(ids,targetid)
     if targetid == ids[i1]:
         ibest = i1

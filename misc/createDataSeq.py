@@ -27,16 +27,8 @@ import shutil
 import fileinput
 from optparse import OptionParser
 
-
-import numpy
 import astropy.io.fits as fits
-from astropy import wcs
-
-from misc.paLog import log
-from misc.version import __version__
-
-import datahandler
-
+from papi.misc.paLog import log
 
 def createDataSeq(input_files, seq_type, overwrite=False, output_dir=None):
     """

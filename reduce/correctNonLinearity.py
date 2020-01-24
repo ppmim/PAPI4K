@@ -46,9 +46,9 @@ import multiprocessing
 
 
 # PAPI modules
-import misc.mef
-from misc.paLog import log
-from misc.version import __version__
+from papi.misc.mef import MEF
+from papi.misc.paLog import log
+from papi.misc.version import __version__
 
 # If you want to use the new multiprocessing module in Python 2.6 within a class, 
 # you might run into some problems. Here's a trick how to do a work-around. 
@@ -211,7 +211,7 @@ class NonLinearityCorrection(object):
             hdulist.close()
             
             # Convert single-FITS to MEF
-            mef = misc.mef.MEF([data_file])
+            mef = MEF([data_file])
             mef_suffix = ".mef.fits"
             n_ext, new_mef_files = mef.convertGEIRSToMEF(mef_suffix, self.out_dir)
             if n_ext !=4:

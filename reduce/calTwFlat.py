@@ -59,24 +59,22 @@ import fileinput
 import shutil
 from optparse import OptionParser
 
-import misc.fileUtils
-import misc.utils
-from misc.version import __version__
-import datahandler
-import misc.robust as robust
-import misc.collapse
-import misc.mef
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.misc.collapse import collapse
+import papi.misc.robust as robust
+from papi.misc.version import __version__
+from papi.misc.mef import MEF
 
 # Pyraf modules
 from pyraf import iraf
 from iraf import mscred
 
-
 # Interact with FITS files
 import astropy.io.fits as fits
-
-# Logging
-from misc.paLog import log
 
 class ExError(Exception):
     pass
@@ -180,7 +178,7 @@ class MasterTwilightFlat(object):
     
         # Cleanup old files
         
-        misc.fileUtils.removefiles(self.__output_filename)
+        removefiles(self.__output_filename)
         
         # Get the user-defined list of flat frames
         framelist = self.__input_files
@@ -191,8 +189,8 @@ class MasterTwilightFlat(object):
         
         # Check exists master DARK
         if self.__master_dark_model:
-            if (type(self.__master_dark_model) == type([]) and 
-                len(self.__master_dark_model) > 0):
+            if (isinstance(self.__master_dark_model, list) and
+                    len(self.__master_dark_model) > 0):
                 self.__master_dark_model = self.__master_dark_mode[-1]
             if not os.path.exists(self.__master_dark_model):
                 log.error("Cannot find frame : %s"%self.__master_dark_model)
@@ -220,7 +218,7 @@ class MasterTwilightFlat(object):
         # STEP 0: Convert (if required) all files to MEF
         # Darks
         try:
-            mef = misc.mef.MEF(self.__master_dark_list)
+            mef = MEF(self.__master_dark_list)
             self.__master_dark_list = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
         except Exception as e:
             log.error("Error converting Darks to MEF file: %s", str(e))
@@ -228,7 +226,7 @@ class MasterTwilightFlat(object):
         
         # Flats
         try:
-            mef = misc.mef.MEF(framelist)
+            mef = MEF(framelist)
             framelist = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
         except Exception as e:
             log.error("Error converting Flats to MEF file: %s", str(e))
@@ -246,7 +244,7 @@ class MasterTwilightFlat(object):
         good_frames = []
         
         for iframe in framelist:
-            f = datahandler.ClFits(iframe)
+            f = ClFits(iframe)
             f_instrument = f.getInstrument()
             log.debug("Checking data compatibility (filter, texp, type)")
             #log.debug("Flat frame '%s' - EXPTIME= %f TYPE= %s FILTER= %s" 
@@ -333,7 +331,7 @@ class MasterTwilightFlat(object):
         use_dark_model = False
         if self.__master_dark_model:
             try:
-                cdark = datahandler.ClFits(self.__master_dark_model)
+                cdark = ClFits(self.__master_dark_model)
                 if not cdark.isMasterDarkModel(): 
                     log.error("File %s does not look a MASTER_DARK_MODEL"%self.__master_dark_model)
                     raise Exception("Cannot find the MASTER_DARK_MODEL to apply.")
@@ -352,11 +350,11 @@ class MasterTwilightFlat(object):
             
             t_darks = {}
             # Check if darks are cubes, then collapse them.
-            darks_frames = misc.collapse.collapse(self.__master_dark_list,
+            darks_frames = collapse(self.__master_dark_list,
                                                   out_dir=self.__temp_dir)
             for idark in darks_frames:
                 try:
-                    cdark = datahandler.ClFits(idark)
+                    cdark = ClFits(idark)
                     if not cdark.isDark() and not cdark.isMasterDark():
                         log.error("File %s is neither a Dark nor a Master Dark."%idark)
                         raise Exception("File %s is neither a Dark nor a Master Dark."%idark) 
@@ -383,12 +381,12 @@ class MasterTwilightFlat(object):
                 
         fileList = []
         # STEP 2.2: Check if images are cubes, then collapse them.
-        good_frames = misc.collapse.collapse(good_frames, out_dir=self.__temp_dir)
+        good_frames = collapse(good_frames, out_dir=self.__temp_dir)
         
         for iframe in good_frames:
             # Remove old dark subtracted flat frames
             my_frame = self.__temp_dir + "/" + os.path.basename(iframe.replace(".fits", "_D.fits"))
-            misc.fileUtils.removefiles(my_frame)
+            removefiles(my_frame)
             
             log.debug("Looking for proper master dark (master dark model or simple master dark)")
             # Build master dark with proper (scaled) EXPTIME and subtract 
@@ -469,8 +467,8 @@ class MasterTwilightFlat(object):
         # - Build the frame list for IRAF
         log.debug("Combining dark subtracted Twilight flat frames...")
         comb_flat_frame = (self.__temp_dir + "/comb_tw_flats.fits").replace("//","/")
-        misc.fileUtils.removefiles(comb_flat_frame)
-        misc.utils.listToFile(fileList, self.__temp_dir + "/twflat_d.list")
+        removefiles(comb_flat_frame)
+        listToFile(fileList, self.__temp_dir + "/twflat_d.list")
         # - Call IRAF task
         # Combine the images to find out the Tw-Flat using sigma-clip algorithm;
         # the input images are scaled to have a common mode, the pixels containing 
@@ -492,7 +490,8 @@ class MasterTwilightFlat(object):
         log.debug("Dark subtracted Twilight flat frames COMBINED")
         
         # Remove the dark subtracted frames
-        for ftr in fileList: misc.fileUtils.removefiles(ftr)
+        for ftr in fileList:
+            removefiles(ftr)
         
         # STEP 3b (optional)
         # Median smooth the master flat
@@ -509,8 +508,8 @@ class MasterTwilightFlat(object):
                         comb_flat_frame)
             
         # Or using scipy (a bit slower than iraf...)
-        #from scipy import ndimage
-        #filtered = ndimage.gaussian_filter(f[0].data, 20)
+        # from scipy import ndimage
+        # filtered = ndimage.gaussian_filter(f[0].data, 20)
         
         # STEP 4: Normalize the flat-field (if MEF, normalize wrt chip SG1)
         # Compute the mean of the image
@@ -560,7 +559,7 @@ class MasterTwilightFlat(object):
             log.debug(msg)
             
             # Cleanup: Remove temporary files
-            misc.fileUtils.removefiles(self.__output_filename)
+            removefiles(self.__output_filename)
             # Compute normalized flat
             iraf.mscred.mscarith(operand1=comb_flat_frame,
                     operand2=median,

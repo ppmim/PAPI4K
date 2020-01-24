@@ -1,6 +1,6 @@
 """Astronomical coordinate functions."""
 
-import re, pdb
+import re
 import numpy as np
 from numpy import arccos, sin, cos
 from math import pi
@@ -12,6 +12,7 @@ DEG_PER_S = DEG_PER_MIN / 60.       # degrees per sec
 DEG_PER_AMIN = 1./60.               # degrees per arcmin
 DEG_PER_ASEC = DEG_PER_AMIN / 60.   # degrees per arcsec
 RAD_PER_DEG = pi / 180.             # radians per degree
+
 
 def ang_sep(ra1, dec1, ra2, dec2):
     """ Returns the angular separation (in units of degrees) on the

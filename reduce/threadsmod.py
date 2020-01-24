@@ -39,7 +39,7 @@ class ExecTaskThread(threading.Thread):
         threading.Thread.__init__(self)
         self._task = task
         self._args = args
-        #self._event=event # not used
+        # self._event=event # not used
         self._task_info = TaskInfo()
         self._task_info_list = task_info_list
     

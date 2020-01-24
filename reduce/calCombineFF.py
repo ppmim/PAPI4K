@@ -65,17 +65,18 @@ from optparse import OptionParser
 import sys
 import astropy.io.fits as fits
 
-import misc.fileUtils
-import datahandler
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.datahandler.clfits import isaFITS
+from papi.misc.version import __version__
 
-# Logging
-from misc.paLog import log
-from misc.version import __version__
 
 # IRAF
 from pyraf import iraf
 from iraf import noao
 from iraf import mscred
+
 
 def combineFF(domeFF, skyFF, combinedFF=None):
     """
@@ -107,16 +108,15 @@ def combineFF(domeFF, skyFF, combinedFF=None):
     If all was successful, the name of the output file is returned
         
     """
-    
-    
-    if not datahandler.isaFITS(domeFF) or not datahandler.isaFITS(skyFF):
+
+    if not isaFITS(domeFF) or not isaFITS(skyFF):
         log.error("Some input FF is not a FITS file")
         raise Exception("Some input FF is not a FITS file")
         
     try:
         #smooth the domeFF
         log.debug("Doing Median smooth of domeFF ...")
-        misc.fileUtils.removefiles(domeFF.replace(".fits", "_smooth.fits"))
+        removefiles(domeFF.replace(".fits", "_smooth.fits"))
         iraf.mscmedian(
                     input=domeFF,
                     output=domeFF.replace(".fits", "_smooth.fits"),
@@ -127,14 +127,13 @@ def combineFF(domeFF, skyFF, combinedFF=None):
                     zloreject=0.2,
                     zhireject=2.0)
 
-        #Or using scipy ( a bit slower then iraf...)
-        #from scipy import ndimage
-        #filtered = ndimage.gaussian_filter(f[0].data, 20)
-                    
-        
-        #smooth the skyFF
+        # Or using scipy ( a bit slower then iraf...)
+        # from scipy import ndimage
+        # filtered = ndimage.gaussian_filter(f[0].data, 20)
+
+        # smooth the skyFF
         log.debug("Doing Median smooth of skyFF ...")
-        misc.fileUtils.removefiles(skyFF.replace(".fits", "_smooth.fits"))
+        removefiles(skyFF.replace(".fits", "_smooth.fits"))
         iraf.mscmedian(
                     input=skyFF,
                     output=skyFF.replace(".fits", "_smooth.fits"),
@@ -147,7 +146,7 @@ def combineFF(domeFF, skyFF, combinedFF=None):
                     )
                        
         # Divide domeFF by smoothed version
-        misc.fileUtils.removefiles(domeFF.replace(".fits", "_div_smooth.fits"))
+        removefiles(domeFF.replace(".fits", "_div_smooth.fits"))
         iraf.mscarith(operand1=domeFF,
                     operand2=domeFF.replace(".fits", "_smooth.fits"),
                     op='/',
@@ -156,7 +155,7 @@ def combineFF(domeFF, skyFF, combinedFF=None):
                     )
 
         # Combine skyFF with domeFF
-        misc.fileUtils.removefiles(combinedFF)
+        removefiles(combinedFF)
         iraf.mscarith(operand1=skyFF.replace(".fits", "_smooth.fits"),
                     operand2=domeFF.replace(".fits", "_div_smooth.fits"),
                     op='*',
@@ -168,14 +167,14 @@ def combineFF(domeFF, skyFF, combinedFF=None):
             value=__version__, comment="PANIC Pipeline version")
 
         # Remove all temporal
-        misc.fileUtils.removefiles(domeFF.replace(".fits", "_smooth.fits"))
-        misc.fileUtils.removefiles(skyFF.replace(".fits", "_smooth.fits"))
-        misc.fileUtils.removefiles(domeFF.replace(".fits", "_div_smooth.fits"))
+        removefiles(domeFF.replace(".fits", "_smooth.fits"))
+        removefiles(skyFF.replace(".fits", "_smooth.fits"))
+        removefiles(domeFF.replace(".fits", "_div_smooth.fits"))
         
     except Exception as e:
         raise e
     
-    log.info("Combined Flat-Field created : %s",combinedFF)
+    log.info("Combined Flat-Field created : %s", combinedFF)
     
     return combinedFF
  
@@ -210,7 +209,7 @@ if __name__ == "__main__":
        parser.print_help()
        sys.exit(0)
     
-    if not options.domeFF or not options.skyFF or len(args)!=0: 
+    if not options.domeFF or not options.skyFF or len(args) != 0:
     # args is the leftover positional arguments after all options have been
     # processed
         parser.print_help()

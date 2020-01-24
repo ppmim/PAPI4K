@@ -37,8 +37,9 @@ def scale_image(filename, scale_factor):
     try:
         scaled = astImages.scaleImage(d, wcs, float(scale_factor))
         astImages.saveFITS(outfilename, scaled['data'], scaled['wcs'])
+        # TODO: update PIXSCALE and INSTRUME
     except Exception as ex:
-        logging.error("Error scaling image: %s" %str(ex))
+        logging.error("Error scaling image: %s" % str(ex))
         raise
     else:
         logging.info("Image scaled: %s" % outfilename)

@@ -20,13 +20,10 @@ import fileinput
 from datetime import datetime
 from optparse import OptionParser
 
-
 # Interact with FITS files
-import datahandler
+from papi.datahandler.clfits import ClFits
+from papi.misc.paLog import log
 
-
-# Logging
-from misc.paLog import log
 
 class LogSheet (object):
     """
@@ -104,7 +101,7 @@ class LogSheet (object):
         sorted_list = {}
         for file in filelist:
             try:
-                fitsf = datahandler.ClFits ( file )
+                fitsf = ClFits( file )
                 sorted_list[fitsf.getDateTimeObs()] = fitsf
             except:
                 log.warning("Unexpected error reading file : `%s`. Skipped !" %file)

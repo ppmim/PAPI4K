@@ -36,7 +36,7 @@ import numpy as np
 import astropy.io.fits as fits
 import matplotlib.pyplot as plt
 
-from reduce import checkQuality
+from papi.reduce import checkQuality
 
 
 class TFOCUSNotFound(Exception):

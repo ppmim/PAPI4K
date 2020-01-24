@@ -40,8 +40,8 @@ from pyraf import iraf
 
 
 # Interact with FITS files
-from misc.paLog import log
-from misc.version import __version__
+from papi.misc.paLog import log
+from papi.misc.version import __version__
 
 
 def imgTrim(inputfile, outputfile=None, p_step=128):

@@ -50,15 +50,15 @@ import fileinput
 
 #Log
 #import misc.paLog
-from misc.paLog import log    
+from papi.misc.paLog import log
 
 #PAPI packages 
-import reduce.reductionset as RS
-import misc.config
-import misc.utils as utils
-import misc.genLogsheet as gls
-import misc.check_papi_modules
-from misc.version import __version__
+from papi.reduce.reductionset import ReductionSet, ReductionSetException
+from papi.misc.config import default_config_file, read_options
+from papi.misc.utils import clock
+from papi.misc.genLogsheet import LogSheet
+from papi.misc.check_papi_modules import check_modules
+from papi.misc.version import __version__
 
 
 ################################################################################
@@ -67,7 +67,7 @@ from misc.version import __version__
 def main(arguments = None):
     
     # Clock to measure the CPU time used
-    t = utils.clock()
+    t = clock()
     t.tic()
         
     if arguments is None:
@@ -88,7 +88,7 @@ def main(arguments = None):
                       action ="store", dest = "config_file",
                       help="Config file for the PANIC Pipeline application."
                        "If not specified, '%s' is used."
-                       % misc.config.default_config_file())
+                       % default_config_file())
 
     parser.add_argument("-s", "--source", type=str,
                   action="store", dest="source",
@@ -212,7 +212,7 @@ def main(arguments = None):
 
     # Check required modules and versions
     if init_options.check_modules:
-        misc.check_papi_modules.check_modules()
+        check_modules()
         return
     
     # Read the default configuration file
@@ -231,7 +231,7 @@ def main(arguments = None):
     # Now, we "mix" the invokation parameter values with the values in the 
     # config file, having priority the invokation values over config file values
     # Note: only values of the 'general' section can be invoked
-    options = misc.config.read_options(init_options, 'general', config_file)
+    options = read_options(init_options, 'general', config_file)
 
     # Manually mix bpm_file, having priority the invokation values over config
     # file value.
@@ -245,10 +245,10 @@ def main(arguments = None):
     # Add the configuration filename as an extra value to the dictionary
     options['general']['config_filename'] = config_file
     
-    #print "options = ",options
+    # print "options = ",options
 
     general_opts = options['general']
-    #print "GEN_OPTS",general_opts
+    # print "GEN_OPTS",general_opts
 
     if not general_opts['source'] or not general_opts['output_file'] \
         or not general_opts['output_dir'] or not general_opts['temp_dir']:
@@ -275,7 +275,7 @@ def main(arguments = None):
     # Check for list files sorted by MJD
     if init_options.list:
         log.debug("Creating logsheet file ....")
-        logSheet = gls.LogSheet(rs_files, "/tmp/logsheet.txt", [0,len(rs_files)], True)
+        logSheet = LogSheet(rs_files, "/tmp/logsheet.txt", [0,len(rs_files)], True)
         logSheet.create()
         return
    
@@ -307,7 +307,7 @@ def main(arguments = None):
     
     # Create the RS (it works both simple FITS as MEF files)
     try:
-        rs = RS.ReductionSet( rs_files, general_opts['output_dir'], 
+        rs = ReductionSet( rs_files, general_opts['output_dir'],
                 #out_file=general_opts['output_file'],
                 out_file=init_options.output_file,
                 obs_mode=general_opts['obs_mode'],
@@ -344,7 +344,7 @@ def main(arguments = None):
                              seqs_to_reduce=m_seqs_to_reduce,
                              types_to_reduce=stype)
                 
-    except RS.ReductionSetException as  e:
+    except ReductionSetException as  e:
         log.error("Error during data reduction: %s " % str(e))
     
     # The following handles ctrl-c. We need to do it this way due to a

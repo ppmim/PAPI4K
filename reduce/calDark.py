@@ -53,23 +53,22 @@ import shutil
 from optparse import OptionParser
 import numpy 
 
-# PAPI modules
-import misc.fileUtils
-import misc.utils as utils
-import misc.robust as robust
-from misc.version import __version__
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.misc.collapse import collapse
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
-import datahandler
-import misc.collapse
 
 # Pyraf modules
 from pyraf import iraf
 from iraf import mscred
 
 # Interact with FITS files
-import astropy.io.fits as fits
-# Logging
-from misc.paLog import log
+from astropy.io import fits
 
 
 class MasterDark(object):
@@ -128,7 +127,7 @@ class MasterDark(object):
         """
            
         log.debug("Start createMaster")
-        t = utils.clock()
+        t = clock()
         t.tic()
 
         # Get the user-defined list of dark frames
@@ -165,14 +164,14 @@ class MasterDark(object):
         good_frames = []
 
         for iframe in framelist:
-            f = datahandler.ClFits(iframe)
+            f = ClFits(iframe)
             log.debug("Frame %s EXPTIME= %f TYPE= %s NCOADDS= %s REAMODE= %s" 
                       %(iframe, f.expTime(), f.getType(), f.getNcoadds(), 
                         f.getReadMode()))
             if not self.no_type_checking and not f.isDark():
                 log.error("Error: Task 'createMasterDark' finished. Frame %s is not 'DARK'",iframe)
                 raise Exception("Found a non DARK frame") 
-                #continue
+                # continue
             else:        
                 # Check EXPTIME, TYPE(dark) and READMODE
                 if (not self.m_texp_scale and f_expt != -1 and 
@@ -199,9 +198,9 @@ class MasterDark(object):
         
         
         # Cleanup : Remove old masterdark
-        misc.fileUtils.removefiles(self.__output_filename)
+        removefiles(self.__output_filename)
         tmp1 = self.__temp_dir + "/dark_tmp.fits"
-        misc.fileUtils.removefiles(tmp1)
+        removefiles(tmp1)
         
         # Add TEXP and NCOADD to master filename
         if f_ncoadds == -1:
@@ -211,10 +210,10 @@ class MasterDark(object):
         
     
         # STEP 1.2: Check if images are cubes, then collapse them.
-        good_frames = misc.collapse.collapse(good_frames, out_dir=self.__temp_dir)
+        good_frames = collapse(good_frames, out_dir=self.__temp_dir)
         
         # Write frames to txt file
-        misc.utils.listToFile(good_frames, self.__temp_dir + "/files.list")
+        listToFile(good_frames, self.__temp_dir + "/files.list")
         
         """
         NOTE: I don't know how darkcombine does the scaling with EXPTIME, in
@@ -248,33 +247,32 @@ class MasterDark(object):
         if self.m_normalize:
             log.debug("Normalizing master dark to 1 sec")
             # divide master dark by the TEXP to get a master dark in ADU/s units
-            texp = datahandler.ClFits(tmp1).expTime()
+            texp = ClFits(tmp1).expTime()
             iraf.mscred.mscarith(operand1 = tmp1,
-    				operand2 = texp,
-    				op = '/',
-    				result =self.__output_filename,
-    				verbose = 'no'
-    				)
+                                 operand2 = texp,
+                                 op='/',
+                                 result=self.__output_filename,
+                                 verbose='no')
         else:
             shutil.move(tmp1, self.__output_filename)
     
         darkframe = fits.open(self.__output_filename,'update')
-        #Add a new keyword-->PAPITYPE
+        # Add a new keyword-->PAPITYPE
         darkframe[0].header.set('PAPITYPE','MASTER_DARK','TYPE of PANIC Pipeline generated file')
         darkframe[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
         darkframe[0].header.set('IMAGETYP','MASTER_DARK','TYPE of PANIC Pipeline generated file')
         if 'PAT_NEXP' in darkframe[0].header:
-            darkframe[0].header.set('PAT_NEXP',1,'Number of position into the current dither pattern')
+            darkframe[0].header.set('PAT_NEXP', 1, 'Number of position into the current dither pattern')
         if self.m_normalize:
-            darkframe[0].header.set('EXPTIME',1.0)
+            darkframe[0].header.set('EXPTIME', 1.0)
             darkframe[0].header.set('ITIME', 1.0)
-            darkframe[0].header.set('NCOADDS',1)
+            darkframe[0].header.set('NCOADDS', 1)
         
         # 'ignore' will ignore any FITS standard violation and allow 
         # write/update the FITS file
         darkframe.close(output_verify='ignore')     
         
-        log.debug('Saved master DARK to %s' , self.__output_filename)
+        log.debug('Saved master DARK to %s', self.__output_filename)
         log.debug("createMasterDark' finished %s", t.tac() )
         
         if self.show_stats:
@@ -282,7 +280,7 @@ class MasterDark(object):
             for i_frame in good_frames:
                 pf = fits.open(i_frame)
                 if len(pf) == 1:
-                    #print "mean=",numpy.mean(pf[0].data[512:1536,512:1536])
+                    # print "mean=",numpy.mean(pf[0].data[512:1536,512:1536])
                     medians.append(robust.r_nanmedian(pf[0].data[512 : 1536, 512 : 1536]))
                 else:
                     print("MEF files now is supported !")

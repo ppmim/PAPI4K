@@ -55,14 +55,15 @@ from iraf import mscred
 import astropy.io.fits as fits
 import numpy
 
-# Logging
-from misc.paLog import log
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock
+from papi.datahandler.clfits import ClFits, isaFITS
 
-import datahandler
-import misc.fileUtils
-import misc.utils as utils
-import misc.robust as robust
-from misc.version import __version__
+import papi.misc.robust as robust
+from papi.misc.version import __version__
+
 
 class BadPixelMask(object):
     """
@@ -78,7 +79,6 @@ class BadPixelMask(object):
         input images is defined as bad in the output mask. 
         
     """
-    
 
     def __init__(self, input_file, outputfile=None, lthr=4.0, hthr=4.0, 
                  temp_dir="/tmp", raw_flag=False):
@@ -116,7 +116,7 @@ class BadPixelMask(object):
             more than a set number of times, then it is defined as bad
         """
         
-        t = utils.clock()
+        t = clock()
         t.tic()
 
         __epsilon = 1.0e-20
@@ -129,14 +129,14 @@ class BadPixelMask(object):
         f_readmode = -1
         if not self.raw_flag:
             for iframe in filelist:
-                fits = datahandler.ClFits(iframe)
+                fits = ClFits(iframe)
                 log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, fits.exptime, fits.type)) 
                 # Check EXPTIME, TYPE (flat) and FILTER
                 if not fits.isDomeFlat():
                     log.warning("Warning: Task 'create BPM' found a non-domeflat frame")
                 else:
                     # Check READMODE
-                    if ( f_readmode!=-1 and (f_readmode!= fits.getReadMode() )):
+                    if f_readmode != -1 and (f_readmode != fits.getReadMode()):
                         log.error("Error: Task 'calBPM' finished. Found a FLAT frame with different  READMODE")
                         raise Exception("Found a FLAT frame with different  READMODE") 
                     else: 
@@ -167,7 +167,7 @@ class BadPixelMask(object):
         # - Build the frame list for IRAF
         log.debug("Combining Flat frames...")
         flat_comb = self.temp_dir + '/flatcomb.fits'
-        misc.fileUtils.removefiles(flat_comb)
+        removefiles(flat_comb)
         # Call IRAF task (it works with MEF or simple images)
         # With next combine, cosmic rays are rejected.
         iraf.mscred.flatcombine(input=("'"+"@"+flats+"'").replace('//','/'), 
@@ -288,7 +288,7 @@ class BadPixelMask(object):
             log.info("Fraction Bad pixel (detector %s): %f"%(i_nExt+1, badfrac))
         
         # STEP 6: Save the BPM --- TODO MEF !!!!
-        misc.fileUtils.removefiles(self.output)
+        removefiles(self.output)
         hdulist = fits.HDUList()     
         hdr0 = fits.getheader(good_flats[0])
         prihdu = fits.PrimaryHDU (data = None, header = None)
@@ -359,7 +359,7 @@ class BadPixelMask(object):
                 more than a set number of times, then it is defined as bad
             """
             
-            t = utils.clock()
+            t = clock()
             t.tic()
             
             
@@ -371,14 +371,14 @@ class BadPixelMask(object):
             f_readmode = -1
             if not self.raw_flag:
                 for iframe in filelist:
-                    fits = datahandler.ClFits(iframe)
+                    fits = ClFits(iframe)
                     log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, fits.exptime, fits.type)) 
                     # Check EXPTIME, TYPE (flat) and FILTER
                     if not fits.isDomeFlat():
                         log.warning("Warning: Task 'create BPM' found a non-domeflat frame")
                     else:
                         # Check READMODE
-                        if ( f_readmode!=-1 and (f_readmode!= fits.getReadMode() )):
+                        if f_readmode!=-1 and (f_readmode!= fits.getReadMode() ):
                             log.error("Error: Task 'calBPM' finished. Found a FLAT frame with different  READMODE")
                             raise Exception("Found a FLAT frame with different  READMODE") 
                         else: 
@@ -406,7 +406,7 @@ class BadPixelMask(object):
             # - Build the frame list for IRAF
             log.debug("Combining Flat frames...")
             flat_comb = self.temp_dir + '/flatcomb.fits'
-            misc.fileUtils.removefiles(flat_comb)
+            removefiles(flat_comb)
             # Call IRAF task (it works with MEF or simple images)
             iraf.mscred.flatcombine(input=("'"+"@"+flats+"'").replace('//','/'), 
                             output=flat_comb, 
@@ -505,7 +505,7 @@ class BadPixelMask(object):
                 log.info("Fraction Bad pixel (extesion %s): %f"%(i_nExt,badfrac))
             
             # STEP 6: Save the BPM --- TODO MEF !!!!
-            misc.fileUtils.removefiles(self.output)
+            removefiles(self.output)
             hdulist = fits.HDUList()     
             hdr0 = fits.getheader(good_flats[0])
             prihdu = fits.PrimaryHDU (data = None, header = None)
@@ -553,7 +553,7 @@ class BadPixelMask(object):
                 raise e
 
             # Remove temp files
-            misc.fileUtils.removefiles(flat_comb)
+            removefiles(flat_comb)
             
             log.debug('Saved Bad Pixel Mask  to %s' , self.output)
             log.debug("createBPM' finished %s", t.tac() )

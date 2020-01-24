@@ -35,18 +35,14 @@ import subprocess
 
 
 # PAPI modules
-import astromatic
-import datahandler
-from reduce.makeobjmask import *
-import reduce.solveAstrometry
+from papi.reduce.makeobjmask import makeObjMask
+from papi.reduce.solveAstrometry import solveField
 
-# Logging
-from misc.paLog import log
-from misc.version import __version__
-import misc.config
-import misc.utils
-
-
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.utils import listToFile
+from papi.datahandler.clfits import ClFits, fits_simple_verify
+import papi.config as config
 
 def align_stack_cube(input_file, output_file=None):
     """
@@ -216,7 +212,7 @@ def getPointingOffsets(image_list,
         # In order to set a real value for satur_level, we have to check the
         # number of coadds of the images (NCOADDS or NDIT keywords).
         try:
-            pf = datahandler.ClFits(image_list[0])
+            pf = ClFits(image_list[0])
             satur_level = int(satur_level) * int(pf.getNcoadds())
             log.critical("SAT_LEVEL=%s"%satur_level)
         except:
@@ -226,7 +222,7 @@ def getPointingOffsets(image_list,
 
         # Make mask
         try:
-            misc.utils.listToFile(image_list, out_dir + "/makeObjMask.list")
+            listToFile(image_list, out_dir + "/makeObjMask.list")
             makeObjMask( out_dir + "/makeObjMask.list", mask_minarea, mask_maxarea, mask_thresh, 
                          satur_level, output_list_file, single_point=single_p)
         except Exception as e:
@@ -237,7 +233,7 @@ def getPointingOffsets(image_list,
         #>mosaic objfiles.nip $off_err > offsets1.nip
         search_box = 10 # half_width of search box in arcsec (default 10)
         offsets_cmd = m_irdr_path + '/offsets ' + output_list_file + '  ' + str(search_box) + ' >' + p_offsets_file
-        if misc.utils.runCmd( offsets_cmd ) == 0:
+        if runCmd(offsets_cmd) == 0:
             log.critical("Some error while computing dither offsets")
             raise Exception("Some error while computing dither offsets")
         else:
@@ -367,7 +363,7 @@ def doAstroCalib( image_list, pix_scale ):
     for my_file in image_list:
         # Run astrometric calibration
         try:
-            solved = reduce.solveAstrometry.solveField(my_file, 
+            solved = solveField(my_file,
                             out_dir, # self.temp_dir produces collision,
                             temp_dir,
                             pix_scale)
@@ -467,7 +463,7 @@ in principle, with small drift of the planes. No resampling is done.
     else:
         config_file = options.config_file
         
-    cfg_options = misc.config.read_config_file(config_file)
+    cfg_options = config.read_config_file(config_file)
     
     # args is the leftover positional arguments after all options have been processed
     if not options.source_file or not options.output_filename or len(args)!=0: 
@@ -477,7 +473,7 @@ in principle, with small drift of the planes. No resampling is done.
     # Check if source_file is a FITS file or a text file listing a set of files
     if os.path.exists(options.source_file):
         try:
-            datahandler.fits_simple_verify(options.source_file)
+            fits_simple_verify(options.source_file)
             filelist = [options.source_file]
         except:
             filelist = [line.replace( "\n", "") 

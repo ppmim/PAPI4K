@@ -25,14 +25,12 @@
 from optparse import OptionParser
 import sys
 import os
-import shutil
 import astropy.io.fits as fits
 import fileinput
 import numpy
 
-# Logging
-from misc.paLog import log
-from misc.version import __version__
+from papi.misc.paLog import log
+from papi.misc.version import __version__
 
 
 def collapse(frame_list, out_dir="/tmp"):
