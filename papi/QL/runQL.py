@@ -45,7 +45,6 @@ import argparse
 from papi.misc.paLog import log
 
 # PAPI packages
-# from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 
 # If ~/iraf/focus_seq.txt exists, QL fails because it try to launch iraf.obsutil.starfocus() 

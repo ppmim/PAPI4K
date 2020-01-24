@@ -84,7 +84,7 @@ setup(
     },
     tests_require=TESTS_REQUIRE,
     entry_points={
-        'console_scripts': ['papi=papi.papi:main']
+        'console_scripts': ['papi=papi.papi:main', 'papi_ql=papi.QL.runQL:main']
     },
     data_files=[('papi/QL/resources/logo.png', ['papi/QL/resources/logo_PANIC.jpg',
                                                 'papi/QL/resources/logo_PANIC_100.jpg',
