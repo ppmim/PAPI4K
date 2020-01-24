@@ -49,24 +49,23 @@ import shutil
 import argparse
 import time
 
-import misc.fileUtils
-import misc.utils as utils
-import misc.robust as robust
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits, isaFITS, checkDataProperties
+from papi.misc.collapse import collapse
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
 # Interact with FITS files
 import astropy.io.fits as fits
-import datahandler
-
-
-# Logging
-from misc.paLog import log
 
 # Pyraf modules
 from pyraf import iraf
 from iraf import noao
 from iraf import mscred
 
-from misc.version import __version__
 
 class SuperSkyFlat(object):
     """
@@ -147,15 +146,15 @@ class SuperSkyFlat(object):
         
         # Check data integrity (all have the same properties)
         m_filelist = self.filelist
-        if self.check and not datahandler.checkDataProperties( m_filelist, c_ncoadds=False):
+        if self.check and not checkDataProperties(m_filelist, c_ncoadds=False):
             log.error("Data integrity ERROR, some files not having same properties (FILTER, EXPTIME, NCOADDS or READMODE)")
             raise Exception("Found a data integrity error")
         
   
         tmp1 = (self.temp_dir + "/tmp_sf.fits").replace('//','/')
-        misc.fileUtils.removefiles(tmp1)
+        removefiles(tmp1)
         log.info("Combining images...(images are scaled to have the same median)")
-        misc.utils.listToFile(m_filelist, self.temp_dir + "/files.txt") 
+        listToFile(m_filelist, self.temp_dir + "/files.txt")
         # Combine the images to find out the super Flat using sigma-clip algorithm;
         # the input images are scaled to have the same median, the pixels containing 
         # objects are rejected by an algorithm based on the measured noise (sigclip),
@@ -363,7 +362,7 @@ creates the master super flat-field median combining images using sigma-clip alg
                   help="Output file to write SuperFlat")
     
     # Not yet implemented
-    #parser.add_argument("-b", "--bpm",
+    # parser.add_argument("-b", "--bpm",
     #              action="store", dest="bpm", 
     #              help="Bad pixel map file [default=%default]", 
     #              default=None)

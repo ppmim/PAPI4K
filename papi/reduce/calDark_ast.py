@@ -52,14 +52,14 @@ import shutil
 from optparse import OptionParser
 import numpy 
 
-# PAPI modules
-import misc.fileUtils
-import misc.utils as utils
-import misc.robust as robust
-from misc.version import __version__
-
-import datahandler
-import misc.collapse
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.misc.collapse import collapse
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
 from astropy.stats import mad_std
 from astropy.nddata import CCDData
@@ -69,8 +69,6 @@ from astropy.nddata import CCDData
 
 # Interact with FITS files
 import astropy.io.fits as fits
-# Logging
-from misc.paLog import log
 
 
 class MasterDark(object):
@@ -129,7 +127,7 @@ class MasterDark(object):
         """
            
         log.debug("Start createMaster")
-        t = utils.clock()
+        t = clock()
         t.tic()
 
         # Get the user-defined list of dark frames
@@ -160,7 +158,7 @@ class MasterDark(object):
         good_frames = []
 
         for iframe in framelist:
-            f = datahandler.ClFits(iframe)
+            f = ClFits(iframe)
             log.debug("Frame %s EXPTIME= %f TYPE= %s NCOADDS= %s REAMODE= %s" 
                       %(iframe, f.expTime(), f.getType(), f.getNcoadds(), 
                         f.getReadMode()))
@@ -194,17 +192,17 @@ class MasterDark(object):
 
         # Cleanup : Remove old masterdark
         tmp1 = self.__temp_dir + "/dark_tmp.fits"
-        misc.fileUtils.removefiles(tmp1)
+        removefiles(tmp1)
         
         # Add TEXP and NCOADD to master filename
         if f_ncoadds == -1:
             f_ncoadds = 1
         self.__output_filename = self.__output_filename.replace(".fits",
                                                                 "_%d_%d.fits" %(f_expt, f_ncoadds))
-        misc.fileUtils.removefiles(self.__output_filename)
+        removefiles(self.__output_filename)
 
         # STEP 1.2: Check if images are cubes, then collapse them.
-        good_frames = misc.collapse.collapse(good_frames, out_dir=self.__temp_dir)
+        good_frames = collapse(good_frames, out_dir=self.__temp_dir)
 
         dark_files = ccdproc.ImageFileCollection(filenames=good_frames)
         combined_dark = ccdproc.combine(img_list=dark_files.files,

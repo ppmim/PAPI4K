@@ -65,10 +65,14 @@ import time
 import shutil
 from optparse import OptionParser
 
-import misc.fileUtils
-import misc.utils as utils
-import datahandler
-import misc.collapse
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.misc.collapse import collapse
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
 # Pyraf modules
 from pyraf import iraf
@@ -78,10 +82,6 @@ from iraf import mscred
 # Interact with FITS files
 import astropy.io.fits as fits
 import numpy as np
-
-# Logging
-from misc.paLog import log
-from misc.version import __version__
 
 
 class MasterDomeFlat(object):
@@ -153,17 +153,17 @@ class MasterDomeFlat(object):
         log.debug("Start createMasterDomeFlat")
         
         start_time = time.time()
-        t = utils.clock()
+        t = clock()
         t.tic()
     
         # Cleanup old files
         
-        misc.fileUtils.removefiles(self.__output_filename)
+        removefiles(self.__output_filename)
         domelist_lampon  = []
         domelist_lampoff = []
         
         # Get the user-defined list of flat frames
-        if type(self.__input_files)==type(list()): 
+        if type(self.__input_files) == type(list()):
             framelist = self.__input_files  # list of sources files to be used in sky-flat computation
         elif os.path.isfile(self.__input_files):
             framelist = [line.replace( "\n", "") 
@@ -178,8 +178,7 @@ class MasterDomeFlat(object):
         except IndexError:
             log.error("No FLAT frames defined")
             raise 'No FLAT frames defined'
-        
-        
+
         if not os.path.exists(os.path.abspath(os.path.join(self.__output_filename, os.pardir))):
             log.error('Directory of combined FLAT frame does not exist')
             raise 'Directory of combined FLAT frame does not exist'
@@ -199,12 +198,12 @@ class MasterDomeFlat(object):
         f_filter = ''
         f_readmode = ''
         for iframe in framelist:
-            f = datahandler.ClFits ( iframe )
+            f = ClFits ( iframe )
             log.debug("Flat frame %s EXPTIME= %f TYPE= %s FILTER= %s" %(iframe, f.expTime(),f.getType(), f.getFilter()))
             # Check EXPTIME
-            if ( f_expt!=-1 and ( int(f.expTime()) != int(f_expt) or 
+            if (f_expt != -1 and (int(f.expTime()) != int(f_expt) or
                                   f.getFilter()!=f_filter or 
-                                  f.getReadMode()!=f_readmode)) :
+                                  f.getReadMode()!=f_readmode)):
                 log.warning("Found a FLAT frame with different FILTER or EXPTIME "
                     "or READMODE. Frame skipped !")
                 continue
@@ -219,18 +218,18 @@ class MasterDomeFlat(object):
         
             # Separate lamp ON/OFF dome flats  
             if f.isDomeFlatON():
-                domelist_lampon.append(iframe.replace("//","/"))
+                domelist_lampon.append(iframe.replace("//", "/"))
             elif f.isDomeFlatOFF():
-                domelist_lampoff.append(iframe.replace("//","/"))
+                domelist_lampoff.append(iframe.replace("//", "/"))
             else:
                 log.warning("Found a FLAT frame with different Flat-Field type "
                     " It should be domeflat LAMP_ON/OFF. Frame skipped !")
         
         
         log.info('Right, all flat frames separated as:')
-        log.info('DOME FLATS LAMP OFF (#%d) %s: ' , len(domelist_lampon), domelist_lampon )
-        log.info('DOME FLATS LAMP ON  (#%d) %s: ' , len(domelist_lampoff), domelist_lampoff )
-        log.info('Filter=%s , TEXP=%f ' , f_filter, f_expt)
+        log.info('DOME FLATS LAMP OFF (#%d) %s: ', len(domelist_lampon), domelist_lampon )
+        log.info('DOME FLATS LAMP ON  (#%d) %s: ', len(domelist_lampoff), domelist_lampoff )
+        log.info('Filter=%s , TEXP=%f ', f_filter, f_expt)
         
         if len(domelist_lampon) < self.MIN_FLATS:
             log.error("Error, not enough lamp_on flats. At least %s are required" %(self.MIN_FLATS))
@@ -247,15 +246,15 @@ class MasterDomeFlat(object):
         # DOME FLATS (it is done implicitly)
     
         # STEP 1.2: Check if images are cubes, then collapse them.
-        domelist_lampon = misc.collapse.collapse(domelist_lampon, out_dir=self.__temp_dir)
-        domelist_lampoff = misc.collapse.collapse(domelist_lampoff, out_dir=self.__temp_dir)
+        domelist_lampon = collapse(domelist_lampon, out_dir=self.__temp_dir)
+        domelist_lampoff = collapse(domelist_lampoff, out_dir=self.__temp_dir)
         
         # STEP 2: Make the combine of Flat LAMP-ON frames
         # - Build the frame list for IRAF
         log.debug("Combining Flat LAMP-ON frames...")
         flat_lampon = self.__temp_dir + "/flat_lampON.fits"
-        #misc.fileUtils.removefiles(flat_lampon)
-        misc.utils.listToFile(domelist_lampon, self.__temp_dir + "/files_on.list") 
+        # misc.fileUtils.removefiles(flat_lampon)
+        listToFile(domelist_lampon, self.__temp_dir + "/files_on.list")
         # - Call IRAF task
         # Combine the images to find out the median using sigma-clip algorithm;
         # the input images are scaled to a common mode, the pixels containing 
@@ -279,8 +278,8 @@ class MasterDomeFlat(object):
         # - Build the frame list for IRAF
         log.debug("Combining Flat LAMP-OFF frames...")    
         flat_lampoff = self.__temp_dir + "/flat_lampOFF.fits"
-        #misc.fileUtils.removefiles(flat_lampoff)
-        misc.utils.listToFile(domelist_lampoff, self.__temp_dir+"/files_off.list") 
+        # misc.fileUtils.removefiles(flat_lampoff)
+        listToFile(domelist_lampoff, self.__temp_dir+"/files_off.list")
         # - Call IRAF task
         # Combine the images to find out the median using sigma-clip algorithm;
         # the input images are scaled to a common median, the pixels containing 
@@ -303,14 +302,14 @@ class MasterDomeFlat(object):
         flat_diff = self.__temp_dir + "/flat_lampON_OFF.fits"
         log.debug("Subtracting Flat ON-OFF frames...%s", flat_diff) 
         # Remove an old masternormflat
-        misc.fileUtils.removefiles(flat_diff)
+        removefiles(flat_diff)
         
         # Single FITS are also supported by mscred.mscarith
         log.debug("Subtracting files...") 
         iraf.mscred.mscarith(operand1 = flat_lampon,
-                    operand2 = flat_lampoff,
-                    op = '-',
-                    result = flat_diff
+                    operand2=flat_lampoff,
+                    op='-',
+                    result=flat_diff
                     )
         
         # STEP 5: Normalize the flat-field (if MEF, normalize wrt chip SG1)
@@ -361,7 +360,7 @@ class MasterDomeFlat(object):
             log.debug(msg)
             
             # Cleanup: Remove temporary files
-            misc.fileUtils.removefiles(self.__output_filename)
+            removefiles(self.__output_filename)
             # Compute normalized flat
             iraf.mscred.mscarith(operand1=flat_diff,
                     operand2=median,
@@ -373,8 +372,8 @@ class MasterDomeFlat(object):
             shutil.move(flat_diff, self.__output_filename)
         
                         
-        ## STEP 6 ##: (optional) 
-        ## Median smooth the master (normalized) flat
+        # STEP 6 ##: (optional)
+        # Median smooth the master (normalized) flat
         if self.__median_smooth:
             log.debug("Doing Median smooth of FF ...")
             iraf.mscmedian(
@@ -405,7 +404,7 @@ class MasterDomeFlat(object):
         
         flatframe[0].header.add_history('lamp_on  files: %s' %domelist_lampon )
         flatframe[0].header.add_history('lamp_off files: %s' %domelist_lampoff )
-        #Add a new keyword-->PAPITYPE
+        # Add a new keyword-->PAPITYPE
         flatframe[0].header.set('PAPITYPE', 'MASTER_DOME_FLAT', 
                                    'TYPE of PANIC Pipeline generated file')
         flatframe[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
@@ -419,12 +418,11 @@ class MasterDomeFlat(object):
         
         
         # Cleanup: Remove temporary files
-        #misc.fileUtils.removefiles(flat_lampoff, flat_lampon, flat_diff)
-        #Remove temp list files
-        misc.fileUtils.removefiles(self.__temp_dir+"/files_off.list")
-        misc.fileUtils.removefiles(self.__temp_dir+"/files_on.list")
-        #todo
-            
+        # misc.fileUtils.removefiles(flat_lampoff, flat_lampon, flat_diff)
+        # Remove temp list files
+        removefiles(self.__temp_dir+"/files_off.list")
+        removefiles(self.__temp_dir+"/files_on.list")
+
         log.debug(t.tac() )
         log.debug('Saved master FLAT to %s' ,  self.__output_filename )
         

@@ -40,13 +40,13 @@ import re
 # Project modules
 from astropy import wcs
 import astropy.io.fits as fits
-import misc.robust as robust
 import numpy
+import papi.misc.robust as robust
 
 try: 
     import clfits
 except ImportError:
-    import datahandler.clfits as clfits
+    import papi.datahandler.clfits as clfits
 
 # TODO
 #

@@ -39,8 +39,8 @@ import glob
 import datetime as dt
 
 # PAPI modules
-import datahandler
-from misc.paLog import log
+from papi.datahandler.clfits import ClFits
+from papi.misc.paLog import log
 
         
 class DataCollector (object):
@@ -164,10 +164,10 @@ class DataCollector (object):
             # filter out files already detected as bad files
             if file not in self.bad_files_found:
                 try:
-                    fits = datahandler.ClFits(file, check_integrity=True)
+                    fits = ClFits(file, check_integrity=True)
                 except IOError as e:
                     if file in self.pend_to_read:
-                        if  self.pend_to_read[file] < self._n_retries_:
+                        if self.pend_to_read[file] < self._n_retries_:
                             self.pend_to_read[file] = self.pend_to_read[file] + 1
                         else:
                             # definitely, file is discarted
@@ -182,8 +182,7 @@ class DataCollector (object):
                     self.bad_files_found.append(file)      
                 else:
                     dataset.append((file, fits.getMJD()))
-        
-        
+
         dataset = sorted(dataset, key=lambda data_file: data_file[1])          
         sorted_files = []
         for l_tuple in dataset:
@@ -212,17 +211,17 @@ class DataCollector (object):
     
         contents = []
         
-        if start_datetime == None:
+        if not start_datetime:
             # by default, we limit the files one day old
             l_start_datetime = dt.datetime.now() - dt.timedelta(days=1)    
-        if end_datetime == None:
+        if not end_datetime:
             l_end_datetime = dt.datetime.now()
         if l_end_datetime < l_start_datetime:
             print("[DC] Error, end_datetime < start_datetime !")
             return []
         
-        #print "start_date = %s"%l_start_datetime
-        #print "end_date = %s"%l_end_datetime
+        # print "start_date = %s"%l_start_datetime
+        # print "end_date = %s"%l_end_datetime
          
         # Read the file contents from a generated GEIRS file
         if type == 1:
@@ -268,8 +267,7 @@ class DataCollector (object):
                         #print "file datetime = %s"%line_date
         
         return contents        
-        
-        
+
     def findNewFiles(self):
         """
         Find files that are not yet listed in the dirlist
@@ -283,7 +281,7 @@ class DataCollector (object):
         try:
             # To Read the directory contents
             if self.mode == "dir":
-                #contents = [os.path.join(self.source, file) for file in os.listdir(self.source)]
+                # contents = [os.path.join(self.source, file) for file in os.listdir(self.source)]
                 contents = self.__listFiles(self.source)
             # To Read a simple text file
             elif self.mode == "file":
@@ -363,18 +361,17 @@ class DataCollector (object):
             # Make sure that (1) the 'file' is not a directory entry, (2) that it
             # matches the filename filter pattern, and (3) that it not yet in
             # the unprocessed or processed list.
-            if ( (not os.path.isdir(file))
+            if ((not os.path.isdir(file))
 			        and (fnmatch.fnmatch(basename, pattern))
 			        and (file not in self.reducedfiles)    
 			        and (file not in self.newfiles)
                     and (file not in self.bad_files_found)
 			        ):
-              
                 # Try-to-read the file (only for integrity check)
                 try:
                     # Now, try to read the file
                     if self.mode != "dir": # for dir, it was already done above in __sortFilesMJD()
-                        fits = datahandler.ClFits(file, check_integrity=True)
+                        fits = ClFits(file, check_integrity=True)
                         del fits
                 except IOError as e:
                     # file is still being saved ! should not happen when reading GEIRS logs

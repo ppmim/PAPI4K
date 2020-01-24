@@ -44,19 +44,17 @@ import os
 import fileinput
 from optparse import OptionParser
 
-import misc.fileUtils
-import misc.utils as utils
-
+# PAPI
+from papi.misc.paLog import log
 
 # Interact with FITS files
 import astropy.io.fits as fits
 from astropy import wcs
 import numpy
 
-# Logging
-from misc.paLog import log
 
-class MEF_Exception (Exception): pass
+class MEF_Exception (Exception):
+    pass
 
 
 class MEF (object):

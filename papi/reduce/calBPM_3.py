@@ -48,14 +48,13 @@ from pyraf import iraf
 import astropy.io.fits as fits
 import numpy
 
-# Logging
-from misc.paLog import log
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
-import datahandler
-import misc.fileUtils
-import misc.utils as utils
-import misc.robust as robust
-from misc.version import __version__
 
 
 class BadPixelMask(object):
@@ -68,7 +67,6 @@ class BadPixelMask(object):
     - Inputs files can be MEF files.
 
     """
-    
 
     def __init__(self, dark_list, flat_list, outputfile=None, dthr=75.0, 
                 fthr=15.0, temp_dir="/tmp"):
@@ -115,13 +113,13 @@ class BadPixelMask(object):
          3. Combine the HOT and COLD masks
         """
         
-        t = utils.clock()
+        t = clock()
         t.tic()
 
         __epsilon = 1.0e-20
         
 
-        if self.dark_list is None and self.flat_list is None:
+        if not self.dark_list and not self.flat_list:
             msg = "Neither Darks nor Flats images provided !"
             log.error(msg)
             raise Exception(msg)
@@ -139,7 +137,7 @@ class BadPixelMask(object):
             # STEP 1: Make the combine of DARK frames
             log.debug("Combining DARKS frames...")
             dark_comb = self.temp_dir + '/darkcomb.fits'
-            misc.fileUtils.removefiles(dark_comb)
+            removefiles(dark_comb)
             # Call IRAF task (it works with MEF or simple images)
             # With next combine, cosmic rays are rejected.
             # Note that frames are scaled by EXPTIME
@@ -194,7 +192,7 @@ class BadPixelMask(object):
         if self.flat_list != None:
             log.debug("Combining Flat frames...")
             flat_comb = self.temp_dir + '/flatcomb.fits'
-            misc.fileUtils.removefiles(flat_comb)
+            removefiles(flat_comb)
             # Call IRAF task (it works with MEF or simple images)
             try:
                 # With next combine, cosmic rays are rejected.
@@ -274,7 +272,7 @@ class BadPixelMask(object):
             log.info("Fraction Bad pixel of detector %s: %f"%(det_id, badfrac))
 
         # STEP 6: Save the BPM ---
-        misc.fileUtils.removefiles(self.output)
+        removefiles(self.output)
         hdulist = fits.HDUList()     
         if self.flat_list is not None:
             hdr0 = flat[0].header
@@ -338,7 +336,7 @@ class BadPixelMask(object):
             raise e
 
         # Remove temp files
-        #misc.fileUtils.removefiles(flat_comb)
+        # misc.fileUtils.removefiles(flat_comb)
         
         log.debug('Saved Bad Pixel Mask  to %s' , self.output)
         log.debug("createBPM' finished %s", t.tac() )
@@ -394,9 +392,9 @@ def main(arguments=None):
        parser.print_help()
        return 2
 
-    if len(args) !=0:
+    if len(args) != 0:
         parser.print_help()
-        return 2 # used for command line syntax errors
+        return 2  # used for command line syntax errors
     
     # Check mandatory arguments
     if (not options.darks_file_list and not options.flats_file_list):

@@ -14,18 +14,17 @@
 # 31/03/2010  : added source as a file_list containing the list files
 ################################################################################
 
-# Import requered modules
+# Import required modules
 import sqlite3 as sqlite
-import datahandler
 import os
 import sys
 import math
 import fileinput
 from optparse import OptionParser
 
-
-# Enable logging
-from misc.paLog import log
+# papi
+from papi.misc.paLog import log
+from papi.datahandler.clfits import ClFits
 
 __docformat__ = "restructuredtext"  
 
@@ -155,7 +154,7 @@ class DataSet(object):
             raise e
         
         try:
-            fitsf = datahandler.ClFits(filename, check_integrity=False)
+            fitsf = ClFits(filename, check_integrity=False)
         except Exception as e:
             log.exception("Unexpected error reading FITS file %s" % filename)
             raise e
@@ -172,7 +171,7 @@ class DataSet(object):
         cur = self.con.cursor()
 
         # Check instrument id
-        if (self.instrument == None or
+        if (not self.instrument or
             (self.instrument == fitsf.getInstrument().lower())):
             try:
                 cur.execute("insert into dataset" + DataSet.TABLE_COLUMNS +

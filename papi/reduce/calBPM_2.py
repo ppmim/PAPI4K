@@ -54,14 +54,13 @@ from iraf import mscred
 import astropy.io.fits as fits
 import numpy
 
-# Logging
-from misc.paLog import log
-
-import datahandler
-import misc.fileUtils
-import misc.utils as utils
-from misc.version import __version__
-import misc.collapse
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock, listToFile
+from papi.datahandler.clfits import ClFits
+from papi.misc.collapse import collapse
+from papi.misc.version import __version__
 
 
 class ExError(Exception):
@@ -172,7 +171,7 @@ class BadPixelMask(object):
         """
         
         log.debug('createBadPixelMask started (iraf.ccdmask)')
-        t = utils.clock()
+        t = clock()
         t.tic()
         
         flats_off_frames = []
@@ -181,7 +180,7 @@ class BadPixelMask(object):
         
         # Check Master_Dark
         if os.path.exists(self.master_dark):
-            f = datahandler.ClFits(self.master_dark)
+            f = ClFits(self.master_dark)
             if not f.getType() == 'MASTER_DARK':
                 log.error("File %s does not look a MASTER_DARK! Check your data.", self.master_dark)
                 raise ExError("File does not look a MASTER_DARK! Check your data.")              
@@ -197,7 +196,7 @@ class BadPixelMask(object):
         #STEP 1: classify/split the frames in 3 sets (DOME_FLAT_LAMP_ON, DOME_FLAT_LAMP_OFF)
         #and create string list for IRAF tasks
         for file in filelist:
-            f = datahandler.ClFits(file)
+            f = ClFits(file)
             if f.isDomeFlatOFF():
                 flats_off_frames.append(f.pathname)
             elif f.isDomeFlatON():
@@ -212,12 +211,12 @@ class BadPixelMask(object):
             raise ExError("Not enough calib frames")
         
         # If required (cubes), collapse the images
-        flats_off_frames = misc.collapse.collapse(flats_off_frames, out_dir=self.temp_dir)
+        flats_off_frames = collapse(flats_off_frames, out_dir=self.temp_dir)
         
         # STEP 2: Subtrac the master dark to each dome flat
         for file in flats_off_frames:
             log.debug("Subtracting the master dark %s to: %s"%(self.master_dark.replace("//","/"), file.replace("//","/")))
-            misc.fileUtils.removefiles(file.replace(".fits","_D.fits"))
+            removefiles(file.replace(".fits","_D.fits"))
             iraf.mscred.mscarith(operand1=file.replace("//", "/"),
                         operand2=self.master_dark.replace("//", "/"),
                         op='-',
@@ -226,11 +225,11 @@ class BadPixelMask(object):
             flats_off_frames[flats_off_frames.index(file)] = file.replace(".fits","_D.fits")
         
         # If required (cubes), collapse the images
-        flats_on_frames = misc.collapse.collapse(flats_on_frames, out_dir=self.temp_dir)
+        flats_on_frames = collapse(flats_on_frames, out_dir=self.temp_dir)
         
         for file in flats_on_frames:
             log.debug("Subtracting the master dark %s to: %s"%(self.master_dark.replace("//","/"), file.replace("//","/")))
-            misc.fileUtils.removefiles(file.replace(".fits","_D.fits"))
+            removefiles(file.replace(".fits","_D.fits"))
             iraf.mscred.mscarith(operand1=file.replace("//","/"),
                         operand2=self.master_dark.replace("//","/"),
                         op='-',
@@ -240,12 +239,12 @@ class BadPixelMask(object):
 
         # STEP 4: Combine dome dark subtracted flats (OFF)
         flat_off_comb = self.temp_dir + "/flats_comb_off.fits"
-        misc.fileUtils.removefiles(flat_off_comb)
+        removefiles(flat_off_comb)
         # Due a bug in PyRAF that does not allow a long list of files separated 
         # with commas as 'input' argument, we need to build again a text file 
         # with the files.
         flats = self.temp_dir + "/flats_off.txt"
-        misc.utils.listToFile(flats_off_frames, flats)
+        listToFile(flats_off_frames, flats)
 
         # For making a master flat, this parameter must always be set to 'mode'.
         iraf.mscred.flatcombine(input="@" + flats.replace('//','/'),
@@ -263,9 +262,9 @@ class BadPixelMask(object):
                         )
 
         flat_on_comb = self.temp_dir + "/flats_comb_on.fits"
-        misc.fileUtils.removefiles(flat_on_comb)
+        removefiles(flat_on_comb)
         flats = self.temp_dir + "/flats_on.txt"
-        misc.utils.listToFile(flats_on_frames, flats)
+        listToFile(flats_on_frames, flats)
         
         # Combine dome dark subtracted flats (on)
         # For making a master flat, this parameter must always be set to 'mode'.
@@ -283,11 +282,11 @@ class BadPixelMask(object):
                         #ParList = _getparlistname ('flatcombine')
                         )
 
-        misc.fileUtils.removefiles(flats)
+        removefiles(flats)
                                     
         #STEP 5: Compute flat_low/flat_high
         flat_ratio = self.temp_dir + '/flat_ratio.fits'
-        misc.fileUtils.removefiles(flat_ratio)
+        removefiles(flat_ratio)
         log.debug( 'Computing FlatRatio')
         iraf.mscred.mscarith(operand1=flat_off_comb.replace('//','/'),
                  operand2=flat_on_comb.replace('//','/'),
@@ -298,7 +297,7 @@ class BadPixelMask(object):
                      
         #STEP 6: Create BPM
         log.debug( 'Now, computing bad pixel mask')
-        misc.fileUtils.removefiles(self.output_file + ".pl")
+        removefiles(self.output_file + ".pl")
 
         try:
             my_hdu = fits.open(flat_ratio)
@@ -395,7 +394,7 @@ class BadPixelMask(object):
         """
         
         log.debug('createBadPixelMask started (simple mode)')
-        t = utils.clock()
+        t = clock()
         t.tic()
         
         flats_off_frames = []
@@ -403,23 +402,24 @@ class BadPixelMask(object):
 
         # Check Master_Dark
         if os.path.exists(self.master_dark):
-            f = datahandler.ClFits(self.master_dark)
+            f = ClFits(self.master_dark)
             if not f.getType() == 'MASTER_DARK':
                 pass
-                #log.error("File %s does not look a MASTER_DARK! Check your data.", self.master_dark)
-                #raise ExError("File does not look a MASTER_DARK! Check your data.")              
+                # log.error("File %s does not look a MASTER_DARK! Check your data.", self.master_dark)
+                # raise ExError("File does not look a MASTER_DARK! Check your data.")
         else:
             log.error("File %s does not exist", self.master_dark)
             raise ExError("File does not exist")    
         
         
         # Read the source file list
-        filelist = [line.replace( "\n", "").replace("//","/") for line in fileinput.input(self.i_file_list)]
+        filelist = [line.replace("\n", "").replace("//", "/")
+                    for line in fileinput.input(self.i_file_list)]
         
         #STEP 1: classify/split the frames in 3 sets (DOME_FLAT_LAMP_ON, DOME_FLAT_LAMP_OFF, DARKS)
         # and create string list for IRAF tasks
         for file in filelist:
-            f = datahandler.ClFits(file)
+            f = ClFits(file)
             if f.isDomeFlatOFF():
                 flats_off_frames.append(f.pathname)
             elif f.isDomeFlatON():
@@ -436,12 +436,12 @@ class BadPixelMask(object):
         
         # OFF
         # If required (cubes), collapse the images
-        flats_off_frames = misc.collapse.collapse(flats_off_frames, out_dir=self.temp_dir)
+        flats_off_frames = collapse(flats_off_frames, out_dir=self.temp_dir)
         
         # STEP 2: Subtrac the master dark to each dome flat
         # NOTE: all dome flats (on and off) should have the same EXPTIME 
         for file in flats_off_frames:
-            misc.fileUtils.removefiles(file.replace(".fits","_D.fits"))
+            removefiles(file.replace(".fits","_D.fits"))
             iraf.mscred.mscarith(operand1=file.replace('//','/'),
                         operand2=self.master_dark.replace('//','/'),
                         op='-',
@@ -451,10 +451,10 @@ class BadPixelMask(object):
         
         # ON
         # If required (cubes), collapse the images
-        flats_on_frames = misc.collapse.collapse(flats_on_frames, out_dir=self.temp_dir)
+        flats_on_frames = collapse(flats_on_frames, out_dir=self.temp_dir)
         
         for file in flats_on_frames:
-            misc.fileUtils.removefiles(file.replace(".fits","_D.fits"))
+            removefiles(file.replace(".fits","_D.fits"))
             iraf.mscred.mscarith(operand1=file.replace('//','/'),
                         operand2=self.master_dark.replace('//','/'),
                         op='-',
@@ -467,11 +467,11 @@ class BadPixelMask(object):
         
         # STEP 3: Combine dome dark subtracted flats (off & on)
         flat_off_comb = self.temp_dir + "flats_comb_off.fits"
-        misc.fileUtils.removefiles(flat_off_comb)
+        removefiles(flat_off_comb)
         # Due to a bug in PyRAF that does not allow a long list of files separated with commas as 'input' argument
         # we need to build again a text file with the files
         flats = self.temp_dir + "/flats_off.txt"
-        misc.utils.listToFile(flats_off_frames, flats)
+        listToFile(flats_off_frames, flats)
         
         # Combine dome dark subtracted OFF-flats
         # For making a master flat, this parameter must always be set to 'mode'.
@@ -491,9 +491,9 @@ class BadPixelMask(object):
         #misc.fileUtils.removefiles(flats)
         
         flat_on_comb = self.temp_dir + "flats_comb_on.fits"
-        misc.fileUtils.removefiles(flat_on_comb)
+        removefiles(flat_on_comb)
         flats = self.temp_dir + "/flats_on.txt"
-        misc.utils.listToFile(flats_on_frames, flats)
+        listToFile(flats_on_frames, flats)
         print("FILE=", flats)
         # Combine dome dark subtracted ON-flats
         # For making a master flat, this parameter must always be set to 'mode'.
@@ -510,11 +510,11 @@ class BadPixelMask(object):
                         #expname='EXPTIME'
                         #ParList = _getparlistname ('flatcombine')
                         )
-        misc.fileUtils.removefiles(flats)
+        removefiles(flats)
                                     
         # STEP 4: Compute flat_comb_off/flat_comb_on
         flat_ratio = self.temp_dir + 'flat_ratio.fits'
-        misc.fileUtils.removefiles(flat_ratio)
+        removefiles(flat_ratio)
         log.debug("Computing FlatRatio: %s / %s "%(flat_off_comb, flat_on_comb))
         iraf.mscred.mscarith(operand1=flat_off_comb.replace('//','/'),
                  operand2=flat_on_comb.replace('//','/'),
@@ -524,8 +524,8 @@ class BadPixelMask(object):
         log.debug("Flat Ratio created.")
                      
         # STEP 5: Create BPM
-        log.debug( 'Now, computing bad pixel mask')
-        misc.fileUtils.removefiles(self.output_file)
+        log.debug('Now, computing bad pixel mask')
+        removefiles(self.output_file)
         
         fr = fits.open(flat_ratio)
         nExt = 1 if len(fr) == 1 else len(fr) - 1
@@ -549,10 +549,10 @@ class BadPixelMask(object):
         fr.close()
         
         # STEP 6: Save the BPM ---
-        misc.fileUtils.removefiles(self.output_file)
+        removefiles(self.output_file)
         hdulist = fits.HDUList()     
         hdr0 = fits.getheader(flats_on_frames[0])
-        prihdu = fits.PrimaryHDU (data = None, header = None)
+        prihdu = fits.PrimaryHDU(data=None, header=None)
         try:
             prihdu.header.set('INSTRUME', hdr0['INSTRUME'])
             prihdu.header.set('TELESCOP', hdr0['TELESCOP'])
@@ -635,8 +635,8 @@ def fixPix(image, mask):
 
         badfits = os.tmpnam() + '.fits'
         outfits = os.tmpnam() + '.fits'
-        fits.writeto(badfits, mask.astype(np.int16))
-        fits.writeto(outfits, im)
+        fits.writeto(badfits, mask.astype(numpy.int16))
+        fits.writeto(outfits, image)
         IRAF.fixpix(outfits, badfits)
         cleaned = fits.getdata(outfits)
         os.remove(badfits)
@@ -653,15 +653,15 @@ def fixPix(image, mask):
     #     z[mask] = interp(x[mask], y[mask])
 
     # create domains around masked pixels
-    dilated = ndimage.binary_dilation(mask)
-    domains, n = ndimage.label(dilated)
+    dilated = numpy.ndimage.binary_dilation(mask)
+    domains, n = numpy.ndimage.label(dilated)
 
     # loop through each domain, replace bad pixels with the average
     # from nearest neigboors
-    x = xarray(image.shape)
-    y = yarray(image.shape)
+    x = numpy.xarray(image.shape)
+    y = numpy.yarray(image.shape)
     cleaned = image.copy()
-    for d in (np.arange(n) + 1):
+    for d in (numpy.arange(n) + 1):
         # find the current domain
         i = (domains == d)
 

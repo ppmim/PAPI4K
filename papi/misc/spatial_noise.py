@@ -36,22 +36,18 @@
 from optparse import OptionParser
 import sys
 import itertools
-import tempfile
 import os
 
 import numpy
-import math
-import matplotlib
 import matplotlib.pyplot as plt
-import pylab
-            
+
 import astropy.io.fits as fits
 
-
 # PAPI modules
-from misc.paLog import log
-from misc.utils import *
-from misc.print_table import print_table
+from papi.misc.paLog import log
+from papi.misc.utils import *
+from papi.misc.print_table import print_table
+
     
 def run_spatial_noise ( input_catalog, area, window, gain, 
                         out_filename="/tmp/hc_out.pdf"):

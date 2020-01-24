@@ -46,15 +46,14 @@ import os
 import numpy
 import math
 import astropy.io.fits as fits
-import matplotlib
 import matplotlib.pyplot as plt
             
 
 # PAPI modules
-from misc.paLog import log
-from misc.utils import *
-import misc.robust as robust
-from misc.print_table import print_table
+from papi.misc.paLog import log
+from papi.misc.utils import *
+import papi.misc.robust as robust
+from papi.misc.print_table import print_table
 
 
 
