@@ -131,6 +131,12 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox
 
+# next lines are required to add the path of the resource file (panicQL_resources_rc.py)
+# get the directory of this script
+path = os.path.dirname(os.path.abspath(__file__))
+# Append path for panicQL_resources_rc.py module
+mod_path = os.path.abspath(os.path.dirname(sys.modules['papi'].__file__))
+sys.path.append(mod_path + "/QL/")
 
 
 # ------------------------------------------------------------------------------
