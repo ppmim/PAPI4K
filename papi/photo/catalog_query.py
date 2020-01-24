@@ -43,12 +43,9 @@ import urllib
 import urllib.parse
 import urllib.request
 import urllib.error
-from optparse import OptionParser
-
 
 # Logging
-from misc.paLog import log
-
+from papi.misc.paLog import log
 
 
 class ICatalog (object):

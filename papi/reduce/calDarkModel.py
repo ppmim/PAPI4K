@@ -41,18 +41,17 @@ import os
 import fileinput
 import time
 
-import misc.fileUtils
-import misc.utils as utils
-import datahandler
-import misc.robust as robust
+# PAPI
+from papi.misc.paLog import log
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock
+from papi.datahandler.clfits import ClFits
+import papi.misc.robust as robust
+from papi.misc.version import __version__
 
 # Interact with FITS files
 import astropy.io.fits as fits
 import numpy
-
-# Logging
-from misc.paLog import log
-from misc.version import __version__
 
 
 class MasterDarkModel(object):
@@ -98,8 +97,7 @@ class MasterDarkModel(object):
         self.__output_filename = output_filename  # full filename (path+filename)
         self.__bpm = bpm
         self.show_stats = show_stats
-        
-    
+
     def createDarkModel(self):
       
         """
@@ -107,7 +105,7 @@ class MasterDarkModel(object):
         """   
         log.debug("Start createDarkModel")
         start_time = time.time()
-        t = utils.clock()
+        t = clock()
         t.tic()
         
         # Get the user-defined list of dark frames
@@ -137,7 +135,7 @@ class MasterDarkModel(object):
         f_readmode = -1
         f_n_extensions = -1
         for iframe in framelist:
-            myfits = datahandler.ClFits(iframe)
+            myfits = ClFits(iframe)
             log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, myfits.exptime, myfits.type)) 
             # Check TYPE (dark)
             if not myfits.isDark():
@@ -174,10 +172,10 @@ class MasterDarkModel(object):
         
 
         # Loop the images
-        counter = 0 # counter for the number of darks
+        counter = 0  # counter for the number of darks
         for i in range(0, nframes):
             file = fits.open(framelist[i])
-            f = datahandler.ClFits(framelist[i])
+            f = ClFits(framelist[i])
             if darks[i] == 1: # is a good dark
                 for i_ext in range(0, f_n_extensions):
                     if f_n_extensions == 1:
@@ -211,7 +209,7 @@ class MasterDarkModel(object):
         log.info("MEDIAN_DARK_CURRENT = %s" % median_dark_current)
         log.info("MEDIAN BIAS = %s" % median_bias)    
         
-        misc.fileUtils.removefiles( self.__output_filename )               
+        removefiles( self.__output_filename )
 
         # Write result in a FITS
         hdulist = fits.HDUList()
@@ -261,10 +259,10 @@ class MasterDarkModel(object):
             raise e
         
         log.debug('Saved DARK Model to %s' , self.__output_filename)
-        log.debug("createDarkModel' finished %s", t.tac() )
+        log.debug("createDarkModel' finished %s", t.tac())
 
-        
         return self.__output_filename
+
         
 ################################################################################
 def my_mode(data):

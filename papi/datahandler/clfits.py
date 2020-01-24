@@ -45,12 +45,12 @@ import time
 
 from astropy import wcs
 import astropy.io.fits as fits
-from misc.check_open import check_open
+from papi.misc.check_open import check_open
 
 # Logging (PAPI or Python built-in)
 try:
     # PAPI logging module
-    from misc.paLog import log
+    from papi.misc.paLog import log
 except ImportError:
     import logging as log
 

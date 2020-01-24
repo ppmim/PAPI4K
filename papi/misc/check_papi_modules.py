@@ -6,9 +6,7 @@ Check the existence of necessary Python modules for PAPI
 
 import sys
 import string
-import os
 from distutils import spawn
-
 
 bold = "\033[1m"         # print bold
 probbold = "\033[1;31m"  # print bold red 

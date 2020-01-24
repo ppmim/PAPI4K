@@ -48,14 +48,13 @@ import argparse
 # Interact with FITS files
 import astropy.io.fits as fits
 import numpy as np
-import datahandler
-import reduce.calSuperFlat
-# from numba import jit
-
-
-# Logging
-from misc.paLog import log
-from misc.version import __version__
+# PAPI
+from papi.misc.paLog import log
+from papi.datahandler.clfits import ClFits, isaFITS
+from papi.reduce.calSuperFlat import SuperSkyFlat
+from papi.reduce.calTwFlat import MasterTwilightFlat
+from papi.reduce.calDomeFlat import MasterDomeFlat
+from papi.misc.version import __version__
 
 
 class SkyGainMap(object):
@@ -75,7 +74,7 @@ class SkyGainMap(object):
         try:
             output_fd, tmp_output_path = tempfile.mkstemp(suffix='.fits')
             os.close(output_fd)
-            superflat = reduce.calSuperFlat.SuperSkyFlat(self.framelist,
+            superflat = SuperSkyFlat(self.framelist,
                                                          tmp_output_path,
                                                          self.bpm, norm=False,
                                                          temp_dir=self.temp_dir)
@@ -117,7 +116,7 @@ class TwlightGainMap(object):
             output_fd, tmp_output_path = tempfile.mkstemp(suffix='.fits')
             os.close(output_fd)
 
-            twflat = reduce.calTwFlat.MasterTwilightFlat(self.framelist,
+            twflat = MasterTwilightFlat(self.framelist,
                                                          master_dark_model=None,
                                                          master_dark_list=self.master_dark_list,
                                                          output_filename=tmp_output_path)
@@ -157,7 +156,7 @@ class DomeGainMap(object):
         try:
             output_fd, tmp_output_path = tempfile.mkstemp(suffix='.fits')
             os.close(output_fd)
-            domeflat = reduce.calDomeFlat.MasterDomeFlat(self.framelist,
+            domeflat = MasterDomeFlat(self.framelist,
                                                          temp_dir="/tmp",
                                                          output_filename=tmp_output_path)
             domeflat.createMaster()
@@ -263,7 +262,7 @@ class GainMap(object):
             os.remove(self.output_filename)
 
         # Check if we have a MEF file
-        f = datahandler.ClFits(self.flat)
+        f = ClFits(self.flat)
         isMEF = f.mef
         
         if not isMEF:
@@ -365,7 +364,7 @@ class GainMap(object):
             buf = np.zeros((self.m_NXBLOCK, self.m_NYBLOCK), dtype=np.float32)
 
             log.debug("STEP #4# - Loop over Blocks")
-            #dev = get_dev(gain, naxis1, naxis2, 0, self.m_NXBLOCK, self.m_NYBLOCK)
+            # dev = get_dev(gain, naxis1, naxis2, 0, self.m_NXBLOCK, self.m_NYBLOCK)
             # Foreach image block
             for i in range(0, naxis1, self.m_NYBLOCK):
                 for j in range(0, naxis2, self.m_NXBLOCK):

@@ -41,9 +41,9 @@ import fileinput
 import sys
 
 # Logging
-from misc.paLog import log
-import reduce.reductionset as RS
-import misc.config
+from papi.misc.paLog import log
+import papi.reduce.reductionset as RS
+import papi.misc.config as config
 
 
 def do_skySubtration(in_filelist, out_dir=None, n_nearest=1, 
@@ -86,7 +86,7 @@ def do_skySubtration(in_filelist, out_dir=None, n_nearest=1,
         out_dir = os.path.abspath(os.path.join(in_filelist, os.pardir))
 
     if os.path.exists(config_file):
-        conf = misc.config.read_config_file(config_file)
+        conf = config.read_config_file(config_file)
         
     try:    
         task = RS.ReductionSet( filelist, 

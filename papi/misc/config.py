@@ -29,7 +29,7 @@ import tempfile
 import io
 
 # PAPI modules
-import misc.style as style
+import papi.misc.style as style
 
 
 def default_config_file():

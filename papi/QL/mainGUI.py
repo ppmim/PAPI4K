@@ -70,7 +70,7 @@ import datetime
 # os.environ['PYRAF_NO_DISPLAY'] = '0'
 
 # PANIC modules
-from papi.reduce import ExecTaskThread
+from papi.reduce.threadsmod import ExecTaskThread
 from papi.reduce.calDark import MasterDark
 from papi.reduce.calTwFlat import MasterTwilightFlat
 from papi.reduce.calGainMap import DomeGainMap, TwlightGainMap, SkyGainMap
@@ -87,7 +87,6 @@ from papi.misc.mef import MEF
 from papi.datahandler.clfits import ClFits
 from papi.datahandler.datacollector import DataCollector
 from papi.datahandler.dataset import DataSet
-import papi.misc.display as display
 from papi.misc.collapse import collapse
 from papi.reduce.eval_focus_serie import FocusSerie
 from papi.astromatic.sextractor import SExtractor
@@ -96,6 +95,7 @@ from papi.reduce.correctNonLinearity import NonLinearityCorrection
 from papi.misc.createDataSeq import createDataSeq
 from papi.commissioning.getImageOffsets import getWCSPointingOffsets, draw_offsets
 from papi.misc.version import __version__
+import papi.misc.display as display
 
 # Log
 from papi.misc.paLog import log

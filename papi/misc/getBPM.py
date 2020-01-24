@@ -24,13 +24,11 @@ import sys
 import os
 from optparse import OptionParser
 
-
 import numpy
 import astropy.io.fits as fits
 
-from misc.paLog import log
-from misc.version import __version__
-import misc.mef 
+from papi.misc.paLog import log
+from papi.misc.mef import MEF
 
 
 def createBPM(input_nlc, output_dir=None, joined=False):
@@ -116,7 +114,7 @@ def createBPM(input_nlc, output_dir=None, joined=False):
     # In addition to the MEF file, if selected, we create a SEF file
     # for the BPM.
     if joined:
-        mef = misc.mef.MEF([new_bpm])
+        mef = MEF([new_bpm])
         res = mef.doJoin(".join.fits", output_dir=output_dir)[1]
         log.info("Joined file created %s"%res)
     

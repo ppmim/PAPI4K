@@ -39,7 +39,7 @@ import fileinput
 import tempfile
 
 # PAPI modules
-from misc.paLog import log
+from papi.misc.paLog import log
 
 class clock:
 

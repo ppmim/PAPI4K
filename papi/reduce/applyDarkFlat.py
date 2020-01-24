@@ -46,20 +46,19 @@ import time
 from optparse import OptionParser
 from scipy import ndimage
 
-import misc.fileUtils
-import misc.statutils
-import misc.utils as utils
-import misc.robust as robust
-import datahandler
+from papi.misc.fileUtils import removefiles
+from papi.misc.utils import clock
+import papi.misc.robust as robust
+from papi.datahandler.clfits import ClFits, isaFITS
 
 # Logging
-from misc.paLog import log
-from misc.version import __version__
+from papi.misc.paLog import log
+from papi.misc.version import __version__
 
 # Interact with FITS files
-import astropy.io.fits as fits
+from astropy.io import fits
 
-import misc.cleanBadPix as cleanBadPix
+import papi.misc.cleanBadPix as cleanBadPix
 import numpy
 
 
@@ -151,7 +150,7 @@ class ApplyDarkFlat(object):
         
         
         start_time = time.time()
-        t = utils.clock()
+        t = clock()
         t.tic()
     
         # some variables 
@@ -175,7 +174,7 @@ class ApplyDarkFlat(object):
                 raise Exception(msg)
             else:
                 dark = fits.open(self.__mdark)
-                cdark = datahandler.ClFits (self.__mdark)
+                cdark = ClFits (self.__mdark)
                 dark_time = cdark.expTime()
                 dark_ncoadd = cdark.getNcoadds()
                 if (not self.__force_apply and cdark.getType() != 'MASTER_DARK' and 
@@ -202,7 +201,7 @@ class ApplyDarkFlat(object):
                 raise Exception(msg)
             else:
                 flat = fits.open(self.__mflat)
-                cflat = datahandler.ClFits (self.__mflat)
+                cflat = ClFits (self.__mflat)
                 
                 if not cflat.isMasterFlat() and not self.__force_apply:
                     log.error("File %s does not look a neither MASTER_FLAT",self.__mflat)
@@ -285,7 +284,7 @@ class ApplyDarkFlat(object):
                 log.error("File '%s' does not exist", iframe)
                 continue  
             f = fits.open(iframe)
-            cf = datahandler.ClFits(iframe)
+            cf = ClFits(iframe)
             f_ncoadd = cf.getNcoadds()
             log.debug("Science frame %s, EXPTIME = %f, TYPE = %s, FILTER = %s, NCOADD = %s"\
                       %(iframe, cf.expTime(), cf.getType(), cf.getFilter(), f_ncoadd))
@@ -299,12 +298,12 @@ class ApplyDarkFlat(object):
                 n_removed = n_removed + 1
             else:
                 # check Number of Extensions
-                if (len(f) > 1 and (len(f) - 1) != n_ext):
+                if len(f) > 1 and (len(f) - 1) != n_ext:
                     raise Exception("File %s does not match the number of "
-                    "extensions (%d)"%( iframe, n_ext))
+                    "extensions (%d)" %(iframe, n_ext))
                 elif len(f) == 1 and n_ext != 1: 
                     raise Exception("File %s does not match the number of "
-                    "extensions (%d)"%( iframe, n_ext))
+                    "extensions (%d)" %(iframe, n_ext))
                 else:
                     log.debug("Good match of the number of extensions.")
 
@@ -312,11 +311,11 @@ class ApplyDarkFlat(object):
                 (path, name) = os.path.split(iframe)
                 newpathname = (self.__out_dir + "/" + \
                              name.replace(".fits", out_suffix)).replace("//","/")
-                misc.fileUtils.removefiles(newpathname)
+                removefiles(newpathname)
                 
                 # Scale master DARK
                 exp_time = float(cf.expTime()) # all extension have the same TEXP
-                if self.__mdark != None and dark_time != None :
+                if self.__mdark and dark_time:
                     time_scale = float(exp_time / dark_time)
                 else: time_scale = 1.0
                 
@@ -437,12 +436,8 @@ class ApplyDarkFlat(object):
                     # no matter if they are MEF or single HDU fits.  
                     sci_data = (sci_data - dark_data) / flat_data
                     
-                    # TEST to convert NaNs to 0's !!
-                    #sci_data = misc.statutils.nan2num(sci_data, 0)
-                    # end-test
-                    
                     # Now, apply BPM
-                    if self.__bpm != None:
+                    if self.__bpm:
                         if sci_data.shape != bpm_data.shape:
                             log.error("Source data and BPM do not match image shape")
                             raise Exception("Source data and BPM do not match image shape")
@@ -683,7 +678,7 @@ same image size.
         parser.print_help()
         parser.error("Incorrect number of arguments " )
     
-    if datahandler.isaFITS(options.source_file_list):
+    if isaFITS(options.source_file_list):
         filelist = [options.source_file_list]
     else:
         filelist = [line.replace( "\n", "") 

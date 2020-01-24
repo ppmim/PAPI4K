@@ -20,8 +20,8 @@ import sys
 
 
 # papi
-from misc.paLog import log
-import datahandler
+from papi.misc.paLog import log
+from papi.datahandler.clfits import ClFits
 
 
 try:
@@ -93,7 +93,7 @@ def showFrame(frame, del_all=False):
         fileList = [frame]
 
     for file in fileList:
-        f = datahandler.ClFits(file)
+        f = ClFits(file)
         if f.mef and f.getNExt() > 1:
                 # Multi-Extension FITS files
                 if f.getInstrument() == 'hawki':

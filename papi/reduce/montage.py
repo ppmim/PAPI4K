@@ -27,10 +27,8 @@ import tempfile
 from optparse import OptionParser
 import fileinput
 
-# Logging
-from misc.paLog import log
-from misc.version import __version__
-import misc.config
+# PAPI
+from papi.misc.paLog import log
 import montage_wrapper as montage
 
 #

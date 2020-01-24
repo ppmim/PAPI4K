@@ -27,15 +27,15 @@ __version__ = '1.2.0'
 logging.getLogger("papi").addHandler(logging.NullHandler())
 
 # modules
-from .calDark import *
-from .calDarkModel import *
-from .threadsmod import *
-from .calTwFlat import *
-from .applyDarkFlat import *
-from .calGainMap import *
-from .calSuperFlat import *
-from .calDomeFlat import *
-from .dxtalk import *
-from .eval_focus_serie import *
-from .correctNonLinearity import NonLinearityCorrection
+# from .calDark import *
+# from .calDarkModel import *
+# from .threadsmod import *
+# from .calTwFlat import *
+# from .applyDarkFlat import *
+# from .calGainMap import *
+# from .calSuperFlat import *
+# from .calDomeFlat import *
+# from .dxtalk import *
+# from .eval_focus_serie import *
+# from .correctNonLinearity import NonLinearityCorrection
 #from .montage import *
