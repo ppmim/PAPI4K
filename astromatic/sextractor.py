@@ -96,11 +96,11 @@ import subprocess
 import re
 import copy
 
-from astromatic.sexcatalog import *
+from papi.astromatic.sexcatalog import *
 
 
 # PAPI packages
-import misc.utils
+import papi.misc.utils as utils
 
 # ======================================================================
 #__version__ = "0.1.5 (2005-02-14)"
@@ -504,7 +504,7 @@ class SExtractor(object):
         print("PASO 4")
 
         # print commandline
-        rcode = misc.utils.runCmd(commandline)
+        rcode = utils.runCmd(commandline)
         print("PASO 5")
 
         if rcode == 0:
