@@ -273,9 +273,9 @@ class ClFits (object):
         return self.instrument == 'panic'
 
     def isPANICFullFrame(self):
-        # Raw PANIC full frame
+        # Raw PANIC full frame (for old H2RG detector)
         return (self.instrument == 'panic' and self.naxis1 == 4096
-                and self.naxis2 == 4096)
+                and self.naxis2 == 4096 and not self._is_panic_h4rg)
 
     @property
     def is_panic_h4rg(self):
@@ -559,7 +559,7 @@ class ClFits (object):
             try:
                 self._is_panic_h4rg = False
                 if ('CAMERA' in myfits[0].header and
-                    'H4RG' in myfits[0].header['CAMERA']):
+                    'H4RG' in myfits[0].header.comments['CAMERA']):
                     self._is_panic_h4rg = True
                     log.info("Found H4RG detector")
             except KeyError:

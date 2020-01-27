@@ -222,7 +222,7 @@ class ReductionSet(object):
         
         """
         
-        super (ReductionSet, self).__init__(*a, **k)
+        super(ReductionSet, self).__init__(*a, **k)
         
         # CONFIG dictionary
         if not config_dict:
@@ -260,8 +260,8 @@ class ReductionSet(object):
 
         # Temporal directory for temporal files created during the data 
         # reduction process
-        if temp_dir == None:
-            if self.config_dict != None:
+        if not temp_dir:
+            if self.config_dict:
                 self.temp_dir = self.config_dict['general']['temp_dir']
             else:
                 self.temp_dir = "/tmp/"
@@ -590,7 +590,7 @@ class ReductionSet(object):
         
         prev_MJD = -1
         for file in files_to_check:
-            fi = ClFits( file )
+            fi = ClFits(file)
             if chk_instrument and not mismatch_instrument: 
                 if fi.getInstrument() != instrument_0:
                     log.debug("File %s does not match INSTRUMENT", file)
@@ -739,7 +739,7 @@ class ReductionSet(object):
         new_frame_list = []  # a list of N list, where N=number of extension of the MEF
         nExt = 0
         if not frame_list or len(frame_list) == 0 or not frame_list[0]:
-            log.debug("Nothing to split ! %s"%frame_list)
+            log.debug("Nothing to split ! %s" % frame_list)
             return [], 0
         
         first_img = ClFits(frame_list[0])
@@ -2866,7 +2866,8 @@ class ReductionSet(object):
                     bpm = self.config_dict['bpm']['bpm_file']
                     
                 # Check and split files if required
-                obj_ext, next = self.split(sequence) # it must return a list of list (one per each extension)
+                # split() must return a list of list (one per each extension)
+                obj_ext, next = self.split(sequence)
                 dark_ext, cext = self.split([dark])
                 flat_ext, cext = self.split([flat])
                 bpm_ext, cext = self.split([bpm])
@@ -2874,7 +2875,7 @@ class ReductionSet(object):
                 
                 # Select the detector to process (Q1, Q2, Q3, Q4, All)
                 detector = self.config_dict['general']['detector']
-                q = -1 # all
+                q = -1  # all
                 if next == 4:
                     if detector == 'Q1': q = 0   # SG1
                     elif detector == 'Q2': q = 1 # SG2
