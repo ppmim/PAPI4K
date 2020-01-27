@@ -481,36 +481,30 @@ class SExtractor(object):
         (if any) will be deleted after SExtractor terminates.
 
         """
-        print("PASO 1")
         if updateconfig:
             self.update_config()
 
         # Try to find SExtractor program
         # This will raise an exception if it failed
 
-        print("PASO 2")
 
         self.program, self.version = self.setup(path)
 
         # Compound extra config command line args
         ext_args = ""
-        print("PASO 3")
 
         for key in self.ext_config.keys():
             ext_args = ext_args + " -" + key + " " + str(self.ext_config[key])
 
         commandline = (
             self.program + " -c " + self.config['CONFIG_FILE'] + " " + ext_args + " " + file)
-        print("PASO 4")
 
         # print commandline
         rcode = utils.runCmd(commandline)
-        print("PASO 5")
 
         if rcode == 0:
             raise SExtractorException(
                   "SExtractor command [%s] failed." % str(commandline))
-        print("PASO 6")
 
         if clean:
             self.clean()
