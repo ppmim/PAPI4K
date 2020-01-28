@@ -1251,7 +1251,7 @@ if __name__ == "__main__":
     
     # Get and check command-line options
     usage = "usage: %prog [options] arg1 arg2"
-    parser = OptionParser (usage)
+    parser = OptionParser(usage)
     
     parser.add_option ("-f", "--file",
                   action = "store", dest = "file",
