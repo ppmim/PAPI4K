@@ -35,7 +35,7 @@
 ################################################################################
 # Import necessary modules
 
-from optparse import OptionParser
+import argparse
 import fileinput
 import numpy
 import numpy.ma as ma 
@@ -46,7 +46,7 @@ import re
 
 from pyraf import iraf
 
-import papi.astromatic as astromatic
+from papi.astromatic.sextractor import SExtractor
 from papi.misc.paLog import log
 
 
@@ -67,7 +67,7 @@ class CheckQuality(object):
        If no error, a seeing estimation value
     """
     def __init__(self, input_file, isomin=32.0, ellipmax=0.3, edge_x=2, edge_y=2, 
-                 pixsize=0.45, gain = 4.15, sat_level=50000, write=False,
+                 pixsize=0.45, gain=4.15, sat_level=50000, write=False,
                  min_snr=5.0, window='all'):
         
         self.input_file = input_file
@@ -78,21 +78,20 @@ class CheckQuality(object):
         self.edge_y = int(edge_y)
         self.pixsize = float(pixsize)
         self.gain = float(gain)
-        self.write = False
+        self.write = write
         self.verbose = False
         self.min_snr = min_snr
         self.MIN_NUMBER_GOOD_STARS = 0
         self.window = window
 
-
         if self.window == 'Q1':
-            self.sex_input_file = input_file + '[%d]'%1 # ext1
+            self.sex_input_file = input_file + '[%d]' %1  # ext1
         elif self.window == 'Q2':
-            self.sex_input_file = input_file + '[%d]'%2 # ext2
+            self.sex_input_file = input_file + '[%d]' %2  # ext2
         elif self.window == 'Q3':
-            self.sex_input_file = input_file + '[%d]'%3 # ext3
+            self.sex_input_file = input_file + '[%d]' %3  # ext3
         elif self.window == 'Q4':
-            self.sex_input_file = input_file + '[%d]'%4 # ext4
+            self.sex_input_file = input_file + '[%d]' %4  # ext4
         else:
             self.sex_input_file = input_file
         
@@ -137,7 +136,6 @@ class CheckQuality(object):
             if len(f) != 5:
                 raise Exception("Error, expected a MEF file with 4 extensions")
 
-        
         # SExtractor configuration
         catalog_file = "test.cat"
         try:
@@ -146,17 +144,17 @@ class CheckQuality(object):
             log.error("Error, variable PAPI_HOME not defined.")
             raise e
         
-        sex = astromatic.SExtractor()
-        sex.config['CONFIG_FILE']= sex_cnf
-        #sex.config['PARAMETERS_NAME'] = os.environ['PAPI_HOME'] + "/irdr/src/config/default.param"
+        sex = SExtractor()
+        sex.config['CONFIG_FILE'] = sex_cnf
+        # sex.config['PARAMETERS_NAME'] = os.environ['PAPI_HOME'] + "/irdr/src/config/default.param"
         sex.ext_config['CATALOG_TYPE'] = "ASCII"
         sex.ext_config['CHECKIMAGE_TYPE'] = "NONE"
         sex.ext_config['PIXEL_SCALE'] = self.pixsize
         sex.ext_config['GAIN'] = self.gain
         sex.ext_config['SATUR_LEVEL'] = self.satur_level
         sex.ext_config['CATALOG_NAME'] = catalog_file
-        #sex.ext_config['DETECT_THRESH'] = config_dict['astrometry']['mask_thresh']
-        #sex.ext_config['DETECT_MINAREA'] = config_dict['astrometry']['mask_minarea']
+        # sex.ext_config['DETECT_THRESH'] = config_dict['astrometry']['mask_thresh']
+        # sex.ext_config['DETECT_MINAREA'] = config_dict['astrometry']['mask_minarea']
         
         # SExtractor execution
         try:
@@ -196,14 +194,16 @@ class CheckQuality(object):
         source_file = catalog_file
 
         try:
-            if self.write: fits_file = fits.open(self.input_file, 'update')
-            else: fits_file = fits.open(self.input_file, 'readonly')
+            if self.write:
+                fits_file = fits.open(self.input_file, 'update')
+            else:
+                fits_file = fits.open(self.input_file, 'readonly')
         except Exception as e:
-            log.error("Error while openning file %s",self.input_file)
+            log.error("Error while openning file %s", self.input_file)
             raise e
         
         try:
-            if len(fits_file)>1: # is a MEF
+            if len(fits_file) > 1:  # is a MEF
                 naxis1 = fits_file[1].header['NAXIS1']
                 naxis2 = fits_file[1].header['NAXIS2']
             else:  # is a simple FITS      
@@ -215,36 +215,35 @@ class CheckQuality(object):
             
         
         # Now, read the SEx catalog
-        #fwhm_world=[float(line.split()[7]) for line in fileinput.input(source_file)]
-        #matrix=[line.split() for line in fileinput.input(source_file)]
-        #b=numpy.array(matrix)
-        
+        # fwhm_world=[float(line.split()[7]) for line in fileinput.input(source_file)]
+        # matrix=[line.split() for line in fileinput.input(source_file)]
+        # b=numpy.array(matrix)
+
         a = numpy.loadtxt(source_file, ndmin=2)
 
-        if len(a)==0:
-            raise Exception("Empy catalog, No stars found.")
-        
+        if len(a) == 0:
+            raise Exception("Empty catalog, No stars found.")
 
         good_stars = []
         # Select 'best' stars for the estimation
-        std = numpy.std(a[:,8])
+        std = numpy.std(a[:, 8])
         print("Initial STD of FWHM=", std)
         for i in range(0, a.shape[0]):
-            x = a[i,1]
-            y = a[i,2]
-            xwin = a[i,15]
-            ywin = a[i,16]
-            isoarea = a[i,6]
-            ellipticity = a[i,7]
-            fwhm = a[i,8]
-            flux = a[i,10]
-            flux_err = a[i,11]
-            flags = a[i,12]
-            #fa=a[i,13]
-            #fea=a[i,14]
-            if flux_err!=0:
+            x = a[i, 1]
+            y = a[i, 2]
+            xwin = a[i, 15]
+            ywin = a[i, 16]
+            isoarea = a[i, 6]
+            ellipticity = a[i, 7]
+            fwhm = a[i, 8]
+            flux = a[i, 10]
+            flux_err = a[i, 11]
+            flags = a[i, 12]
+            # fa=a[i,13]
+            # fea=a[i,14]
+            if flux_err != 0:
                 snr = flux / flux_err
-                #print "SNR=",snr
+                # print("SNR= %s" %snr)
             else:
                 continue
             if (x > self.edge_x and x < naxis1 - self.edge_x and 
@@ -253,9 +252,9 @@ class CheckQuality(object):
                 fwhm < 20 and flags == 0 and   
                 isoarea > float(self.isomin) and snr > self.min_snr): 
                 # and fwhm<5*std it does not work many times
-                good_stars.append(a[i,:])
-                #print "%s SNR_APER= %s " %(i, snr)
-                #print "ISO_AREA= %s  ISO_MIN=%s"%(isoarea,self.isomin)
+                good_stars.append(a[i, :])
+                # print "%s SNR_APER= %s " %(i, snr)
+                # print "ISO_AREA= %s  ISO_MIN=%s"%(isoarea,self.isomin)
             else:
                 """
                 print "STAR #%s"%i
@@ -266,23 +265,24 @@ class CheckQuality(object):
                 print "  ELLIP=", ellipticity
                 """
                 pass
-        
+
         m_good_stars = numpy.array(good_stars)
         
         print("Found <%d> GOOD stars" % len(m_good_stars))
         
-        if len(m_good_stars)>self.MIN_NUMBER_GOOD_STARS:
-            std = numpy.std(m_good_stars[:,8])
-            print("STD2 = ", std)
-            efwhm = numpy.median(m_good_stars[:,8])
-            print("best-FWHM-median(pixels) = ", efwhm)
-            print("Mean-FWHM(px) = ", numpy.mean(m_good_stars[:,8]))
-            print("FLUX_RADIUS (as mentioned in Terapix T0004 explanatory table) =", numpy.median(m_good_stars[:,9]))
-            print("Masked-mean = ", ma.masked_outside(m_good_stars[:,8], 0.01, 3*std).mean())
+        if len(m_good_stars) > self.MIN_NUMBER_GOOD_STARS:
+            std = numpy.std(m_good_stars[:, 8])  # fwhm
+            print("STD2 of FWHMs = ", std)
+            efwhm = numpy.median(m_good_stars[:, 8])
+            print("FWHM-median(px) = ", efwhm)
+            print("FWHM-mean(px) = ", numpy.mean(m_good_stars[:, 8]))
+            print("FLUX_RADIUS (as mentioned in Terapix T0004 "
+                  "explanatory table) =", numpy.median(m_good_stars[:, 9]))
+            print("FWM-Masked-mean = ",
+                  ma.masked_outside(m_good_stars[:, 8], 0.01, 3*std).mean())
             
             if self.write:
-                fits_file[0].header.update('hierarch PAPI.SEEING', efwhm*self.pixsize)
-                print("Fits keyword updated ")
+                fits_file[0].header.set('hierarch PAPI.SEEING', efwhm*self.pixsize)
 
             # 2nd Estimation Method (psfmeasure)
             if psfmeasure:
@@ -300,10 +300,10 @@ class CheckQuality(object):
         else:
             print("Not enough good stars found !!")
             fits_file.close(output_verify='ignore')    
-            return -1,-1,-1,-1
+            return -1, -1, -1, -1
         
-        #print "FWHM-median(pixels)= ", numpy.median(fwhm_world), numpy.amin(fwhm_world), numpy.amax(fwhm_world)
-        #print "FWHM-mean(pixels)= ", numpy.mean(fwhm_world)
+        # print "FWHM-median(pixels)= ", numpy.median(fwhm_world), numpy.amin(fwhm_world), numpy.amax(fwhm_world)
+        # print "FWHM-mean(pixels)= ", numpy.mean(fwhm_world)
         
         fits_file.close(output_verify='ignore')
         
@@ -375,7 +375,7 @@ class CheckQuality(object):
         except Exception as e:
             log.error("Error, variable PAPI_HOME not defined.")
             raise e
-        sex = astromatic.SExtractor()
+        sex = SExtractor()
         #sex.config['CONFIG_FILE']= "/disk-a/caha/panic/DEVELOP/PIPELINE/PANIC/trunk/config_files/sex.conf"
         sex.config['CONFIG_FILE']= sex_cnf
         #sex.config['CATALOG_TYPE'] = "ASCII"
@@ -409,100 +409,97 @@ gives a mean estimation of the FWHM of all extensions/detectors, not distinguish
 between them. However, the -W --window flag can be used to specify a certain
 detector (Q1,Q2,Q3,Q4). 
 """
- 
-    parser = OptionParser(usage, description=desc)
+
+    parser = argparse.ArgumentParser(description=desc,
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_option("-f", "--input_image",
+    parser.add_argument("-f", "--input_image",
                   action="store", dest="input_image", 
                   help="Input FITS image to run FWHM estimation.")
 
-    parser.add_option("-F", "--input_file_list",
+    parser.add_argument("-F", "--input_file_list",
                   action="store", dest="input_file_list", 
                   help="Text file with all FITS images to be FWHM-estimated. "
                   "It will produce a Output.txt text file with the results.")
 
-    parser.add_option("-i", "--isoarea_min",
-                  action="store", dest="isoarea_min",type=int,
-                  help="Minimum value of ISOAREA (default = %default)",
+    parser.add_argument("-o", "--output_file",
+                        action="store", dest="output_file", type=str,
+                        help="Output file for results",
+                        default="output.txt")
+
+    parser.add_argument("-i", "--isoarea_min",
+                  action="store", dest="isoarea_min", type=int,
+                  help="Minimum value of ISOAREA",
                   default=32)
     
-    parser.add_option("-S", "--snr",
+    parser.add_argument("-S", "--snr",
                   action="store", dest="snr", type=int,
-                  help="Min SNR of stars to use (default = %default)",
+                  help="Min SNR of stars to use",
                   default=5)
     
-    parser.add_option("-e", "--ellipmax",
+    parser.add_argument("-e", "--ellipmax",
                   action="store", dest="ellipmax", type=float, default=0.3,
-                  help="Maximum SExtractor ELLIPTICITY (default = %default)")
+                  help="Maximum SExtractor ELLIPTICITY ")
                   
-    parser.add_option("-x", "--edge_x",
+    parser.add_argument("-x", "--edge_x",
                   action="store", dest="edge_x", type=int, 
-                  help="Consider sources out of image borders on X axis (default = %default)",
+                  help="Consider sources out of image borders on X axis",
                   default=2)
     
-    parser.add_option("-y", "--edge_y",
+    parser.add_argument("-y", "--edge_y",
                   action="store", dest="edge_y", type=int, 
-                  help="Consider sources out of image borders on Y axis (default = %default)",
+                  help="Consider sources out of image borders on Y axis ",
                   default=2)
     
-    parser.add_option("-p", "--pixsize",
+    parser.add_argument("-p", "--pixsize",
                   action="store", dest="pixsize", type=float, 
-                  help="Pixel scale of the input image (default = %default)",
+                  help="Pixel scale of the input image",
                   default=0.45)
     
-    parser.add_option("-g", "--gain",
+    parser.add_argument("-g", "--gain",
                   action="store", dest="gain", type=float, 
-                  help="Detector gain (default = %default)",
+                  help="Detector gain",
                   default=4.15)
     
-    parser.add_option("-l", "--satur_level",
+    parser.add_argument("-l", "--satur_level",
                   action="store", dest="satur_level", type=float, 
-                  help="Saturation level (default = %default)",
+                  help="Saturation level",
                   default=1500000)
     
-    parser.add_option("-w", "--write",
+    parser.add_argument("-w", "--write",
                   action="store_true", dest="write", default=True,
-                  help="Update header with PA_SEEING keyword [default=%default]")
+                  help="Update header with PA_SEEING keyword")
     
-    parser.add_option('-W', '--window',
-                      type='choice',
+    parser.add_argument('-W', '--window',
                       action='store',
                       dest='window',
                       choices=['Q1', 'Q2', 'Q3', 'Q4', 'all'],
                       default='all',
                       help="When input is a MEF, it means the "
                       "window/dectector/extension to process: "
-                      "Q1, Q2, Q3, Q4, full [default: %default]")
+                      "Q1, Q2, Q3, Q4, full")
 
-    parser.add_option("-P", "--psfmeasure",
+    parser.add_argument("-P", "--psfmeasure",
                   action="store_true", dest="psfmeasure", default=False,
-                  help="Show iraf.obsutil.psfmeasure FWHM measurements [default=%default]")
+                  help="Show iraf.obsutil.psfmeasure FWHM measurements")
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
-    if len(sys.argv[1:])<1:
-       parser.print_help()
-       sys.exit(0)
-    
-    if (not options.input_image and not options.input_file_list) or len(args)!=0: 
-    # args is the leftover positional arguments after all options have been processed
+    if not options.input_image and not options.input_file_list:
+        # args is the leftover positional arguments after all options have
+        # been processed
         parser.print_help()
-        parser.error("Wrong number of arguments " )
-    
-
-    #if not os.path.exists(options.input_image) and not os.path.exists(options.input_file_list):
-    #    log.error ("Input image %s does not exist", options.input_image)
-    #    sys.exit(0)
+        parser.error("Wrong number of arguments ")
     
     if options.input_file_list:
         if not os.path.exists(options.input_file_list):
-            log.error ("Input image %s does not exist", options.input_file_list)
+            log.error("Input image %s does not exist", options.input_file_list)
             sys.exit(0)
 
-        filelist = [line.replace( "\n", "") 
+        filelist = [line.replace("\n", "")
                 for line in fileinput.input(options.input_file_list)]
-        
-        text_file = open("Output.txt", "w")
+
+        text_file = open(options.output_file, "w")
         text_file.write("#  Filename \t FWHM \t STD \t X \t Y\n")
         text_file.write("#  X,Y =spatial coordinates of **last** star found. \n")
 
@@ -513,12 +510,15 @@ detector (Q1,Q2,Q3,Q4).
                                   options.pixsize, options.gain, options.satur_level , 
                                   options.write, options.snr, options.window)
                 efwhm, std, x, y = cq.estimateFWHM()
-                text_file.write("%s    %s    %s    %s    %s\n"%(m_file, efwhm, std, x, y))
+                text_file.write("%s    %s    %s    %s    %s\n" %(m_file, efwhm,
+                                                                std, x, y))
             except Exception as e:
-                log.error("There was some error with image %s : %s "%(m_file, str(e)))
-                text_file.write("%s    %s    %s\n"%(m_file, -1, -1, -1, -1))
+                log.error("There was some error with image %s : %s " %(m_file, str(e)))
+                text_file.write("%s    %s    %s  %s   %s\n" % (m_file, -1, -1,
+                                                              -1, -1))
         
         text_file.close()
+        log.info("Results saved in %s" % options.output_file)
     
     elif options.input_image:
         if not os.path.exists(options.input_image):
@@ -531,7 +531,7 @@ detector (Q1,Q2,Q3,Q4).
                                 options.pixsize, options.gain, options.satur_level , 
                                 options.write, options.snr, options.window)
             efwhm, std, k, k = cq.estimateFWHM(options.psfmeasure)
-            log.info("FWHM= %s  STD= %s"%(efwhm, std))
+            log.info("FWHM= %s  STD= %s" %(efwhm, std))
         except Exception as e:
             log.error("There was some error with image %s : %s "%(options.input_image, str(e)))
     else:
