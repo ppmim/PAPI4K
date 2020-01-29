@@ -1362,8 +1362,8 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset>
-        <normaloff>:/my_icon/images/logo_PANIC_100.jpg</normaloff>:/my_icon/images/logo_PANIC_100.jpg</iconset>
+       <iconset resource="resources/panicQL_resources.qrc">
+        <normaloff>:/my_icon/logo_PANIC_100.jpg</normaloff>:/my_icon/logo_PANIC_100.jpg</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -3459,10 +3459,10 @@
   </action>
   <action name="fileShow">
    <property name="icon">
-    <iconset>
-     <normaloff>:/my_icon/images/ds9.png</normaloff>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/ds9.png</normaloff>
      <normalon>:/my_icon/images/ds9.png</normalon>
-     <selectedon>:/my_icon/images/ds9.png</selectedon>:/my_icon/images/ds9.png</iconset>
+     <selectedon>:/my_icon/images/ds9.png</selectedon>:/my_icon/ds9.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Show</string>
@@ -3645,6 +3645,10 @@
    </property>
   </action>
   <action name="toolsDS9_displayAction">
+   <property name="icon">
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/ds9.png</normaloff>:/my_icon/ds9.png</iconset>
+   </property>
    <property name="text">
     <string>DS9 display</string>
    </property>
@@ -3659,6 +3663,10 @@
    </property>
   </action>
   <action name="toolsAladinAction">
+   <property name="icon">
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/aladin_large.gif</normaloff>:/my_icon/aladin_large.gif</iconset>
+   </property>
    <property name="text">
     <string>Aladin</string>
    </property>
@@ -3690,7 +3698,7 @@
   <action name="quitAction">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/system-shutdown.png</normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/system-shutdown.png</iconset>
+     <normaloff>resources/system-shutdown.png</normaloff>resources/system-shutdown.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>
@@ -3705,7 +3713,7 @@
   <action name="irafConsoleAction">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/apps/package_system_shell.png</normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/apps/package_system_shell.png</iconset>
+     <normaloff>resources/utilities-terminal.png</normaloff>resources/utilities-terminal.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>
@@ -3728,7 +3736,7 @@
   <action name="actionAladin">
    <property name="icon">
     <iconset>
-     <normaloff>images/aladin_large.gif</normaloff>images/aladin_large.gif</iconset>
+     <normaloff>resources/aladin_large.gif</normaloff>resources/aladin_large.gif</iconset>
    </property>
    <property name="text">
     <string>Aladin</string>
