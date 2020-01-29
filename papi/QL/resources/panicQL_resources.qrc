@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="my_icon">
+    <file>utilities-terminal.png</file>
+    <file>system-shutdown.png</file>
+    <file>aladin_large.gif</file>
     <file>ds9.png</file>
     <file>logo_PANIC_100.jpg</file>
   </qresource>
