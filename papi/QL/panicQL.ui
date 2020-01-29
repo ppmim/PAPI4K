@@ -3417,8 +3417,8 @@
   </widget>
   <action name="fileOpenAction">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/archive-insert.png</normaloff>resources/archive-insert.png</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/archive-insert.png</normaloff>:/my_icon/archive-insert.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -3438,8 +3438,8 @@
   </action>
   <action name="fileDirAction">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/archive-insert-directory.png</normaloff>resources/archive-insert-directory.png</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/archive-insert-directory.png</normaloff>:/my_icon/archive-insert-directory.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open...</string>
@@ -3682,8 +3682,8 @@
   </action>
   <action name="fileSearchAction">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/edit-find.png</normaloff>resources/edit-find.png</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/edit-find.png</normaloff>:/my_icon/edit-find.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>
@@ -3697,8 +3697,8 @@
   </action>
   <action name="quitAction">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/system-shutdown.png</normaloff>resources/system-shutdown.png</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/system-shutdown.png</normaloff>:/my_icon/system-shutdown.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>
@@ -3712,8 +3712,8 @@
   </action>
   <action name="irafConsoleAction">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/utilities-terminal.png</normaloff>resources/utilities-terminal.png</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/utilities-terminal.png</normaloff>:/my_icon/utilities-terminal.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>
@@ -3735,8 +3735,8 @@
   </action>
   <action name="actionAladin">
    <property name="icon">
-    <iconset>
-     <normaloff>resources/aladin_large.gif</normaloff>resources/aladin_large.gif</iconset>
+    <iconset resource="resources/panicQL_resources.qrc">
+     <normaloff>:/my_icon/aladin_large.gif</normaloff>:/my_icon/aladin_large.gif</iconset>
    </property>
    <property name="text">
     <string>Aladin</string>
