@@ -3418,7 +3418,7 @@
   <action name="fileOpenAction">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/archive-insert.png</normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/archive-insert.png</iconset>
+     <normaloff>resources/archive-insert.png</normaloff>resources/archive-insert.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -3439,7 +3439,7 @@
   <action name="fileDirAction">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/archive-insert-directory.png</normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/archive-insert-directory.png</iconset>
+     <normaloff>resources/archive-insert-directory.png</normaloff>resources/archive-insert-directory.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open...</string>
@@ -3683,7 +3683,7 @@
   <action name="fileSearchAction">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/edit-find.png</normaloff>../../../../../../../../../../../../../../usr/share/icons/default.kde4/32x32/actions/edit-find.png</iconset>
+     <normaloff>resources/edit-find.png</normaloff>resources/edit-find.png</iconset>
    </property>
    <property name="iconText">
     <string>Action</string>

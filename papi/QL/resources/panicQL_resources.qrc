@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="my_icon">
+    <file>archive-insert-directory.png</file>
+    <file>archive-insert.png</file>
+    <file>edit-find.png</file>
     <file>utilities-terminal.png</file>
     <file>system-shutdown.png</file>
     <file>aladin_large.gif</file>
