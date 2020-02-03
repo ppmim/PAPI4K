@@ -22,45 +22,81 @@ Installation
 
 PAPI has the following strict requirements:
  
- - Python 3.7
+ - `Python`_ 3.7
  - Numpy 1.18.x or later
- - Anaconda 3.18.9 o later
+ - `Anaconda`_ 3.18.9 o later
+ - `IRAF`_
 
 and also depends on next packages:
 
- - `SciPy <http://www.scipy.org>`_ (> v0.12.2)
- - `Astropy <http://www.astropy.org/>`_ (> v4.x)
- - `Matplotlib <http://matplotlib.org/>`_ (> v1.3.0)
- - `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
- - `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
- - `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
- - `stsci_python <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
- - `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
- - `SExtractor <http://astromatic.iap.fr/software/sextractor/>`_ (> v2.8.6)
- - `SCAMP <http://www.astromatic.net/software/scamp>`_ (> v1.7.0)
- - `SWarp <http://www.astromatic.net/software/swarp>`_ (> v2.19.1)
- - `Astrometry.net <http://astrometry.net/>`_ with `42xx index files <http://broiler.astrometry.net/~dstn/4200/>`_
- - `SAO DS9 and XPA <http://hea-www.harvard.edu/RD/ds9>`_ (> v7.3b5)
- - `Montage <http://montage.ipac.caltech.edu/download/Montage_v3.3.tar.gz>`_ (v3.3)
- - `montage_wrapper <https://pypi.python.org/pypi/montage-wrapper>`_ (0.9.9)
+ * `NumPy <http://numpy.scipy.org/>`_ (> v1.18.x)
+    * `SciPy <http://www.scipy.org>`_ (> v1.4.x)
+    * `Astropy <http://www.astropy.org/>`_ (4.x)
+    * `Matplotlib <http://matplotlib.org/>`_ (> v3.1.1)
+    * `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+    * `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
+    * `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
+    * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
 
+The above packages are automatically included in the `Anaconda` package, and then you do not need to install them manually.
+However, next tools need to be installed by the user following the instructions included in each package:
+
+    * `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
+    * `SExtractor <http://astromatic.iap.fr/software/sextractor/>`_ (> v2.8.6)
+    * `SCAMP <http://www.astromatic.net/software/scamp>`_ (> v1.7.0)
+    * `SWarp <http://www.astromatic.net/software/swarp>`_ (> v2.19.1)
+    * `Astrometry.net <http://astrometry.net/>`_ with `42xx index files <http://broiler.astrometry.net/~dstn/4200/>`_
+    * `SAO DS9 and XPA <http://hea-www.harvard.edu/RD/ds9>`_ (> v7.3b5)
+    * `Montage <http://montage.ipac.caltech.edu/download/Montage_v3.3.tar.gz>`_ (v3.3)
+    * `montage_wrapper <https://pypi.python.org/pypi/montage-wrapper>`_ (0.9.8)
 
 Note that, for PyRAF_ you have to install IRAF_ (v2.16 or later), what can be a 
 tricky task. However, is has been simplified in recent versions.
 
+Installation steps
+------------------
+The PAPI package can be installed into a virtualenv or `Conda`_ (prefered) environment
+manager via pip. We recommend a fresh environment with only python installed. Via Conda:
 
-To install PAPI as a "personal user" (non-root), follow the next steps:
+1. Install `Anaconda3`_ (for Python 3.7), which include Conda manager.
 
-1. Clone the PAPI files in a suitable location. Note that, it is a development 
-version:
+2. Create environment (papienv) and install PyRAF::
 
-	* ``git clone https://github.com/ppmim/PAPI ~/papi``
+    $ conda config --add channels http://ssb.stsci.edu/astroconda
+    $ conda create -n papienv python=3.7 iraf-all pyraf-all
 
-#. Once you have installed the required packages described above, you are ready to install
-PAPI; for this, follow the next steps::
+.. warning::
 
-    $ cd papi
-    $ ./papi_setup.sh
+    Due to Python 3.x incompatibilities present in several tasks, `STScI`_ recommends to install IRAF alongside Python 2.7.
+    However, PAPI is implemented for Python3, and no problems was found by the moment.
+
+
+After the installation is complete go ahead and activate the “papienv” environment.
+This command only needs to be executed one time per terminal session::
+
+    $ conda activate  papienv
+
+3. Install the tools required by PAPI (TBC, requirements.txt ?)::
+
+    $ pip install scipy
+    $ pip install montage_wrapper
+    $ conda install -c astropy ccdproc==2
+
+Installing for end-users
+++++++++++++++++++++++++
+
+To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.1.0``::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git@2.1.0
+
+The latest development version (from ``master``) can also be installed from Github::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git
+
+As can a particular commit hash::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git@3f03323c
+
 
 .. warning::
     
@@ -78,7 +114,7 @@ PAPI; for this, follow the next steps::
 
 Supported Platforms
 ===================
-Currently PAPI has only be tested under openSuSE12.x and openSuSE13.1, but it
+Currently PAPI has only be tested under openSuSE15.1 and Ubuntu 19.10, but it
 should work on any 64-bit Linux box with the software packages required above.
 
 
@@ -112,3 +148,14 @@ Maintainer: jmiguel@iaa.es
 .. _Astromatic: http://www.astromatic.net/
 .. _Sphinx: http://sphinx-doc.org/
 .. _IRAF: http://www.iraf.net
+.. _Omega2000: http://www.caha.es/CAHA/Instruments/O2000/index.html
+.. _HAWK-I: http://www.eso.org/sci/facilities/paranal/instruments/hawki/
+.. _sphinx: https://pypi.org/project/Sphinx/
+.. _pdf: http://www.iaa.es/~jmiguel/PANIC/PAPI/PAPI.pdf
+.. _openSuSE: http://www.opensuse.org/
+.. _Ubuntu: https://ubuntu.com/download/desktop
+.. _Conda: https://docs.conda.io/projects/conda/en/latest/index.html
+.. _Anaconda3: https://www.anaconda.com/distribution/#download-section
+.. _issue tracker: https://github.com/ppmim/PAPI/issues
+.. _Python: http://www.python.org
+.. _STScI: https://astroconda.readthedocs.io/en/latest/installation.html

@@ -10,20 +10,34 @@ Installation & Configuration
 Requirements and Supported Platforms
 ------------------------------------
 
+System Requirements
++++++++++++++++++++
+
+    * 64-bit Intel/AMD processor (x86_64)
+    * 64-bit Linux (glibc ≥ 2.12) or Mac OS X (≥ 10.7)
+    * BASH or ZSH as your default shell environment (T/CSH is NOT supported)
+
+Software Requirements
++++++++++++++++++++++
+
 Because PAPI is written mostly in Python_ and ANSI C, it can run on any platform
 that has the required Python modules and GCC compilier. However, it has been developed
-and deeply tested under `openSuSE`_ 12.x/13.x x86_64 Linux OS.  
-`Python 2.7.x <http://www.python.org>`_ or higher and the following packages 
+and deeply tested under `openSuSE`_ 15.1 and `Ubuntu`_ 19.1 x86_64 Linux OS.
+`Python 3.6.x <http://www.python.org>`_ or higher and the following packages
 are required:
 
-    * `NumPy <http://numpy.scipy.org/>`_ (> v1.6)
-    * `SciPy <http://www.scipy.org>`_ (> v0.12.2)
-    * `Astropy <http://www.astropy.org/>`_ (> v0.3.1, v2.x not tested)
-    * `Matplotlib <http://matplotlib.org/>`_ (> v1.3.0)
-    * `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
+    * `NumPy <http://numpy.scipy.org/>`_ (> v1.18.x)
+    * `SciPy <http://www.scipy.org>`_ (> v1.4.x)
+    * `Astropy <http://www.astropy.org/>`_ (4.x)
+    * `Matplotlib <http://matplotlib.org/>`_ (> v3.1.1)
+    * `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
     * `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
     * `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
-    * `stsci_python <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
+    * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
+
+The above packages are automatically included in the `Anaconda` package, and then you do not need to install them manually.
+However, next tools need to be installed by the user following the instructions included in each package:
+
     * `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
     * `SExtractor <http://astromatic.iap.fr/software/sextractor/>`_ (> v2.8.6)
     * `SCAMP <http://www.astromatic.net/software/scamp>`_ (> v1.7.0)
@@ -54,29 +68,80 @@ The latest stable version of PAPI can be downloaded from `GitHub repository <htt
 
 Building and Installation
 -------------------------
-PAPI installation is thought to be done as a 'personal user' (non-root), however it should work
-under any system directory (ie., /usr/local/). 
+The PAPI package can be installed into a virtualenv or `Conda`_ (prefered) environment
+manager via pip. We recommend a fresh environment with only python installed. Via Conda:
 
-1. To install PAPI as a "personal user" (non-root), follow the next steps:
+1. Install `Anaconda3`_ (for Python 3.7), which include Conda manager.
 
-Once you have installed the required packages described above, you are ready to install
-PAPI; for this, follow the next steps::
+2. Create environment (papienv) and install PyRAF::
 
-    $ git clone https://github.com/ppmim/PAPI.git ~/papi
-    $ cd papi
+    $ conda config --add channels http://ssb.stsci.edu/astroconda
+    $ conda create -n papienv python=3.7 iraf-all pyraf-all
+
+.. warning::
+
+    Due to Python 3.x incompatibilities present in several tasks, `STScI`_ recommends to install IRAF alongside Python 2.7.
+    However, PAPI is implemented for Python3, and no problems was found by the moment.
+
+
+After the installation is complete go ahead and activate the “papienv” environment.
+This command only needs to be executed one time per terminal session::
+
+    $ conda activate  papienv
+
+3. Install the tools required by PAPI (TBC, requirements.txt ?)::
+
+    $ pip install montage_wrapper
+    $ conda install -c astropy ccdproc==2
+
+Installing for end-users
+++++++++++++++++++++++++
+
+To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.1.0``::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git@2.1.0
+
+The latest development version (from ``master``) can also be installed from Github::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git
+
+As can a particular commit hash::
+
+    $ pip install git+https://github.com/ppmim/PAPI.git@3f03323c
+
+
+
+
+Installing for developers
++++++++++++++++++++++++++
+
+Fork and clone the repo::
+
+    $ git clone https://github.com/ppmim/PAPI.git
+    $ cd PAPI
+
+Install from your local checked out copy as an "editable" install::
+
+    $ pip install -e .
+
+If you want to run the tests and/or build the docs, you can make sure those dependencies are installed too::
+
+    $ pip install -e .[test]
+    $ pip install -e .[docs]
+    $ pip install -e .[test,docs]
+
+Note: If you wish to install directly from github, but also include the extra dependencies, the syntax is as follows::
+
+    $ pip install "jwst[test] @ git+https://github.com/ppmim/PAPI.git"
+
+Need other useful packages in your development environment::
+
+    $ pip install ipython flake8 pytest-xdist
+
+
+Edit the papi_setup.sh and set the right values to PAPI_HOME and PAPI_BIN variables, and then run the script as an user::
+
     $ ./papi_setup.sh
-
-
-2. To install PAPI as root on your system, follow the next steps::
-
-    $ cd /usr/local
-    $ git clone https://github.com/ppmim/PAPI.git papi
-    $ cd papi
-    
-    Edit the papi_setup.sh and set the right values to PAPI_HOME and PAPI_BIN variables, and then run the script as an user:
-    
-    $ ./papi_setup.sh
-
 
 .. warning::
     
@@ -101,11 +166,14 @@ if you type `make`.
 Bug reports
 -----------
 
-Please submit issues with the `issue tracker <https://github.com/ppmim/PAPI/issues>`_ on github.
+Please submit issues with the `issue tracker`_ on github.
 
 
 Release Notes
 -------------
+* 2.0.x
+    - Support for new PANIC detector H4RG
+    - Support for Python 3.7.x and Conda environment
 
 * 1.2.x
     - Support for new MEF structure (Qi); old format (SGi_1) also supported
@@ -118,8 +186,12 @@ Release Notes
 .. _CAHA: http://www.caha.es
 .. _Omega2000: http://www.caha.es/CAHA/Instruments/O2000/index.html
 .. _HAWK-I: http://www.eso.org/sci/facilities/paranal/instruments/hawki/
-.. _sphinx: http://sphinx.pocoo.org
+.. _sphinx: https://pypi.org/project/Sphinx/
 .. _pdf: http://www.iaa.es/~jmiguel/PANIC/PAPI/PAPI.pdf
 .. _openSuSE: http://www.opensuse.org/
-.. _issue tracker
+.. _Ubuntu: https://ubuntu.com/download/desktop
+.. _Conda: https://docs.conda.io/projects/conda/en/latest/index.html
+.. _Anaconda3: https://www.anaconda.com/distribution/#download-section
+.. _issue tracker: https://github.com/ppmim/PAPI/issues
 .. _Python: http://www.python.org
+.. _STScI: https://astroconda.readthedocs.io/en/latest/installation.html
