@@ -20,8 +20,8 @@ import sphinx_rtd_theme
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-sys.path.insert(0,os.path.abspath('.'))
-sys.path.insert(0,'../')
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, '../')
 
 # -- General configuration -----------------------------------------------------
 
@@ -30,8 +30,10 @@ sys.path.insert(0,'../')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
-extensions.append('sphinxext.numpydoc')
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx',
+              'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.imgmath',
+              'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
+# extensions.append('sphinxext.numpydoc')
 extensions.append('sphinx.ext.autosummary')
 
 # Add any paths that contain templates here, relative to this directory.
@@ -48,14 +50,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PAPI'
-copyright = u'2008-2015, J.M.Ibáñez-Mengual (IAA-CSIC)'
+copyright = u'2008-2020, J.M.Ibáñez-Mengual (IAA-CSIC)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '1.2'
+version = '2.0'
 from misc.version import __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
@@ -256,7 +258,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PAPI', u'PAPI Documentation',
-   u'J.M.Ibanez (IAA-CSIC)', 'PAPI', 'One line description of project.',
+   u'J.M.Ibanez (IAA-CSIC)', 'PAPI', 'PANIC data processing pipeline',
    'Miscellaneous'),
 ]
 

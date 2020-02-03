@@ -4552,7 +4552,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QMessageBox.about(self,
                           "PANIC Quick-Look Tool",
 """
-PQL version: %s\nCopyright (c) 2009-2019 IAA-CSIC  - All rights reserved.\n
+PQL version: %s\nCopyright (c) 2009-2020 IAA-CSIC  - All rights reserved.\n
 Author: Jose M. Ibanez. (jmiguel@iaa.es)
 Instituto de Astrofisica de Andalucia, IAA-CSIC
 
@@ -4570,7 +4570,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""%__version__)
+""" % __version__)
 
     def setSFlat_slot(self):
         print("panicQL.setSFlat_slot(): Not implemented yet")
