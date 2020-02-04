@@ -26,16 +26,16 @@ and deeply tested under `openSuSE`_ 15.1 and `Ubuntu`_ 19.1 x86_64 Linux OS.
 `Python 3.6.x <http://www.python.org>`_ or higher and the following packages
 are required:
 
+    * `Astropy <http://www.astropy.org/>`_ (4.x)
     * `NumPy <http://numpy.scipy.org/>`_ (> v1.18.x)
     * `SciPy <http://www.scipy.org>`_ (> v1.4.x)
-    * `Astropy <http://www.astropy.org/>`_ (4.x)
     * `Matplotlib <http://matplotlib.org/>`_ (> v3.1.1)
     * `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
     * `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
     * `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
     * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
 
-The above packages are automatically included in the `Anaconda` package, and then you do not need to install them manually.
+The above packages are automatically included in the `Anaconda`_ package, and then you do not need to install them manually.
 However, next tools need to be installed by the user following the instructions included in each package:
 
     * `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
@@ -66,17 +66,21 @@ Download
 
 The latest stable version of PAPI can be downloaded from `GitHub repository <https://github.com/ppmim/PAPI>`_ .
 
-Building and Installation
--------------------------
+Environment Installation
+------------------------
 The PAPI package can be installed into a virtualenv or `Conda`_ (prefered) environment
 manager via pip. We recommend a fresh environment with only python installed. Via Conda:
 
-1. Install `Anaconda3`_ (for Python 3.7), which include Conda manager.
+1. Install `Anaconda3`_ (for Python 3.7), which include Conda manager::
+
+    $ sh Anaconda3-2019.10-Linux-x86_64.sh
+
 
 2. Create environment (papienv) and install PyRAF::
 
+    $ conda create -n papienv python=3.7
     $ conda config --add channels http://ssb.stsci.edu/astroconda
-    $ conda create -n papienv python=3.7 iraf-all pyraf-all
+    $ conda install python=3.7 iraf-all pyraf-all
 
 .. warning::
 
@@ -89,13 +93,85 @@ This command only needs to be executed one time per terminal session::
 
     $ conda activate  papienv
 
-3. Install the tools required by PAPI (TBC, requirements.txt ?)::
+3. Install other Python staff::
 
-    $ pip install montage_wrapper
     $ conda install -c astropy ccdproc==2
+    $ pip install montage_wrapper
+    $ pip install sphinx_rtd_theme
 
-Installing for end-users
-++++++++++++++++++++++++
+4. Install Third Party tools:
+
+First we need to install next modules required for those third party tools::
+
+    $ sudo zypper install libXmu6-32bit libncurses5-32bit
+    (for IRAF 32-bit compatibility)
+    $ sudo zypper install libXt-devel libnsl-devel cfitsio-devel
+    $ sudo zypper install python2-devel
+    (required for astrometry.net)
+
+
+ Montage
+ '''''''
+
+    $ mkdir /home/panic/Software/PAPI/; cd /home/panic/Software/PAPI/
+    $ wget https://irsa.ipac.caltech.edu/Montage/download/Montage_v3.3.tar.gz
+    $ tar -xvzf Montage_v3.3.tar.gz
+    $ cd Montage_v3.3
+    $ make
+    $ export PATH=$PATH:/home/panic/Software/PAPI/Montage_v3.3/bin
+
+ DS9
+ '''
+
+    $ wget http://ds9.si.edu/download/opensuse15/ds9.opensuse15.8.1.tar.gz
+    $ tar -xvzf ds9.opensuse15.8.1.tar.gz
+    $ cp ds9 /usr/local/bin/
+
+  XPA
+  '''
+
+    $ git clone https://github.com/ericmandel/xpa.git
+    $ ./configure
+    $ make install
+
+  Astrometry.net
+  ''''''''''''''
+
+    $ wget http://astrometry.net/downloads/astrometry.net-latest.tar.gz
+    $ tar -xvzf
+    $ cd astrometry.net
+    $ make install
+    $ export PATH=$PATH:/usr/local/astrometry/bin/
+
+And then download and copy the 42xx index files from::
+
+   wget http://broiler.astrometry.net/~dstn/4200/
+
+to::
+
+    /usr/local/astrometry/data
+
+And then update and config file::
+
+   /usr/local/astrometry/etc/astrometry.cfg
+
+
+  Astromatic.net
+  ''''''''''''''
+
+    $ sudo zypper install fftw3-devel
+    $ sudo zypper install libplplot16
+    $ sudo zypper install cblas-devel
+
+    $ rpm -i swarp-2.38.0-1.x86_64.rpm
+    $ rpm -i sextractor-2.19.5-1.x86_64.rpm
+    $ rpm -i --nodpes scamp-2.0.4-1.x86_64.rpm
+
+    $ sudo ln -s /usr/lib64/libqhull.so.7 /usr/lib64/libqhull.so.5
+    $ sudo ln -s /usr/lib64/libplplot.so.16 /usr/lib64/libplplotd.so.11
+
+PAPI Installation
+-----------------
 
 To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.1.0``::
 
@@ -113,7 +189,7 @@ As can a particular commit hash::
 
 
 Installing for developers
-+++++++++++++++++++++++++
+-------------------------
 
 Fork and clone the repo::
 
@@ -132,7 +208,7 @@ If you want to run the tests and/or build the docs, you can make sure those depe
 
 Note: If you wish to install directly from github, but also include the extra dependencies, the syntax is as follows::
 
-    $ pip install "jwst[test] @ git+https://github.com/ppmim/PAPI.git"
+    $ pip install "papi[test] @ git+https://github.com/ppmim/PAPI.git"
 
 Need other useful packages in your development environment::
 
