@@ -13,9 +13,11 @@ PANIC Pipeline Documentation
 
 .. warning::
 
-   This "Documentation" is still a work in progress; some of the material
+   1. This "Documentation" is still a work in progress; some of the material
    is not organized, and several aspects of PAPI are not yet covered
    with sufficient detail.
+
+   2. This manual support **HAWAII-2RG** and **HAWAII-4RG** detectors.
 
 Welcome! This is the Documentation for :ref:`papi`, the Data Reduction Pipeline of PANIC
 instrument, and for :ref:`pql`, the GUI of PAPI used during the observation;
@@ -36,9 +38,12 @@ This manual is a complete description of the data reduction recipes implemented
 by the PAPI pipeline, showing the status of the current pipeline version
 and describing data reduction process of the PANIC data using PAPI.
 
-Although PAPI was developed for the PANIC camera, its development was initiated
-using data from Omega2000_ camera at the 3.5m CAHA telescope and HAWK-I_ camera at the 
-VLT; thus, in principle it should work with data these instruments, although it is not
+Although PAPI was developed for the PANIC camera with **H2RG** detector, it as updated
+in 2020 to support the new **H4RG** detector integrated into PANIC.
+
+Moreover, its development was initiated using data from Omega2000_ camera at
+the 3.5m CAHA telescope and HAWK-I_ camera at the VLT; thus, in principle it
+should work with data these instruments, although it is not
 optimized for them.
 
 In addition to this html version of the manual, there is also a pdf_ version to download.
