@@ -6,14 +6,23 @@ are organized. However, for a deeper description, see the GEIRS_ manual.
 
 Detector
 --------
-The detector is an array (FPA) of four HAWAII-2RG_ detectors. The inter-chip 
-gap between the detectors is only 167 pixels (or 75 arcsec at the 2.2m telescope) 
-and is filled by dithering with sufficient amplitude. For applications 
-which image only 30x30 arcmin this design is ideal.
+The PANIC instrument had initially was mounted with a mosaic of four 2k x 2k
+HAWAII-2RG_ detectors. However, during 2020 a new single 4k x 4k HAWAII-4RG_ detector
+was installed due to the damages in the HAWAII-2RG_.
 
-HAWAII-2RG_ detectors have an effective surface of 2040x2040 sensitive pixels. 
-A 4-pixel wide border is used as reference to correct for relatively slow bias 
-drifts.
+
+ * The detector is an array (FPA) of four HAWAII-2RG_ detectors. The inter-chip
+   gap between the detectors is only 167 pixels (or 75 arcsec at the 2.2m telescope)
+   and is filled by dithering with sufficient amplitude. For applications
+   which image only 30x30 arcmin this design is ideal.
+
+   HAWAII-2RG_ detectors have an effective surface of 2040x2040 sensitive pixels.
+   A 4-pixel wide border is used as reference to correct for relatively slow bias
+   drifts.
+
+ * The HAWAII-4RG_ detector is a 4096x4096 pixels with 15um pixel pitch; it is
+   the next generation, state-of-the-art readout integrated circuit for visible
+   and infrared instrumentation in ground-based and space-based telescope applications.
 
 
 FITS
@@ -61,7 +70,7 @@ the next type of FITS files (in order of preference):
  
  .. Note:: Currently PAPI is **not working** with non-integrated individual files of an 
     exposition. In case you are interested in no-integrated files and wish to reduce 
-    the data with PAPI, you should use SEF of MEF non-integrated FITS-cube mode.
+    the data with PAPI, you should use SEF or MEF non-integrated FITS-cube mode.
 
 |
 
@@ -73,9 +82,11 @@ next figure:
    :scale: 60%
 
 |
+HAWAII-2RG
+**********
 
-
-Next table shows the mapping of extension/quadrant names and detectors:
+Next table shows the mapping of extension/quadrant names and detectors with
+the H2RG detector array:
 
 
 +------------------------+------+------+------+-------+
@@ -92,7 +103,7 @@ Q2 (ext. 2), Q3 (ext. 3) and Q4 (ext. 4).
 
 
 Headers
--------
+'''''''
 The header keywords currently used in a raw PANIC FITS file is as shown bellow:
 
 **Primary Header**
@@ -359,8 +370,16 @@ as each file is created. If these are not saved, neither PAPI nor PQL will work 
     PAT_NAME= 'OS Ks 2 '           / PANIC Observing Secuence Pattern Name          
     PAT_EXPN=                    1 / PANIC Pattern exposition number                
     PAT_NEXP=                    5 / PANIC Pattern total number of expositions      
-    IMAGETYP= 'SCIENCE '           / PANIC Image type                         
+    IMAGETYP= 'SCIENCE '           / PANIC Image type
 
+
+HAWAII-2RG
+**********
+    * TBC
+
+Headers
+'''''''
+    * TBC
 
 
 Data
@@ -414,6 +433,7 @@ together.
 .. _scamp: http://www.astromatic.net/software/scamp
 .. _swarp: http://www.astromatic.net/software/swarp
 .. _HAWAII-2RG: http://panic.iaa.es/detectors
+.. _HAWAII-4RG: http://www.teledyne-si.com/products-and-services/imaging-sensors/hawaii-4rg
 .. _GEIRS: http://www2.mpia-hd.mpg.de/~mathar/public/PANIC-SW-DCS-01.pdf
 .. _OT: http://www.iaa.es/~agsegura/PANIC_OT/PANIC_Observation_Tool.html
 .. _FITS: http://fits.gsfc.nasa.gov

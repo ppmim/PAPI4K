@@ -25,7 +25,7 @@ Quickstart
 
 Running PAPI can be as simple as executing the following command in a terminal::
 	
-	$ papi.py -s raw_data -d result 
+	$ papi -s raw_data -d result
 
 Where ``raw_data`` is the directory of the raw dataset (uncalibrated) having 
 both science or calibration files, and ``result`` is the path to the directory 
@@ -33,7 +33,7 @@ where the calibrated data produced by the pìpeline will be saved.
 
 Example::
 
-   $ papi.py -s /my/raw_data/directory -d /my/result/directory
+   $ papi -s /my/raw_data/directory -d /my/result/directory
 
 .. index:: uncalibrated, data
 
@@ -49,14 +49,14 @@ may be applied to help improve the reductions.
 
 The next command will show some of the available options::
 
-   $ papi.py --help
+   $ papi --help
 
 
 Then, the listing of the PAPI command line options:
 
 ::
 
-    Usage: papi.py [OPTION]... DIRECTORY...
+    Usage: papi [OPTION]... DIRECTORY...
     
     This is PAPI, the PANIC PIpeline data reduction system - IAA-CSIC - Version 1.2.20150508064845
 
@@ -175,11 +175,11 @@ by the OT during the observation.
 
 Command::
 
-    $papi.py -s /my/raw_data/directory -p
+    $papi -s /my/raw_data/directory -p
     
 Example::
 
-    $papi.py -s /data2/2015-03-10/ -p
+    $papi -s /data2/2015-03-10/ -p
     
     [PAPI]: 2015-05-28 09:18:01,484 DEBUG    reductionset:1150: Found 16 groups of files
     [PAPI]: 2015-05-28 09:18:01,484 DEBUG    reductionset:1157: =========================================================
@@ -316,7 +316,7 @@ Show grouped files per filter and coordinates of a raw directory
 ----------------------------------------------------------------
 Command::
 
-    $papi.py -s /my/raw_data/directory -g filter -p 
+    $papi -s /my/raw_data/directory -g filter -p
 
 
 Reduce (quick) a specificied number of sequences of the group list 
@@ -329,11 +329,11 @@ you have to use the `-S` parameter with two values, N1 and N2, where:
 
 Command::
 
-    $papi.py -s /my/raw_data/directory -S N1 N2 
+    $papi -s /my/raw_data/directory -S N1 N2
 
 Example::
 
-    $papi.py -s /data2/2015-03-10/ -S 14 20
+    $papi -s /data2/2015-03-10/ -S 14 20
 
 By default, PAPI process the files in quick mode (single pass for sky subtraction), 
 however if you can use the 'science' mode (double pass for sky subtraction) adding
@@ -341,7 +341,7 @@ the '-M science' when you run PAPI:
 
 Example::
 
-    $papi.py -s /data2/2015-03-10/ -S 14 20 -M science
+    $papi -s /data2/2015-03-10/ -S 14 20 -M science
     
 
     
@@ -349,7 +349,7 @@ If you only want to reduce a specific sequence, for example number 14, you shoul
 
 ::
     
-    $papi.py -s /data2/2015-03-10/ -S 14 14 
+    $papi -s /data2/2015-03-10/ -S 14 14
     
     [PAPI]: 2015-05-28 09:52:15,122 DEBUG    calDark:283: Saved master DARK to /data2/out/mDark_Xdb5bc_6_1.fits
     [PAPI]: 2015-05-28 09:52:15,122 DEBUG    calDark:284: createMasterDark' finished Elapsed time(s): 2.183243
@@ -366,7 +366,7 @@ Reduce all the sequences of a given directory
 
 Command::
 
-    $papi.py -s /my/raw_data/directory -d /my/output/directory 
+    $papi -s /my/raw_data/directory -d /my/output/directory
     
 With this command, the pipeline will reduce all the detected sequences in the /my/raw_data/directory
 using the default values set in the $PAPI_CONFIG file, and with the reduction mode specified in 
@@ -376,7 +376,7 @@ using the `-M` option as follow:
 
 ::
     
-    $papi.py -s /my/raw_data/directory -d /my/output/directory -M quick
+    $papi -s /my/raw_data/directory -d /my/output/directory -M quick
 
 
 Reduce all the sequences of a given set of directories
@@ -391,7 +391,7 @@ you should create an script to do that; for example see next bash script:
     # Script to reduce a set of directories
 
 
-    PAPI=$HOME/bin/papi.py
+    PAPI=$HOME/bin/papi
     CONFIG_FILE=$PAPI_CONFIG
     MY_DIRS_JAN="2015-03-05 2015-03-06 2015-03-07 2015-03-08 2015-03-09"
     for dir in $MY_DIRS
@@ -435,7 +435,7 @@ look for them into the external calibration directory provided (/my/calibration/
 
 Command::
 
-    $papi.py -s /my/raw_data/directory -d /my/output/directory -C /my/calibrations/dir
+    $papi -s /my/raw_data/directory -d /my/output/directory -C /my/calibrations/dir
 
 Enable the Non-Linearity correction for the data processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -461,7 +461,7 @@ can use the option '-W Qx'::
 
 Example::
 
-    $papi.py -s /my/raw_data/directory -d /my/output/directory -W Q1
+    $papi -s /my/raw_data/directory -d /my/output/directory -W Q1
     
     
 Reduction modes
