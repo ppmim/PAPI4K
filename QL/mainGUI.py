@@ -229,19 +229,18 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         if not os.path.exists(self._fitsGeirsWritten_):
             self._fitsGeirsWritten_ = "Error: Cannot find ~/tmp/fitsGeirsWritten"
 
-
-        self.m_sourcedir =  self.m_default_data_dir 
+        self.m_sourcedir = self.m_default_data_dir
         self.m_outputdir = output_dir 
         self.m_tempdir = temp_dir
         self._ini_cwd = os.getcwd()
         
         # PAPI_HOME
         try:
-            self.papi_home = os.environ['PAPI_HOME']
-            if self.papi_home[-1]!='/':
-                self.papi_home+='/'
+            self.papi_home = os.path.dirname(sys.modules['papi'].__file__)
+            if self.papi_home[-1] != '/':
+                self.papi_home += '/'
         except Exception as e:
-            log.error("Error, variable PAPI_HOME not defined.")
+            log.error("Error, cannot get papi home directory")
             raise e
 
 

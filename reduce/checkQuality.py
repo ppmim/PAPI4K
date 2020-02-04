@@ -139,9 +139,10 @@ class CheckQuality(object):
         # SExtractor configuration
         catalog_file = "test.cat"
         try:
-            sex_cnf = os.environ['PAPI_HOME'] + "/config_files/sextractor.sex"
+            papi_home = os.path.dirname(sys.modules['papi'].__file__)
+            sex_cnf = papi_home + "/config_files/sextractor.sex"
         except Exception as e:
-            log.error("Error, variable PAPI_HOME not defined.")
+            log.error("Error, cannot get papi home directory")
             raise e
         
         sex = SExtractor()

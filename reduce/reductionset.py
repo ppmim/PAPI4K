@@ -251,11 +251,12 @@ class ReductionSet(object):
 
         # PAPI_HOME
         try:
-            self.papi_home = os.environ['PAPI_HOME']
+            # self.papi_home = os.environ['PAPI_HOME']
+            self.papi_home = os.path.dirname(sys.modules['papi'].__file__)
             if self.papi_home[-1] != '/':
                 self.papi_home += '/'
         except Exception as ex:
-            log.error("Error, variable PAPI_HOME not defined.")
+            log.error("Error, cannot get papi home directory")
             raise ex
 
         # Temporal directory for temporal files created during the data 
@@ -1377,11 +1378,11 @@ class ReductionSet(object):
         out_files = []
         
         # get the skymodel
-        if skymodel == None:
+        if not skymodel:
             skymodel = self.config_dict['skysub']['skymodel']
         
         # Fix type for bad pixels
-        if fix_type == None:
+        if not fix_type:
             if self.config_dict['bpm']['mode'] == 'fix':
                 fix_type = 1
             else:
@@ -3605,8 +3606,8 @@ class ReductionSet(object):
         ########################################################################     
         if self.red_mode == 'quick-lemon':
             output_fd, papi_output = \
-                tempfile.mkstemp(prefix = out_dir,
-                                 suffix = '.papi_output', text = True)
+                tempfile.mkstemp(prefix=out_dir,
+                                 suffix='.papi_output', text=True)
             os.close(output_fd)
             os.unlink(papi_output)
             listToFile(self.m_LAST_FILES, papi_output)
