@@ -359,11 +359,12 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     
     # PAPI_HOME
     try:
-        papi_home = os.environ['PAPI_HOME']
+        # papi_home = os.environ['PAPI_HOME']
+        papi_home = os.path.dirname(sys.modules['papi'].__file__)
         if papi_home[-1] != '/':
             papi_home += '/'
     except Exception as e:
-        log.error("Error, variable PAPI_HOME not defined.")
+        log.error("Error, cannot get papi home directory")
         raise e
 
     ## STEP 2: Make astrometric calibration 

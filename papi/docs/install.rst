@@ -139,7 +139,7 @@ Need other useful packages in your development environment::
     $ pip install ipython flake8 pytest-xdist
 
 
-Edit the papi_setup.sh and set the right values to PAPI_HOME and PAPI_BIN variables, and then run the script as an user::
+Edit the papi_setup.sh and set the right values to PAPI_CONFIG, and then run the script as an user::
 
     $ ./papi_setup.sh
 

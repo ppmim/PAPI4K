@@ -7,7 +7,9 @@ import pathlib
 
 
 NAME = 'papi'
+irdr_bins = [s for s in glob('papi/irdr/bin/*')]
 SCRIPTS = [s for s in glob('scripts/*') if basename(s) != '__pycache__']
+
 PACKAGE_DATA = {
     '': [
         '*.fits',
@@ -86,11 +88,18 @@ setup(
     entry_points={
         'console_scripts': ['papi=papi.papi:main', 'papi_ql=papi.QL.runQL:main']
     },
-    data_files=[('papi/QL/resources/logo.png', ['papi/QL/resources/logo_PANIC.jpg',
-                                                'papi/QL/resources/logo_PANIC_100.jpg',
-                                                'papi/QL/resources/ds9.png',
-                                                'papi/QL/resources/aladin_large.gif']),
-                ('papi/config_files', ['papi/config_files/papi.cfg'])],
+    data_files=[('resources',
+                              ['papi/QL/resources/logo_PANIC.jpg',
+                              'papi/QL/resources/logo_PANIC_100.jpg',
+                              'papi/QL/resources/ds9.png',
+                              'papi/QL/resources/aladin_large.gif']),
+                ('config_files',
+                            ['papi/config_files/papi.cfg']),
+                ('irdr_bin',
+                            ['papi/irdr/bin/skyfilter',
+                             'papi/irdr/bin/dithercubemean',
+                             'papi/irdr/bin/gainmap'])
+                ]
     # To compile .ui and .qrc files
     # cmdclass=cmdclass,
 )
