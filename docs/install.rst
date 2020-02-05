@@ -35,7 +35,7 @@ are required:
     * `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
     * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
 
-The above packages are automatically included in the `Anaconda`_ package, and then you do not need to install them manually.
+The above packages are automatically included in the `Anaconda3`_ package, and then you do not need to install them manually.
 However, next tools need to be installed by the user following the instructions included in each package:
 
     * `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
