@@ -17,8 +17,8 @@ class BuildQt(Command):
     It looks for *.ui files in _UI_PATH subfolder.
     It looks for *.qrc files in _QRC_PATH subfolder.
     """
-    _UI_PATH = os.path.join('your_path', 'ui')
-    _QRC_PATH = os.path.join('your_path', 'resources')
+    _UI_PATH = os.path.join('papi/QL', 'ui')
+    _QRC_PATH = os.path.join('papi/QL', 'resources')
 
     # I don't think setuptools uses these options
     user_options = [
@@ -56,6 +56,7 @@ class BuildQt(Command):
                   "a custom command with --rcc=command")
 
     def run(self):
+        print("----- Running BuildQt  ----")
         # compile ui files
         for infile in glob(os.path.join(self._UI_PATH, '*.ui')):
             directory, ui_filename = os.path.split(infile)

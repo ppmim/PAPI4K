@@ -2,8 +2,40 @@ from os.path import basename
 from setuptools import setup, find_packages
 from glob import glob
 from buildqt import BuildQt
+from setuptools.command.install import install
+import os
+import subprocess
 
-import pathlib
+
+class InstallWrapper(install):
+    """
+    This class provide a wrapper around the install procedure to run some
+    specific task for PAPI installation:
+    1) IRDR compilation
+
+    """
+    def run(self):
+        print(os.path.dirname(__file__))
+        print("[InstallWrapper] QUe PASSSS  ")
+        try:
+            # print(os.path.dirname(__file__))
+            cwd = os.curdir
+            irdr_directory = os.path.join(cwd, 'papi/irdr')
+            print(irdr_directory)
+            if not os.path.exists(irdr_directory):
+                return
+            os.chdir(irdr_directory)
+            subprocess.run(['make', 'all'])
+            os.chdir(cwd)
+        except Exception as e:
+            print(str(e))
+            raise e
+
+        print("Now, run normal install...")
+        try:
+            install.run(self)
+        except Exception as e:
+            print(str(e))
 
 
 NAME = 'papi'
@@ -43,6 +75,7 @@ TESTS_REQUIRE = [
 
 cmdclass = {}
 cmdclass['build_qt'] = BuildQt
+cmdclass['install'] = InstallWrapper
 
 setup(
     name=NAME,
@@ -99,7 +132,7 @@ setup(
                             ['papi/irdr/bin/skyfilter',
                              'papi/irdr/bin/dithercubemean',
                              'papi/irdr/bin/gainmap'])
-                ]
+                ],
     # To compile .ui and .qrc files
-    # cmdclass=cmdclass,
+    cmdclass=cmdclass
 )
