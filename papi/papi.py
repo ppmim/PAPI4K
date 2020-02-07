@@ -64,7 +64,7 @@ from papi.misc.version import __version__
 ################################################################################
 # main
 ################################################################################
-def main(arguments = None):
+def main(arguments=None):
     
     # Clock to measure the CPU time used
     t = clock()

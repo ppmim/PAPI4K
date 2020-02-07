@@ -319,7 +319,7 @@ class MasterDark(object):
 
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     # Get and check command-line options
     # The script doesnt take any positional arguments, so only options
     usage = "usage: %prog [options] "
@@ -383,3 +383,7 @@ creates the master dark and computes several statistics.
     except Exception as e:
         log.error("Task failed. Some error was found: %s" % str(e))
 
+######################################################################
+import sys
+if __name__ == "__main__":
+    sys.exit(main())

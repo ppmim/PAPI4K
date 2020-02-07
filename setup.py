@@ -14,26 +14,30 @@ class InstallWrapper(install):
     1) IRDR compilation
 
     """
+    def finalize_options(self):
+        install.finalize_options(self)
+        self.install_lib = self.install_platlib
+
     def run(self):
-        print(os.path.dirname(__file__))
-        print("[InstallWrapper] QUe PASSSS  ")
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        print("[InstallWrapper] Dir = %s" % dir_path)
         try:
-            # print(os.path.dirname(__file__))
-            cwd = os.curdir
-            irdr_directory = os.path.join(cwd, 'papi/irdr')
+            irdr_directory = os.path.join(dir_path, 'papi/irdr')
             print(irdr_directory)
             if not os.path.exists(irdr_directory):
                 return
             os.chdir(irdr_directory)
             subprocess.run(['make', 'all'])
-            os.chdir(cwd)
+            os.chdir("../..")
         except Exception as e:
             print(str(e))
             raise e
 
-        print("Now, run normal install...")
+        print("Now, run standard install...")
         try:
-            install.run(self)
+            self.run_command("build")
+            # install.run(self)
+            install.do_egg_install(self)
         except Exception as e:
             print(str(e))
 
@@ -119,7 +123,9 @@ setup(
     },
     tests_require=TESTS_REQUIRE,
     entry_points={
-        'console_scripts': ['papi=papi.papi:main', 'papi_ql=papi.QL.runQL:main']
+        'console_scripts': ['papi=papi.papi:main', 'papi_ql=papi.QL.runQL:main',
+                            'mef=papi.misc.mef:main',
+                            'calDark=papi.reduce.calDark:main']
     },
     data_files=[('resources',
                               ['papi/QL/resources/logo_PANIC.jpg',
