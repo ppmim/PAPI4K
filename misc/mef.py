@@ -126,10 +126,11 @@ class MEF (object):
         
         new_files = []    
         for file in self.input_files:        
-            if output_dir == None:
+            if not output_dir:
                 output_dir = os.path.abspath(os.path.join(file, os.pardir))
                 print("OUT_DIR=", output_dir)
-                if output_dir == "": output_dir = "."
+                if output_dir == "":
+                    output_dir = "."
             try:
                 hdulist = fits.open(file)
             except IOError as ex:
@@ -1206,14 +1207,14 @@ class MEF (object):
 
                     # DETSEC and DATASEC
                     data_sec = '[%i:%i,%i:%i]' % (5, 2044, 5, 2044)
-                    if det_id==1: # SG1
-                        det_sec = '[%i:%i,%i:%i]'  % (2049, 4096, 1, 2048)
-                    elif det_id==2: # SG2
-                        det_sec = '[%i:%i,%i:%i]'  % (2049, 4096, 2049, 4096)
-                    elif det_id==3: # SG3
-                        det_sec = '[%i:%i,%i:%i]'  % (1, 2048, 2049, 4096)
-                    elif det_id==4: # SG4
-                        det_sec = '[%i:%i,%i:%i]'  % (1, 2048, 1, 2048)
+                    if det_id == 1:  # SG1
+                        det_sec = '[%i:%i,%i:%i]' % (2049, 4096, 1, 2048)
+                    elif det_id == 2:  # SG2
+                        det_sec = '[%i:%i,%i:%i]' % (2049, 4096, 2049, 4096)
+                    elif det_id == 3:  # SG3
+                        det_sec = '[%i:%i,%i:%i]' % (1, 2048, 2049, 4096)
+                    elif det_id == 4:  # SG4
+                        det_sec = '[%i:%i,%i:%i]' % (1, 2048, 1, 2048)
                     
                     prihdu.header.set('DETSEC', det_sec)
                     prihdu.header.set('DATASEC', data_sec)        
@@ -1225,7 +1226,7 @@ class MEF (object):
                 
                     new_filename = file.replace(".fits", 
                                                 out_filename_suffix % det_id) # number from 1 to 4
-                    if out_dir != None: 
+                    if out_dir:
                         new_filename = new_filename.replace(os.path.abspath(os.path.join(new_filename, os.pardir)), 
                                                             out_dir) 
                     out_filenames.append(new_filename)
@@ -1244,10 +1245,12 @@ class MEF (object):
         
         log.debug("End of [splitGEIRSToSimple]")
         return n_ext, out_filenames
+
                                   
 ################################################################################
 # main
-if __name__ == "__main__":
+#
+def main(arguments=None):
     
     # Get and check command-line options
     usage = "usage: %prog [options] arg1 arg2"
@@ -1344,7 +1347,9 @@ if __name__ == "__main__":
     
     elif options.geirs_convert:
         myMEF.convertGEIRSToMEF(out_dir=options.output_dir)
-        
-              
-        
-        
+
+
+######################################################################
+import sys
+if __name__ == "__main__":
+    sys.exit(main())
