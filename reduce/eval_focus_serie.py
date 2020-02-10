@@ -25,8 +25,7 @@
 # into account the FWHM of a focus exposures.
 # ==============================================================================
 
-import string
-import optparse
+import argparse
 import sys
 import os
 import os.path
@@ -276,47 +275,14 @@ class FocusSerie(object):
         
         return focus
         
-        
-def check_python_env():
-    """    
-    Check for Python 2.X with X >= 5; the 'optparse' module needs
-    Python 2.5 for the used 'epilog' feature (see below).
-    """
-    version = sys.version.split()[0].split('.')
-    # well, Python version 3 just gives us a syntax error at the
-    # first print statement :-)
-    if list(map(int, version)) >= [3, 0, 0] or list(map(int, version)) < [2, 5, 0]:
-        sys.stderr.write("This script needs Python 2.Y.X (with Y >= 5)\n\n")
-        sys.stderr.write("You have Python V%s.%s.%s\n" \
-                          % (version[0], version[1], version[2]))
-        sys.exit(1)
-        
-    # import non-standard modules:
-    try:
-        import numpy
-        import astropy.io.fits as fits
-    except ImportError:
-        sys.stderr.write("This script needs the modules 'astropy.io.fits' and 'numpy'!\n")
-        sys.stderr.write("see http://www.astropy.org\n")
-        sys.stderr.write("and/or http://numpy.scipy.org/\n")
-        sys.exit(1)
-
 
 ################################################################################
 # main
-if __name__ == "__main__":
-
-    check_python_env()
+def main(arguments=None):
 
     # The following class allows us to define a usage message epilogue which
-    # does not skip newline characters:
-    class MyParser(optparse.OptionParser):
-        def format_epilog(self, formatter):
-            return self.epilog
-    
-    usage = "%prog [Options] "
-    parser = MyParser(usage=usage, epilog=
-    """
+
+    desc = """
     Description:
        Given a focus exposures serie as a set of FITS files images, the FWHM is 
        computed for each of the images, and the best focus is determined by 
@@ -328,51 +294,51 @@ if __name__ == "__main__":
     
        - eval_focus_serie.py -s /data-dir/focus.list -o fwhm_values.pdf
     
-    """)
-    
-    parser.add_option("-i", "--input", dest="input",
+    """
+    parser = argparse.ArgumentParser(description=desc)
+
+    parser.add_argument("-i", "--input", dest="input",
                       help="Name of input directory or list file "
-                      "[default: %default].",
+                      "[default: %(default)s].",
                       default="")
-    parser.add_option("-o", "--output", dest="output",
+    parser.add_argument("-o", "--output", dest="output",
                       help="Name of output [pdf] file with results " 
-                      "[default: %default]",
+                      "[default: %(default)s]",
                       default="output.pdf")
     
-    parser.add_option("-p", "--pix_scale", dest="pix_scale",
-                      help="Pixel scale [default: %default].",
+    parser.add_argument("-p", "--pix_scale", dest="pix_scale",
+                      help="Pixel scale [default: %(default)s].",
                       default=0.45)
     
-    parser.add_option("-s", "--satur_level", dest="satur_level",
+    parser.add_argument("-s", "--satur_level", dest="satur_level",
                       help="Saturation level in ADUs. NCOADD is not taken "
-                      "into account [default: %default].",
+                      "into account [default: %(default)s].",
                       default=50000)
 
-    parser.add_option("-a", "--min_isoarea", dest="min_isoarea",
+    parser.add_argument("-a", "--min_isoarea", dest="min_isoarea",
                       help="Minimum isoarea of the objects detected."
-                      "[default: %default].",
+                      "[default: %(default)s].",
                       default=32)
     
-    parser.add_option('-W', '--window',
-                      type='choice',
+    parser.add_argument('-W', '--window',
                       action='store',
                       dest='window',
                       choices=['Q1', 'Q2', 'Q3', 'Q4', 'all'],
                       default='all',
                       help="When input is a MEF, it means the "
                       "window/dectector/extension to process: "
-                      "Q1(SG1), Q2(SG2), Q3(SG3), Q4(SG4), all [default: %default]")
+                      "Q1(SG1), Q2(SG2), Q3(SG3), Q4(SG4), all [default: %(default)s]")
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
-    if len(sys.argv[1:]) < 1 or len(args) != 0:
+    if len(sys.argv[1:]) < 1:
         parser.print_help()
         sys.exit(0)
 
     # Read input files
     files = []    
     if os.path.isfile(options.input):
-        files = [line.replace("\n", "").replace('//','/')
+        files = [line.replace("\n", "").replace('//', '/')
                      for line in fileinput.input(options.input)]
     elif os.path.isdir(options.input):
         for file in os.listdir(options.input):
@@ -397,3 +363,6 @@ if __name__ == "__main__":
         # and bye:
         sys.exit(0)
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

@@ -31,7 +31,7 @@ import logging
 import subprocess
 import multiprocessing
 import glob
-from optparse import OptionParser
+import argparse
 from distutils import spawn
 
 import time
@@ -414,49 +414,47 @@ def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
 ###############################################################################
 # main
 ###############################################################################
-if __name__ == "__main__":
-    
-    
+def main(arguments=None):
+
     # Get and check command-line options
     usage = "usage: %prog [options] arg1 arg2 ..."
     desc = """Performs the astrometric calibration of a set of images,
 in principle previously reduced, but not mandatory; Astromety.net tool is used.
 
 """
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file",
                   help="Source file list of data frames. "
                   "It can be a file or directory name.")
     
-    parser.add_option("-o", "--output_dir",
+    parser.add_argument("-o", "--output_dir",
                   action="store", dest="output_dir", default="/tmp",
-                  help="Place all output files in the specified directory [default=%default]")
+                  help="Place all output files in the specified directory [default: %(default)s]")
     
-    parser.add_option("-t", "--temp_dir",
+    parser.add_argument("-t", "--temp_dir",
                   action="store", dest="temp_dir", default="/tmp",
-                  help="Place all temp files in the specified directory [default=%default]")
+                  help="Place all temp files in the specified directory [default: %(default)s]")
     
     
-    parser.add_option("-p", "--pixel_scale",
+    parser.add_argument("-p", "--pixel_scale",
                   action="store", dest="pixel_scale", type=float, 
                   help="Pixel scale of the images")
     
-    parser.add_option("-e", "--extension",
+    parser.add_argument("-e", "--extension",
                   action="store", dest="extension", type=float, default=0,
                   help="If file is a MEF, extension to be used for solving the field ("
                   "1=SG1, 2=SG2, 3=SG3, 4=SG4, 0=non MEF)")
                   
-    parser.add_option("-r", "--recursive",
+    parser.add_argument("-r", "--recursive",
                   action="store_true", dest="recursive", default=False,
                   help="Recursive subdirectories if source is a directory name (only first level)")
     
                                 
-    (options, args) = parser.parse_args()
-    
-    
+    options = parser.parse_args()
+
     # Logging setup
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -480,7 +478,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     files_not_solved = []
     
     # args is the leftover positional arguments after all options have been processed
-    if not options.source_file  or len(args)!=0: 
+    if not options.source_file or len(args) != 0:
         parser.print_help()
         parser.error("incorrect number of arguments " )
     
@@ -544,3 +542,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     logging.info("Time : %s"%(toc-tic))
 
     sys.exit()
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

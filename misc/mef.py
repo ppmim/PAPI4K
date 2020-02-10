@@ -42,7 +42,7 @@
 
 import os
 import fileinput
-from optparse import OptionParser
+import argparse
 
 # PAPI
 from papi.misc.paLog import log
@@ -1253,64 +1253,64 @@ class MEF (object):
 def main(arguments=None):
     
     # Get and check command-line options
-    usage = "usage: %prog [options] arg1 arg2"
-    parser = OptionParser(usage)
+    desc = "Multi-Extension FITS tool to manipulate MEF files."
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option ("-f", "--file",
-                  action = "store", dest = "file",
-                  help = "Input MEF file. It has to be a fullpath file name")
+    parser.add_argument("-f", "--file",
+                  action="store", dest="file",
+                  help="Input MEF file. It has to be a fullpath file name")
     
-    parser.add_option ("-l", "--input",
-                  action = "store", dest = "input_file_list",
-                  help = "Source file list of data frames. "\
+    parser.add_argument("-l", "--input",
+                  action="store", dest="input_file_list",
+                  help="Source file list of data frames. "\
                   "It has to be a fullpath file name.")
     
-    parser.add_option ("-s", "--suffix",
-                  action = "store", dest = "out_suffix", \
-                  help = "suffix to out files (default .Q%02d.fits)")
+    parser.add_argument("-s", "--suffix",
+                  action="store", dest = "out_suffix",
+                  help="suffix to out files (default: .Qnn.fits)")
     
-    parser.add_option ("-J", "--join",
-                  action = "store_true", dest = "join", \
-                  help = "make a join/stitch of the FITS extensions " \
-                  "creating a single FITS file", default = False)
+    parser.add_argument("-J", "--join",
+                  action = "store_true", dest = "join",
+                  help = "make a join/stitch of the FITS extensions "
+                  "creating a single FITS file", default=False)
                                  
-    parser.add_option ("-S", "--split",
-                  action = "store_true", dest = "split", \
-                  help = "make a split of MEF files, adding a suffix " \
-                  "for each extension", default = False)
+    parser.add_argument("-S", "--split",
+                  action = "store_true", dest = "split",
+                  help = "make a split of MEF files, adding a suffix "
+                  "for each extension", default=False)
     
-    parser.add_option ("-P", "--slice",
-                  action = "store_true", dest = "slice", \
-                  help = "Slice a MEF-cube, adding a suffix " \
-                  "for each plane", default = False)
+    parser.add_argument("-P", "--slice",
+                  action="store_true", dest="slice",
+                  help="Slice a MEF-cube, adding a suffix for each plane",
+                    default = False)
     
-    parser.add_option ("-G", "--geirs-split",
-                  action = "store_true", dest = "geirs_split", \
-                  help = "make a split of GEIRS SEF file, creating "\
-                  "4-single files and adding a suffix for each extension", \
-                  default = False)
+    parser.add_argument("-G", "--geirs-split",
+                  action = "store_true", dest="geirs_split",
+                  help = "make a split of GEIRS SEF file, creating "
+                  "4-single files and adding a suffix for each extension",
+                  default=False)
     
-    parser.add_option ("-C", "--create",
-                  action = "store_true", dest = "create", \
-                  help = "create a MEF (with N extensions) from a " \
-                  "set N single FITS files", default = False)
+    parser.add_argument("-C", "--create",
+                  action="store_true", dest = "create",
+                  help="create a MEF (with N extensions) from a "
+                  "set N single FITS files", default=False)
    
-    parser.add_option ("-g", "--geirs-convert",
-                  action = "store_true", dest = "geirs_convert", \
-                  help = "convert a GEIRS SEF file to a " \
-                  "MEF FITS file with 4 extensions", default = False)
+    parser.add_argument("-g", "--geirs-convert",
+                  action = "store_true", dest = "geirs_convert",
+                  help = "convert a GEIRS SEF file to a "
+                  "MEF FITS file with 4 extensions", default=False)
     
-    parser.add_option ("-d", "--output_dir",
+    parser.add_argument("-d", "--output_dir",
                   action = "store", dest = "output_dir",
                   help = "Directory where output files will be saves.",
                   default = None)
     
-    parser.add_option ("-o", "--output_file",
-                  action = "store", dest = "output_file",
-                  help = "Filename of the output file created [default = %default].",
+    parser.add_argument("-o", "--output_file",
+                  action = "store", dest="output_file",
+                  help = "Filename of the output file created [default: %(default)s].",
                   default = "mef.fits")
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     if options.file:
         filelist = [options.file]
@@ -1327,7 +1327,7 @@ def main(arguments=None):
     if options.join:
         if not options.out_suffix: 
             options.out_suffix = ".join.fits"
-        myMEF.doJoin(options.out_suffix , output_dir=options.output_dir)
+        myMEF.doJoin(options.out_suffix, output_dir=options.output_dir)
         
     elif options.split:
         if not options.out_suffix: 

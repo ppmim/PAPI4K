@@ -408,9 +408,10 @@ class NonLinearityCorrection(object):
 
 ################################################################################
 # main
-if __name__ == "__main__":
-    
-    
+
+
+def main(arguments=None):
+
     desc = """Performs the non-linearity correction of the PANIC raw data files
 using the proper NL-Model (FITS file). Raw data files must be MEF files; if 
 MEF-cubes, each plane is corrected individually.
@@ -487,4 +488,8 @@ MEF-cubes, each plane is corrected individually.
         except Exception,e:
             log.error("Error applying NLC model to file '%s': %s"%(i_file, str(e)))
     """
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())
 

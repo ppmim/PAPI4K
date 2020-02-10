@@ -57,13 +57,12 @@
 ################################################################################
 # Import necessary modules
 
-import getopt
 import sys
 import os
 import fileinput
 import time
 import shutil
-from optparse import OptionParser
+import argparse
 
 # PAPI
 from papi.misc.paLog import log
@@ -386,10 +385,7 @@ class MasterDomeFlat(object):
             shutil.move(self.__output_filename.replace(".fits", "_smooth.fits"),
                         self.__output_filename)
 
-        #Or using scipy ( a bit slower than iraf...)
-        #from scipy import ndimage
-        #filtered = ndimage.gaussian_filter(f[0].data, 20)                      
-        
+
         # Change back to the original working directory
         iraf.chdir()
         
@@ -414,9 +410,10 @@ class MasterDomeFlat(object):
             flatframe[0].header.set('PAT_NEXP', 1,
                                              '# of positions into dither pattern')
 
-        flatframe.close(output_verify='ignore') # This ignore any FITS standar violation and allow write/update the FITS file
-        
-        
+        # This ignore any FITS standar violation and allow write/update the
+        # FITS file
+        flatframe.close(output_verify='ignore')
+
         # Cleanup: Remove temporary files
         # misc.fileUtils.removefiles(flat_lampoff, flat_lampon, flat_diff)
         # Remove temp list files
@@ -430,21 +427,20 @@ class MasterDomeFlat(object):
         
 ################################################################################
 # main
-if __name__ == "__main__":
-    
-    usage = "usage: %prog [options]"
+def main(arguments=None):
+
     desc = """This module receives a series of Dome Flats (On and Off) and
 then creates a Master Dome Flat-Field. It does **not** require any Master Dark.
 """
-    parser = OptionParser(usage, description = desc)
+    parser = argparse.ArgumentParser(description=desc)
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file list of data frames."
                   " It can be a file or directory name.")
     
     
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
                   help="Final coadded output image")
     
@@ -454,20 +450,19 @@ then creates a Master Dome Flat-Field. It does **not** require any Master Dark.
                   action="store", dest="master_bpm",
                   help="Bad pixel mask to be used (optional)", default=None)
     """
-    parser.add_option("-N", "--normalize",
+    parser.add_argument("-N", "--normalize",
                   action="store_true", dest="normalize", default=False,
                   help="Normalize master flat by median. "
                   "If image is multi-detector, then normalization"
-                  " wrt chip 1 is done) [default=%default].")
+                  " wrt chip 1 is done) [default=%(default)s].")
 
-    parser.add_option("-m", "--median_smooth",
+    parser.add_argument("-m", "--median_smooth",
                   action="store_true", dest="median_smooth", default=False,
-                  help="Median smooth the combined flat-field [default=%default]")
+                  help="Median smooth the combined flat-field [default=%(default)s]")
 
+    options = parser.parse_args()
     
-    (options, args) = parser.parse_args()
-    
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
     
@@ -477,11 +472,14 @@ then creates a Master Dome Flat-Field. It does **not** require any Master Dark.
     
     
         
-    filelist = [line.replace( "\n", "") for line in fileinput.input(options.source_file_list)]
+    filelist = [line.replace( "\n", "") for line in
+                fileinput.input(options.source_file_list)]
 
-    print("Files:",filelist)
     tmp_dir = os.path.abspath(os.path.join(options.output_filename, os.pardir))
     mDFlat = MasterDomeFlat(filelist, tmp_dir, options.output_filename, 
                             options.normalize, options.median_smooth)
     mDFlat.createMaster()
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

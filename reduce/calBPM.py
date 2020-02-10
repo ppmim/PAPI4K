@@ -37,12 +37,11 @@
 
 
 # Import necessary modules
-
+import argparse
 import datetime
 import os
 import sys
 import fileinput
-from optparse import OptionParser
 from scipy import interpolate, ndimage
 
 
@@ -555,8 +554,8 @@ class BadPixelMask(object):
             # Remove temp files
             removefiles(flat_comb)
             
-            log.debug('Saved Bad Pixel Mask  to %s' , self.output)
-            log.debug("createBPM' finished %s", t.tac() )
+            log.debug('Saved Bad Pixel Mask  to %s', self.output)
+            log.debug("createBPM' finished %s", t.tac())
 
 #-------------------------------------------------------------------------------
 # Some util routines
@@ -647,6 +646,7 @@ def fixPix(im, mask, iraf=False):
 
     return cleaned 
 
+
 def applyBPM(filename, master_bpm, output_filename, overwrite=False):
     """
     Apply a BPM to a input file setting to NaN the bad pixels.
@@ -704,7 +704,7 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
                 # TO BE DONE: support for sub-windows  
                 #if 'DATASEC' in gh:
 
-        gh.set('HISTORY','Combined with BPM:%s'%master_bpm)
+        gh.set('HISTORY', 'Combined with BPM:%s' % master_bpm)
 
         # Write masked data
         if overwrite:
@@ -714,78 +714,73 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
     except Exception as e:
         raise e
     else:
-        if not overwrite: return output_filename
-        else: return filename
-
-
-
-###############################################################################
-usage = "usage: %prog [options] "
-desc = """
-Generate a bad pixel mask from a list of dark corrected dome flat images.
-    
-A list of dark corrected dome flat images is given. A master flat 
-is created from all the input flats in the list. Each input flat is 
-then divided by the master. Bad pixels are marked on the new image as 
-those that are above or below the threshold (in sigma) in the new image. 
-Any pixel which has been marked as bad for more than a quarter of the 
-input images is defined as bad in the output mask.
-
-The output mask (BPM) created is a FITS file with same size than input images
-and with 0's for Good pixels and 1's for Bad pixels.
-
-Note: MEF files are supported as input files.
-
-"""
-parser = OptionParser(usage, description=desc)
- 
-               
-parser.add_option("-s", "--source",
-              action="store", dest="source_file_list",
-              help="list of input (optionally dark corrected) dome flat images..")
-
-parser.add_option("-o", "--output",
-              action="store", dest="output_filename", 
-              help="The output bad pixel mask (0's for good, 1's for bad pixels)")
-
-parser.add_option("-L", "--lthr",
-              action="store", dest="lthr", type='float', default=10.0,
-              help="The low rejection threshold in units of sigma [default=%default]")
-
-parser.add_option("-H", "--hthr",
-              action="store", dest="hthr", type='float', default=10.0,
-              help="The high rejection threshold in units of sigma [default=%default]")
-
-parser.add_option("-r", "--raw",
-              action="store_true", dest="raw_flag", default=False,
-              help="Neither check FLAT type nor Readout-mode [default=%default]")
-
-parser.add_option("-a", "--apply_bpm",
-              action="store", dest="apply_bpm",
-              help="Apply (set to NaN) the given BPM to the source files.")
-
-parser.add_option("-f", "--fix_bp",
-              action="store", dest="fix_bp",
-              help="Fix (replaced with a bi-linear interpolation from nearby pixels)"
-              "the given BPM to the source files")
+        if not overwrite:
+            return output_filename
+        else:
+            return filename
 
 
 ################################################################################
 # main
 def main(arguments=None):
-    
-    if arguments is None:
-        arguments = sys.argv[1:] # argv[0] is the script name
-    (options, args) = parser.parse_args(args = arguments)
+    ###############################################################################
+    desc = """
+    Generate a bad pixel mask from a list of dark corrected dome flat images.
 
-    if len(sys.argv[1:])<1:
+    A list of dark corrected dome flat images is given. A master flat
+    is created from all the input flats in the list. Each input flat is
+    then divided by the master. Bad pixels are marked on the new image as
+    those that are above or below the threshold (in sigma) in the new image.
+    Any pixel which has been marked as bad for more than a quarter of the
+    input images is defined as bad in the output mask.
+
+    The output mask (BPM) created is a FITS file with same size than input images
+    and with 0's for Good pixels and 1's for Bad pixels.
+
+    Note: MEF files are supported as input files.
+
+    """
+    parser = argparse.ArgumentParser(description=desc)
+
+    parser.add_argument("-s", "--source",
+                      action="store", dest="source_file_list",
+                      help="list of input (optionally dark corrected) dome flat images..")
+
+    parser.add_argument("-o", "--output",
+                      action="store", dest="output_filename",
+                      help="The output bad pixel mask (0's for good, 1's for bad pixels)")
+
+    parser.add_argument("-L", "--lthr",
+                      action="store", dest="lthr", type=float, default=10.0,
+                      help="The low rejection threshold in units of sigma [default=%(default)s]")
+
+    parser.add_argument("-H", "--hthr",
+                      action="store", dest="hthr", type=float, default=10.0,
+                      help="The high rejection threshold in units of sigma [default=%(default)s]")
+
+    parser.add_argument("-r", "--raw",
+                      action="store_true", dest="raw_flag", default=False,
+                      help="Neither check FLAT type nor Readout-mode [default=%(default)s]")
+
+    parser.add_argument("-a", "--apply_bpm",
+                      action="store", dest="apply_bpm",
+                      help="Apply (set to NaN) the given BPM to the source files.")
+
+    parser.add_argument("-f", "--fix_bp",
+                      action="store", dest="fix_bp",
+                      help="Fix (replaced with a bi-linear interpolation from nearby pixels)"
+                           "the given BPM to the source files")
+
+    if arguments is None:
+        arguments = sys.argv[1:]  # argv[0] is the script name
+
+    options = parser.parse_args(args=arguments)
+
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        return 2
 
-    if len(args) !=0:
-        parser.print_help()
-        return 2 # used for command line syntax errors
-    
+
     # Check mandatory arguments
     if not options.output_filename or not options.source_file_list:
         parser.print_help()
@@ -794,7 +789,7 @@ def main(arguments=None):
         
     # Make sure we are not overwriting an existing file 
     if os.path.exists(options.output_filename):
-        print("Error. The output file '%s' already exists."  %
+        print("Error. The output file '%s' already exists." %
               (options.output_filename))
         return 1
 
@@ -805,7 +800,7 @@ def main(arguments=None):
     
     # 1 - Apply the given BPM to the source files
     if options.fix_bp:
-        filelist = [line.replace( "\n", "") 
+        filelist = [line.replace("\n", "")
                     for line in fileinput.input(options.source_file_list)]
         bpm_data = fits.getdata(options.fix_bp, header=False)
         for myfile in filelist:
@@ -837,4 +832,3 @@ def main(arguments=None):
 if __name__ == "__main__":
     print('Starting BadPixelMap....')
     sys.exit(main())
-        

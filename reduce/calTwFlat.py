@@ -57,7 +57,7 @@ import sys
 import os
 import fileinput
 import shutil
-from optparse import OptionParser
+import argparse
 
 # PAPI
 from papi.misc.paLog import log
@@ -76,8 +76,10 @@ from iraf import mscred
 # Interact with FITS files
 import astropy.io.fits as fits
 
+
 class ExError(Exception):
     pass
+
 
 class MasterTwilightFlat(object):
     """
@@ -607,63 +609,60 @@ class MasterTwilightFlat(object):
         
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     # Get and check command-line options
-    usage = "usage: %prog [options]"
     desc = """This module receives a series of Twilight Flats and
 and a Master Dark Model and then creates a Master Twilight Flat-Field.
 Note: Dome Flats series (not lamp ON/OFF) are also supported.
 """
-    parser = OptionParser(usage, description = desc)
-    
+    parser = argparse.ArgumentParser(description=desc)
                   
-    parser.add_option("-s", "--source",
-                  action="store", dest="source_file_list", type='str',
+    parser.add_argument("-s", "--source",
+                  action="store", dest="source_file_list", type=str,
                   help="Source file list of data *Sky Flat* frames."
                   " It can be a file or directory name.")
     
-    parser.add_option("-D", "--master_dark_model", type='str',
+    parser.add_argument("-D", "--master_dark_model", type=str,
                   action="store", dest="master_dark_model",
                   help="Master dark model to subtract each raw flat"
                   " (it will be scaled by TEXP)")
     
-    parser.add_option("-d", "--master_dark_list", type='str',
+    parser.add_argument("-d", "--master_dark_list", type=str,
                   action="store", dest="master_dark_list",
                   help="List of Master darks to subtract each raw flat"
                   " (they must have the same TEXP)")
     
-    parser.add_option("-o", "--output", type='str',
+    parser.add_argument("-o", "--output", type=str,
                   action="store", dest="output_filename", 
                   help="Final coadded output image")
     
     ## -optional
     
-    parser.add_option("-b", "--master_bpm", type='str',
+    parser.add_argument("-b", "--master_bpm", type=str,
                   action="store", dest="master_bpm",
                   help="Bad pixel mask to be used (optional)", default=None)
     
-    parser.add_option("-N", "--normalize",
+    parser.add_argument("-N", "--normalize",
                   action="store_true", dest="normalize", default=False,
                   help="Normalize master flat by median. If image is "
                   "multi-detector, then normalization wrt chip 1 is done)"
-                  " [default=%default]")
+                  " [default=%(default)s]")
     
-    parser.add_option("-m", "--median_smooth",
+    parser.add_argument("-m", "--median_smooth",
                   action="store_true", dest="median_smooth", default=False,
-                  help="Median smooth the combined flat-field [default=%default]")
+                  help="Median smooth the combined flat-field [default=%(default)s]")
     
-    parser.add_option("-L", "--low", type='float', default=10000,
+    parser.add_argument("-L", "--low", type=float, default=10000,
                   action="store", dest="minlevel", 
                   help="Flats with median level bellow are rejected "
-                  "[default=%default].")
+                  "[default=%(default)s].")
     
-    parser.add_option("-H", "--high", type='float', default=40000,
+    parser.add_argument("-H", "--high", type=float, default=40000,
                   action="store", dest="maxlevel", 
                   help="Flats with median level above are rejected "
-                  "[default=%default].")
-    
-    (options, args) = parser.parse_args()
-    
+                  "[default=%(default)s].")
+
+    options = parser.parse_args()
     
     if len(sys.argv[1:]) < 1:
         parser.print_help()
@@ -680,11 +679,11 @@ Note: Dome Flats series (not lamp ON/OFF) are also supported.
         
     # Start proceduce
     
-    filelist = [line.replace( "\n", "") 
+    filelist = [line.replace("\n", "")
               for line in fileinput.input(options.source_file_list)]
     
     if options.master_dark_list and os.path.exists(options.master_dark_list):
-        dark_list = [line.replace( "\n", "") 
+        dark_list = [line.replace("\n", "")
               for line in fileinput.input(options.master_dark_list)]
     else: dark_list = []
     try:
@@ -701,3 +700,7 @@ Note: Dome Flats series (not lamp ON/OFF) are also supported.
     except Exception as ex:
         log.error("Unexpected error: %s", str(ex))
         sys.exit(1)
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

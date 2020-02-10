@@ -43,7 +43,7 @@ import sys
 import os
 import fileinput
 import time
-from optparse import OptionParser
+import argparse
 from scipy import ndimage
 
 from papi.misc.fileUtils import removefiles
@@ -607,7 +607,7 @@ def fixpix_old(im, mask, iraf=False):
         
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     
     # Get and check command-line options
     usage = "usage: %prog [options]"
@@ -619,49 +619,48 @@ In principle, source raw files can be MEFs and data cubes, but cannot be
 mixed MEF files and non-MEF files, and of course, images must have the
 same image size.
 """
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file listing the filenames of raw frames.")
     
-    parser.add_option("-d", "--dark",
+    parser.add_argument("-d", "--dark",
                   action="store", dest="dark_file", 
                   help="Master dark to be subtracted.")
     
-    parser.add_option("-f", "--flat-field",
+    parser.add_argument("-f", "--flat-field",
                   action="store", dest="flat_file",
                   help="Master flat-field to be divided by.")
     
-    parser.add_option("-b", "--bpm",
+    parser.add_argument("-b", "--bpm",
                   action="store", dest="bpm_file",
                   help="Master Bad Pixel Mask to use (optional)")
     
-    parser.add_option('-a', '--bpm_action',
-                      type='choice',
+    parser.add_argument('-a', '--bpm_action',
                       action='store',
                       dest='bpm_action',
                       choices=['fix', 'grab', 'none',],
                       default='none',
-                      help='Action (none,grab,fix) to perform with BPM [default: %default]')
+                      help='Action (none,grab,fix) to perform with BPM [default: %(default)s]')
 
-    parser.add_option("-o", "--out_dir",
+    parser.add_argument("-o", "--out_dir",
                   action="store", dest="out_dir", default="/tmp/",
-                  help="Directory where output files will be saved [Default: %default]")
+                  help="Directory where output files will be saved [Default: %(default)s]")
 
-    parser.add_option("-F", "--force_apply",
+    parser.add_argument("-F", "--force_apply",
                   action="store_true", dest="force_apply", default=False,
-                  help="Forces operations withouth checking FITS data type [default: %default]")
+                  help="Forces operations withouth checking FITS data type [default: %(default)s]")
    
-    parser.add_option("-N", "--normalize_FF",
+    parser.add_argument("-N", "--normalize_FF",
                   action="store_false", dest="normalize", default=False,
-                  help="Performs Flat-Filed normalization [default: %default]")
+                  help="Performs Flat-Filed normalization [default: %(default)s]")
 
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
-    if len(sys.argv[1:]) < 1 :
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
@@ -694,3 +693,6 @@ same image size.
         log.error("Error running task: %s" % str(e))
         sys.exit(0)
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

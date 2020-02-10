@@ -22,7 +22,7 @@
 
 
 # Import necessary modules
-from optparse import OptionParser
+import argparse
 import sys
 import os
 import astropy.io.fits as fits
@@ -209,46 +209,46 @@ def collapse_distinguish(frame_list, out_filename="/tmp/collapsed.fits"):
 ################################################################################
 # main
 ################################################################################
-if __name__ == "__main__":
+def main(arguments=None):
 
     log.info("Start-of-collapse")
 
     # Get and check command-line options
         
-    USAGE = "usage: %prog [options] arg1 arg2 ..."
     desc = "Collapse (add them up arithmetically) each cube of a list files into a single 2D image."
+
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser = OptionParser(USAGE, description=desc)
-    
-    parser.add_option("-i", "--input_image",
+    parser.add_argument("-i", "--input_image",
                   action="store", dest="input_image", 
                   help="input FITS cube image (MEF or non MEF) to collapse into a 2D coadded image")
     
-    parser.add_option("-L", "--input_image_list",
+    parser.add_argument("-L", "--input_image_list",
                   action="store", dest="input_image_list", 
                   help="input list of FITS (MEF or non MEF) to be collapsed individually into a 2D coadded image")
     
-    parser.add_option("-l", "--input_single_image_list",
+    parser.add_argument("-l", "--input_single_image_list",
                   action="store", dest="input_single_image_list", 
                   help="input image list (text file) of a set of single images (non MEF) to be collapsed into a single 2D coadded image")
 
-    parser.add_option("-o", "--output_file",
+    parser.add_argument("-o", "--output_file",
                   action="store", dest="output_file", 
-                  help="output filename (default = %default)",
+                  help="output filename (default = %(default)s)",
                   default="/tmp/out.fits")
 
-    parser.add_option("-d", "--output_dir",
+    parser.add_argument("-d", "--output_dir",
                   action="store", dest="output_dir", 
-                  help="output directory (default = %default)",
+                  help="output directory (default = %(default)s)",
                   default="/tmp")
-                                
-    (options, args) = parser.parse_args()
+
+    options = parser.parse_args()
     
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
-    if (not options.input_image and not options.input_image_list and not options.input_single_image_list) or len(args)!=0: 
+    if (not options.input_image and not options.input_image_list and
+            not options.input_single_image_list):
         # args is the leftover positional arguments after all options have been processed
         parser.print_help()
         parser.error("Wrong number of arguments " )
@@ -300,3 +300,6 @@ if __name__ == "__main__":
         
     log.info("End-of-collapse")
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

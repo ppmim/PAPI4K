@@ -50,7 +50,7 @@ import sys
 import os
 import fileinput
 import shutil
-from optparse import OptionParser
+import argparse
 import numpy 
 
 # PAPI
@@ -322,44 +322,43 @@ class MasterDark(object):
 def main(arguments=None):
     # Get and check command-line options
     # The script doesnt take any positional arguments, so only options
-    usage = "usage: %prog [options] "
     desc = """This module receives a series of FITS images (darks) and
 creates the master dark and computes several statistics.
 """
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file listing the filenames of dark frames.")
     
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
                   help="final coadded output image")
     
-    parser.add_option("-n", "--normalize",
+    parser.add_argument("-n", "--normalize",
                   action="store_true", dest="normalize", default=False,
                   help="normalize master dark to 1 sec [default False]")
     
-    parser.add_option("-e", "--scale",
+    parser.add_argument("-e", "--scale",
                   action="store_true", dest="texp_scale", default=False,
                   help="scale raw frames by TEXP [default False]")
    
-    parser.add_option("-S", "--show_stats",
+    parser.add_argument("-S", "--show_stats",
                   action="store_true", dest="show_stats", default=False,
                   help="Show frame stats [default False]")    
     
-    parser.add_option("-t", "--no_type_checking",
+    parser.add_argument("-t", "--no_type_checking",
                   action="store_true", dest="no_type_checking", default=False,
                   help="Do not make frame type checking [default False]")    
     
-    parser.add_option("-v", "--verbose",
+    parser.add_argument("-v", "--verbose",
                   action="store_true", dest="verbose", default=True,
                   help="verbose mode [default]")
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
    
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
@@ -372,7 +371,7 @@ creates the master dark and computes several statistics.
         parser.print_help()
         parser.error("Source and output must be a file, not a directory")
         
-    filelist = [line.replace( "\n", "") 
+    filelist = [line.replace("\n", "")
                 for line in fileinput.input(options.source_file_list)]
     
     try:
@@ -384,6 +383,5 @@ creates the master dark and computes several statistics.
         log.error("Task failed. Some error was found: %s" % str(e))
 
 ######################################################################
-import sys
 if __name__ == "__main__":
     sys.exit(main())
