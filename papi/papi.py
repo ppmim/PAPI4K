@@ -47,9 +47,7 @@ import os.path
 import argparse
 import fileinput
 
-
-#Log
-#import misc.paLog
+# Log
 from papi.misc.paLog import log
 
 #PAPI packages 

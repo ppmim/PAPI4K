@@ -30,8 +30,9 @@
 #
 ###############################################################################
 
+import sys
+import argparse
 import os
-from optparse import OptionParser
 import astropy.io.fits as fits
 
 
@@ -270,7 +271,7 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
                 str(int(ymin)) + ":" + str(int(ymax)) + "]", output=ima_objs)
                 
     except Exception as e:
-        log.debug("Some error trimming image %s . Probaby input image is wrong." % ima_sec)
+        log.debug("Some error trimming image %s . Probaby input image is wrong."% ima_sec)
 
     log.debug("....End of imgTrim --> XMIN= %d YMIN=%d XMAX= %d YMAX=%d"
             %(xmin, ymin, xmax, ymax))
@@ -279,30 +280,27 @@ def imgTrim(inputfile, outputfile=None, p_step=128):
         
 ###############################################################################
 # main
-if __name__ == "__main__":
-        
-    
+def main(arguments=None):
+
     # Get and check command-line options
-    usage = "usage: %prog [options]  arg2 ..."
-    desc = """Performs image trimming looking for a constant frame around the \
+    desc = """Performs image trimming looking for a constant frame around the
 image.
 """
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option("-i", "--input_image",
+    parser.add_argument("-i", "--input_image",
                   action="store", dest="input_image", 
                   help="Input image to trim")
     
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_image", 
                   help="Output file for trimmed image")
     
-    parser.add_option("-s", "--step",
+    parser.add_argument("-s", "--step",
                   action="store", dest="step", default=128, type=int,
-                  help="Max. step to look for border pixels [default=%default]")
-    
-                                
-    (options, args) = parser.parse_args()
+                  help="Max. step to look for border pixels [default=%(default)s]")
+
+    options = parser.parse_args()
     
     
     if options.input_image and os.path.exists(options.input_image) and \
@@ -312,8 +310,11 @@ image.
                     options.output_image,
                     options.step)
         except Exception as e:
-            log.error("Error while trimming image %s"%options.input_image)
+            log.error("Error while trimming image %s" % options.input_image)
             log.error("%s" % str(e))
             raise e
     else:
         parser.error("Input or output file does not exist.")
+
+if __name__ == "__main__":
+    sys.exit(main())

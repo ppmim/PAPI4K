@@ -59,8 +59,8 @@ field of next observations.
 """
 
 # Import necessary modules
-from optparse import OptionParser
 import sys
+import argparse
 
 import astropy.io.fits as fits
 import numpy
@@ -582,23 +582,23 @@ def de_crosstalk_PANIC(in_image, out_image=None, overwrite=False):
     return out_file
 
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     
     
     usage = "usage: %prog [options]"
     desc = "Remove the cross-talk spots in the input image."
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option("-i", "--input_image",
+    parser.add_argument("-i", "--input_image",
                   action="store", dest="input_image", 
                   help="input image to remove crosstalk ")
                   
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_image", 
-                  help="output filename (default = %default)",
+                  help="output filename (default = %(default)s)",
                   default="dxtalk.fits")
     
-    parser.add_option("-O", "--overwrite",
+    parser.add_argument("-O", "--overwrite",
                   action="store_true", dest="overwrite", default=False,
                   help="overwrite the original image with the corrected one")
 
@@ -606,14 +606,14 @@ if __name__ == "__main__":
     #parser.add_option("-S", "--check_stars",
     #              action="store_true", dest="check_stars", default=False,
     #              help="check if there are bright stars and take them into account for the cube median")  
-                                
-    (options, args) = parser.parse_args()
+
+    options = parser.parse_args()
     
     if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
        
-    if not options.input_image or len(args)!=0: 
+    if not options.input_image0:
     # args is the leftover positional arguments after all options have been processed
         parser.print_help()
         parser.error("wrong number of arguments " )
@@ -627,3 +627,8 @@ if __name__ == "__main__":
         log.error("Fail of Crosstalk procedure: %s" % str(e))
     else:
         log.info("Well done!")
+
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

@@ -16,9 +16,10 @@
 # Import necessary modules
 
 import os
+import sys
 import fileinput
 from datetime import datetime
-from optparse import OptionParser
+import argparse
 
 # Interact with FITS files
 from papi.datahandler.clfits import ClFits
@@ -72,7 +73,6 @@ class LogSheet (object):
         @summary:  Create a log sheet text file from a set of FITS files
         """   
         log.debug("Start createLogSheet")
-        
         
         # STEP 0:Get the user-defined list of frames
         if type(self.__file_list)==type([]):
@@ -145,44 +145,41 @@ class LogSheet (object):
 ################################################################################
 # main
 ################################################################################
-if __name__ == "__main__":
-    print('Start Log Sheet generator....')
+def main(arguments=None):
+    desc = 'Start Log Sheet generator'
     # Get and check command-line options
+
+    parser = argparse.ArgumentParser(description=desc)
     
-    
-    usage = "usage: %prog [options] arg1 arg2"
-    parser = OptionParser(usage)
-    
-    parser.add_option("-v", "--verbose",
+    parser.add_argument("-v", "--verbose",
                   action="store_true", dest="verbose", default=True,
                   help="verbose mode [default]")
     
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file list of data frames. It can be a file or directory name.")
     
-    parser.add_option("-o", "--output file for logsheet",
-                  action="store", dest="output_filename", type="str",
+    parser.add_argument("-o", "--output file for logsheet",
+                  action="store", dest="output_filename", type=str,
                   default="/tmp/files.txt",
-                  help="write output logsheet to specified file (default=%default)")
+                  help="write output logsheet to specified file (default=%(default)s)")
     
-    parser.add_option("-d", "--display",
+    parser.add_argument("-d", "--display",
                   action="store_true", dest="show", default=True,
                   help="show result on screen (stdout)")
     
-    parser.add_option("-r", "--rows", nargs=2,
+    parser.add_argument("-r", "--rows", nargs=2,
                   action="store", dest="rows", type=int,
                   help="show only filenames the range of rows specified (0 to N")
 
-    parser.add_option("-F", "--filenames_only",
+    parser.add_argument("-F", "--filenames_only",
                   action="store_true", dest="filenames_only", default=False,
                   help="Only print out the filenames")
-    
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     # args is the leftover positional arguments after all options have been processed
-    if not options.source_file_list or not options.output_filename or len(args)!=0: 
+    if not options.source_file_list or not options.output_filename:
         parser.print_help()
         parser.error("incorrect number of arguments " )
     if options.verbose:
@@ -196,3 +193,6 @@ if __name__ == "__main__":
     if options.show:
         logsheet.show()
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

@@ -38,7 +38,7 @@
 ################################################################################
 
 # Import necessary modules
-from optparse import OptionParser
+import argparse
 import sys
 import os
 
@@ -61,7 +61,7 @@ class CmdException(Exception):
     pass
 
 
-def catalog_xmatch( cat1, cat2, out_filename, out_format='votable', error=2.0 ):
+def catalog_xmatch(cat1, cat2, out_filename, out_format='votable', error=2.0 ):
     """
     *** Currently NOT used ***
 
@@ -324,7 +324,8 @@ def generate_phot_comp_plot( input_catalog, filter, expt = 1.0 ,
         raise CmdException("STILTS command failed !")
     
     else:
-        if out_filename: return out_filename
+        if out_filename:
+            return out_filename
         else:
             return 'stdout'
 
@@ -365,11 +366,11 @@ def compute_regresion2( column_x, column_y , filter_name,
     # to take into account when the output_filename has no path.
     output_dir = os.path.abspath(os.path.join(output_filename, os.pardir))
     
-    X = column_x # MAG_AUTO = -2.5 * numpy.log10(table_new['FLUX_AUTO']/1.0)
-    Y = column_y # 2MASS photometric value
+    X = column_x  # MAG_AUTO = -2.5 * numpy.log10(table_new['FLUX_AUTO']/1.0)
+    Y = column_y  # 2MASS photometric value
    
    
-    #remove the NaN values 
+    # remove the NaN values
     validdata_X = ~numpy.isnan(X)
     validdata_Y = ~numpy.isnan(Y)
     validdataBoth = validdata_X & validdata_Y
@@ -684,18 +685,18 @@ def compute_regresion( vo_catalog, column_x, column_y ,
     print("LEN2=",len(temp[numpy.where(numpy.abs(m_err)<std*2)]))
     zp2 = numpy.median( temp[numpy.where(numpy.abs(m_err)<std*2)])
     m_err2 = n_Y - (n_X + zp2) 
-    rms2 = numpy.sqrt( numpy.mean( (m_err2)**2 ) )
+    rms2 = numpy.sqrt( numpy.mean((m_err2)**2))
     std2 = numpy.std(m_err2)
     MAD2 = numpy.median( numpy.abs(m_err2-numpy.median(m_err2)))
     MAD2b = numpy.sqrt( numpy.median( (m_err2-numpy.median(m_err2))**2 ) )
     #std3 = numpy.std(m_err[numpy.where(numpy.abs(m_err2)<std2*2)])
 
     log.debug("ZP2 = %f"%zp2)
-    log.debug("MAD2(m_err2) = %f"%MAD2)
-    log.debug("MAD2b(m_err2) = %f"%MAD2b)
-    log.debug("MEAN2(m_err2) = %f"%numpy.mean(m_err2))
-    log.debug("STD(m_err2) = %f"%std2)
-    log.debug("RMS(m_err2) = %f"%rms2)
+    log.debug("MAD2(m_err2) = %f" % MAD2)
+    log.debug("MAD2b(m_err2) = %f" % MAD2b)
+    log.debug("MEAN2(m_err2) = %f" % numpy.mean(m_err2))
+    log.debug("STD(m_err2) = %f" % std2)
+    log.debug("RMS(m_err2) = %f" % rms2)
 
     #log.debug("STD3 = %f"%std3)
     
@@ -705,17 +706,18 @@ def compute_regresion( vo_catalog, column_x, column_y ,
     #print m_err
     # Lo normal es que coincida la RMS con la STD, pues la media de m_err en este caso es 0
     my_mag = n_X+zp2
-    plt.plot( my_mag[numpy.where(m_err<std*2)], m_err[numpy.where(m_err<std*2)], '.')
+    plt.plot(my_mag[numpy.where(m_err<std*2)],
+             m_err[numpy.where(m_err<std*2)], '.')
     plt.xlabel("Inst_Mag")
     plt.ylabel("2MASS_Mag-Inst_Mag")
-    plt.title("(2) Calibration with 2MASS - STD = %f"%std2)
-    #plt.plot((b * n_X + a), m_err, '.')
+    plt.title("(2) Calibration with 2MASS - STD = %f" % std2)
+    # plt.plot((b * n_X + a), m_err, '.')
     plt.savefig("/tmp/phot_errs.pdf")
     plt.show()
     
     
     pylab.hist(m_err2, bins=50, normed=0)
-    pylab.title("Mag error Histogram - RMS = %f mag STD = %f"%(rms2,std2))
+    pylab.title("Mag error Histogram - RMS = %f mag STD = %f" % (rms2,std2))
     pylab.xlabel("Mag error")
     pylab.ylabel("Frequency")
     plt.savefig("/tmp/phot_hist.pdf")
@@ -742,7 +744,7 @@ class STILTSwrapper (object):
     
     def __init__(self, *a, **k):
         """ The constructor """
-        super (STILTSwrapper, self).__init__ (*a, **k)
+        super (STILTSwrapper, self).__init__(*a, **k)
         
     
     def runXMatch(self, cat1, cat2, out_filename=None, out_format='votable', 
@@ -964,54 +966,50 @@ def doPhotometry(input_image, pixel_scale, catalog, output_filename,
 ################################################################################
 # main
 ################################################################################
-if __name__ == "__main__":
+def main(arguments=None):
 
     # Get and check command-line options
-    usage = "usage: %prog [options]"
     desc = """This module receives a reduced image of any known NIR filter and
 match to 2MASS catalog performing a fit in order to get a estimation of the 
 Zero Point."""
- 
-    parser = OptionParser(usage, description=desc)
+
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option("-i", "--input_image",
+    parser.add_argument("-i", "--input_image",
                   action="store", dest="input_image", 
                   help="Input image to calibrate to do photometric comparison with")
     
-    parser.add_option("-p", "--pix_scale",
+    parser.add_argument("-p", "--pix_scale",
                   action="store", dest="pix_scale", type=float,
-                  help="Pixel scale of image (default = %default)",
+                  help="Pixel scale of image (default = %(default)s)",
                   default=0.45)
 
-    parser.add_option("-S", "--snr",
+    parser.add_argument("-S", "--snr",
                   action="store", dest="snr", type=float,
-                  help="Min SNR of stars used for linear fit (default = %default)",
+                  help="Min SNR of stars used for linear fit (default = %(default)s)",
                   default=10.0)
     
-    parser.add_option("-z", "--zero_point",
+    parser.add_argument("-z", "--zero_point",
                   action="store", dest="zero_point", type=float, default=25.0,
-                  help="Initial Magnitude Zero Point estimation [%default]; used for SExtractor")
+                  help="Initial Magnitude Zero Point estimation [%(default)s]; used for SExtractor")
                   
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
-                  help="Output plot filename (default = %default)",
+                  help="Output plot filename (default = %(default)s)",
                   default="photometry.pdf")
+
+    options = parser.parse_args()
     
-    
-                                
-    (options, args) = parser.parse_args()
-    
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
 
-    if not options.input_image or len(args)!=0: 
+    if not options.input_image:
     # args is the leftover positional arguments after all options have been processed
         parser.print_help()
-        parser.error("wrong number of arguments " )
+        parser.error("wrong number of arguments ")
     if not options.output_filename:
         options.output_filename = None
-    
 
     if not os.path.exists(options.input_image):
         log.error ("Input image %s does not exist", options.input_image)
@@ -1025,3 +1023,6 @@ Zero Point."""
         log.info("Some error while running photometric calibration: %s"%str(e))
         sys.exit(0)
         
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

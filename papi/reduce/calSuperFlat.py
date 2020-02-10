@@ -345,7 +345,7 @@ class SuperSkyFlat(object):
                                     
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     # Get and check command-line options
 
     desc = """This module receives a series of FITS images (science)  and
@@ -410,3 +410,6 @@ creates the master super flat-field median combining images using sigma-clip alg
     except Exception as e:
         log.error("Error: %s" % str(e))
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

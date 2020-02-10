@@ -80,6 +80,7 @@ manager via pip. We recommend a fresh environment with only python installed. Vi
 
     $ conda create -n papienv python=3.7
     $ conda config --add channels http://ssb.stsci.edu/astroconda
+    $ conda activate papienv
     $ conda install python=3.7 iraf-all pyraf-all
 
 .. warning::

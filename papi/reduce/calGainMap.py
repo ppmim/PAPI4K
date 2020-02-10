@@ -475,7 +475,9 @@ def get_dev(gain, naxis1, naxis2, chip, nx, ny):
 #############################################################################
 # main
 # ###########################################################################
-if __name__ == "__main__":
+
+
+def main(arguments=None):
     # Get and check command-line options
 
     DESC = """Creates a master gain map from a given master flat field (dome,
@@ -545,5 +547,8 @@ if __name__ == "__main__":
     except Exception as ex:
         log.error("Some kind of problem happened %s" % str(ex))
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())
 
 

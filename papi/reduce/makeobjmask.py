@@ -45,7 +45,7 @@ import sys
 import os
 import glob
 import fileinput
-from optparse import OptionParser
+import argparse
 import astropy.io.fits as fits
 
 from papi.misc.paLog import log
@@ -202,64 +202,66 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
     
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     
-    usage = "usage: %prog [options]"
     desc = """ Creates object masks (SExtractor OBJECTS images) for a list of FITS images.
 Expects the command "sex" (SExtractor Version 2+) in path.  If weight maps
 exist they will be used (assume weight map filename given by replacing .fits
 with .weight.fits)."""
 
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
                   
-    parser.add_option("-s", "--file", type="str",
+    parser.add_argument("-s", "--file", type=str,
                   action="store", dest="inputfile",
                   help="It can be a source file listing data frames or a single FITS file to process.")
     
-    parser.add_option("-o", "--output", type="str",
+    parser.add_argument("-o", "--output", type=str,
                   action="store", dest="outputfile", 
-                  help="Output text file including the list of objects mask files created by SExtractor ending with '.objs' suffix")
+                  help="Output text file including the list of objects mask "
+                       "files created by SExtractor ending with '.objs' suffix")
     
-    parser.add_option("-m", "--minarea", type="int", default=5,
+    parser.add_argument("-m", "--minarea", type=int, default=5,
                   action="store", dest="minarea", 
-                  help="SExtractor DETECT_MINAREA (default=%default)")
+                  help="SExtractor DETECT_MINAREA (default=%(default)s)")
     
-    parser.add_option("-M", "--maxarea", type="int", default=0,
+    parser.add_argument("-M", "--maxarea", type=int, default=0,
                   action="store", dest="maxarea", 
-                  help="SExtractor DETECT_MAXAREA (default=%default), 0=unlimited")
+                  help="SExtractor DETECT_MAXAREA (default=%(default)s), 0=unlimited")
     
-    parser.add_option("-t", "--threshold", type="float", default=2.0,
+    parser.add_argument("-t", "--threshold", type=float, default=2.0,
                   action="store", dest="threshold", 
-                  help="SExtractor DETECT_THRESH (default=%default)")
+                  help="SExtractor DETECT_THRESH (default=%(default)s)")
     
-    parser.add_option("-l", "--saturlevel", type="int", default=300000,
+    parser.add_argument("-l", "--saturlevel", type=int, default=300000,
                   action="store", dest="saturlevel",
-                  help="SExtractor SATUR_LEVEL (default=%default)")
+                  help="SExtractor SATUR_LEVEL (default=%(default)s)")
     
-    parser.add_option("-1", "--single_point", default=False,
+    parser.add_argument("-1", "--single_point", default=False,
                   action="store_true", dest="single_point",
-                  help="Create a single point object mask (default=%default)")
-    
-    
-    (options, args) = parser.parse_args()
+                  help="Create a single point object mask (default=%(default)s)")
 
-    if len(sys.argv[1:])<1:
+    options = parser.parse_args()
+
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
     
     # args is the leftover positional arguments after all options have been 
     # processed
-    if not options.inputfile or not options.outputfile or len(args)!=0: 
+    if not options.inputfile or not options.outputfile:
         parser.print_help()
-        parser.error("Incorrect number of arguments " )
+        parser.error("Incorrect number of arguments ")
         
     try:
-        makeObjMask( options.inputfile, options.minarea, options.maxarea,
+        makeObjMask(options.inputfile, options.minarea, options.maxarea,
                     options.threshold, options.saturlevel, options.outputfile, 
                      options.single_point)
     except Exception as e:
-        log.error("Error while running 'makeobjectmask' %s"%str(e))
+        log.error("Error while running 'makeobjectmask' %s" % str(e))
     else:
         log.debug("Well done!")
-        
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

@@ -399,12 +399,11 @@ class CheckQuality(object):
 
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     
     # Get and check command-line options
         
-    usage = "usage: %prog [options]"
-    desc = """This module gives an estimation of the FWHM of the input image 
+    desc = """This module gives an estimation of the FWHM of the input image
 using best stars of its SExtractor catalog. If input file is a MEF, the routine
 gives a mean estimation of the FWHM of all extensions/detectors, not distinguishing
 between them. However, the -W --window flag can be used to specify a certain
@@ -523,7 +522,7 @@ detector (Q1,Q2,Q3,Q4).
     
     elif options.input_image:
         if not os.path.exists(options.input_image):
-            log.error ("Input image %s does not exist", options.input_image)
+            log.error("Input image %s does not exist", options.input_image)
             sys.exit(0)
 
         try:
@@ -539,3 +538,6 @@ detector (Q1,Q2,Q3,Q4).
         log.error("No input file given.")
         sys.exit(0)
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

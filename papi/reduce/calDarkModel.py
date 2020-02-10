@@ -35,7 +35,7 @@
 
 # Import necessary modules
 
-from optparse import OptionParser
+import argparse
 import sys
 import os
 import fileinput
@@ -284,29 +284,31 @@ def my_mode(data):
     
     return modelist,maxcount
 
+
+################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     usage = "usage: %prog [options]"
     desc = """
 This module receives a series of FITS images (darks) with increasing exposure 
 time and creates the master dark model and computes several statistics.
 """
     
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file_list",
                   help="Source file listing the filenames of dark frames.")
     
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
                   help="final coadded output image")
     
-    parser.add_option("-S", "--show_stats",
+    parser.add_argument("-S", "--show_stats",
                   action="store_true", dest="show_stats", default=False,
                   help="Show frame stats [default False]")    
     
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     if len(sys.argv[1:])<1:
        parser.print_help()
@@ -314,7 +316,7 @@ time and creates the master dark model and computes several statistics.
 
     if not options.source_file_list or not options.output_filename:
         parser.print_help()
-        parser.error("Incorrect number of arguments " )
+        parser.error("Incorrect number of arguments ")
 
     if os.path.isdir(options.source_file_list) or \
             os.path.isdir(options.output_filename):
@@ -332,4 +334,9 @@ time and creates the master dark model and computes several statistics.
     except Exception as e:
         log.error("Error computing dark model: %s"%str(e))
         sys.exit(0)
+
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())
 

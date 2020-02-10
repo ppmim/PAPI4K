@@ -22,7 +22,8 @@
 # Import necessary modules
 
 import fileinput
-from optparse import OptionParser
+import argparse
+import sys
 
 # Interact with FITS files
 import astropy.io.fits as fits
@@ -103,33 +104,33 @@ def modFITS(files, keyword, value, ext=0):
                                   
 ################################################################################
 # main
-if __name__ == "__main__":
+def main(arguments=None):
     
     # Get and check command-line options
-    usage = "usage: %prog [options] arg1 arg2"
-    parser = OptionParser(usage)
+    desc = "FITS header modification tool"
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option("-f", "--fits",
-                  action="store", dest="fits", type="str",
+    parser.add_argument("-f", "--fits",
+                  action="store", dest="fits", type=str,
                   help="Input FITS file. It has to be a fullpath file name")
     
-    parser.add_option("-l", "--input",
-                  action="store", dest="input_file_list", type="str",
+    parser.add_argument("-l", "--input",
+                  action="store", dest="input_file_list", type=str,
                   help="Source file list of data frames. It has to be a fullpath file name")
                   
-    parser.add_option("-k", "--key_value",
-                  action="store", dest="keyword", type="str", nargs=1,
+    parser.add_argument("-k", "--key_value",
+                  action="store", dest="keyword", type=str, nargs=1,
                   help="Keyword space separated to be modified")
                   
-    parser.add_option("-v", "--value", type="str",
+    parser.add_argument("-v", "--value", type=str,
                   action="store", dest="value",
                   help="Value to set to 'keyword'")
                                 
-    parser.add_option("-e", "--ext",
-                  action="store", dest="extension_number", type="int", default=0,
+    parser.add_argument("-e", "--ext",
+                  action="store", dest="extension_number", type=int, default=0,
                   help="Extension number in which to look for 'keyword' [0,N]")
-    
-    (options, args) = parser.parse_args()
+
+    options = parser.parse_args()
     
     if options.fits:
         filelist = [options.fits]
@@ -148,3 +149,6 @@ if __name__ == "__main__":
     except Exception as e:
         raise e
 
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

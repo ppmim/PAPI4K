@@ -20,11 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import argparse
 import sys
 import os
 import shutil
 import tempfile
-from optparse import OptionParser
 import fileinput
 import astropy.io.fits as fits
 
@@ -982,44 +982,43 @@ class AstroWarp(object):
 ################################################################################
 # main
 ################################################################################
-if __name__ == "__main__":
+def main(arguments=None):
     
-    log.debug( 'Start AstroWarp....')
+    log.debug('Start AstroWarp....')
     
     # Get and check command-line options
-    usage = "usage: %prog [options]"
     desc = """Performs the alignment and warping of a set of images,
 in principle previously reduced, but not mandatory.
 """
-    parser = OptionParser(usage, description=desc)
+    parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_option("-c", "--config_file",
+    parser.add_argument("-c", "--config_file",
                   action="store", dest="config_file", help="Optional PAPI configuration file.")
                   
-    parser.add_option("-s", "--source",
+    parser.add_argument("-s", "--source",
                   action="store", dest="source_file",
                   help="Source input file. It can be a FITS file or "
                   "text file with a list of FITS files.")
     
-    parser.add_option("-o", "--output",
+    parser.add_argument("-o", "--output",
                   action="store", dest="output_filename", 
                   help="final coadded output image")
     
-    parser.add_option("-r", "--resample",
+    parser.add_argument("-r", "--resample",
                   action="store_true", dest="resample", default=False,
-                  help="Resample input image [default=%default]")
+                  help="Resample input image [default=%(default)s]")
     
-    parser.add_option("-b", "--subtract_back",
+    parser.add_argument("-b", "--subtract_back",
                   action="store_true", dest="subtract_back", default=False,
-                  help="Subtract sky background [default=%default]")
+                  help="Subtract sky background [default=%(default)s]")
     
-    parser.add_option("-e", "--engine",
+    parser.add_argument("-e", "--engine",
                   action="store", dest="engine", default="SCAMP",
-                  help="Astrometric engine to use (SCAMP, AstrometryNet) [default=%default]")
+                  help="Astrometric engine to use (SCAMP, AstrometryNet) [default=%(default)s]")
     
     
                                 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     
     if len(sys.argv[1:])<1:
        parser.print_help()
@@ -1095,4 +1094,7 @@ in principle previously reduced, but not mandatory.
         
     sys.exit()
         
-    
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())
+
