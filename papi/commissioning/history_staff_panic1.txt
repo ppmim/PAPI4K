@@ -1,0 +1,1000 @@
+    4  kate runStarfocus.py 
+    5  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG2-1.reg
+    6  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG2-2.reg
+    7  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG2-3.reg
+    8  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG2-4.reg
+    9  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG3-1.reg
+   10  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG3-2.reg
+   11  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG3-3.reg
+   12  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG3-4.reg
+   13  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-1.reg
+   14  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-2.reg
+   15  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-3.reg
+   16  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-4.reg
+   17  kate runStarfocus.py 
+   18  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG3-3.reg
+   19  kate runStarfocus.py 
+   20  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG1-1.reg
+   21  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG1-2.reg
+   22  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG2-2.reg
+   23  kate runStarfocus.py 
+   24  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-4.reg
+   25  cd..
+   26  ls
+   27  vf
+   28  cd
+   29  cd iraf/
+   30  ls -lrt
+   31  vi login.cl
+   32  cd
+   33  cd /data2/
+   34  cd commissioning
+   35  ls -lrt
+   36  cd NGC1647/
+   37  ls -lrt
+   38  ls
+   39  vi All_regions.reg
+   40  more centers_all_regions_revisado2_NGC1647
+   41  more centers_all_regions_NGC1647
+   42  ll
+   43  ls 
+   44  vi SG4_revisado_ds9.reg
+   45  ./runStarfocus.py -s M67/M67_J_NLC_D_F.txt -c M67/region_SG4-4.regcd..
+   46  cd..
+   47  ll
+   48  ./get-centers.py ZenithSky/allRegion_ZenithSky.reg 
+   49  more ZenithSky/region_SG1-1.reg
+   50  cd..
+   51  cd commissioning
+   52  ./runStarfocus.py -s ../Tilt_ZenithSky/H_D_F_BPM.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/H_SG1_1.txt -t ZenithSky
+   53  ll ../Tilt_ZenithSky/
+   54  ll ../Tilt_ZenithSky/H
+   55  more ../Tilt_ZenithSky/H/files_red.txt
+   56  ./runStarfocus.py -s ../Tilt_ZenithSky/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/H_SG1_1.txt -t ZenithSky
+   57  ./runStarfocus.py -s ../Tilt_ZenithSky/H/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/H_SG1_1.txt -t ZenithSky
+   58  kate runStarfocus.py 
+   59  ./runStarfocus.py -s ../Tilt_ZenithSky/H/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/H_SG1_1.txt -t ZenithSky
+   60  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/Ks_SG1_1.txt -t ZenithSky
+   61  ll
+   62  touch ZenithSky/kk
+   63  rm ZenithSky/kk
+   64  ll ZenithSky/
+   65  more region_SG1-1.reg
+   66  more ZenithSky/region_SG1-1.reg
+   67  diff region_SG1-1.reg
+   68  diff region_SG1-1.reg ZenithSky/region_SG1-1.reg
+   69  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/Ks_SG1_1.txt -t ZenithSky
+   70  ./runStarfocus.py -s M67/M67_J_D_F_BPM.txt -c M67/region_SG2-1.reg
+   71  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/Ks_SG1_1.txt -t ZenithSky
+   72  kate runStarfocus.py 
+   73  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/Ks_SG1_1.txt -t ZenithSky
+   74  ./runStarfocus.py -s ../Tilt_ZenithSky/H/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/H_SG1_1.txt -t ZenithSky
+   75  kate runStarfocus.py 
+   76  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-1.reg -d ZenithSky/Moffat/Ks_SG1_1.txt -t ZenithSky
+   77  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-2.reg -d ZenithSky/Moffat/Ks_SG1_2.txt -t ZenithSky
+   78  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG1-3.reg -d ZenithSky/Moffat/Ks_SG1_3.txt -t ZenithSky
+   79  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG2-1.reg -d ZenithSky/Moffat/Ks_SG2_1.txt -t ZenithSky
+   80  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG2-3.reg -d ZenithSky/Moffat/Ks_SG2_3.txt -t ZenithSky
+   81  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG3-2.reg -d ZenithSky/Moffat/Ks_SG3_2.txt -t ZenithSky
+   82  kate ../Tilt_ZenithSky/Ks/files_red.txt
+   83  cp ../Tilt_ZenithSky/Ks/files_red.txt ../Tilt_ZenithSky/Ks/files_red.txt.bak
+   84  kate ../Tilt_ZenithSky/Ks/files_red.txt
+   85  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG3-2.reg -d ZenithSky/Moffat/Ks_SG3_2.txt -t ZenithSky
+   86  kate ../Tilt_ZenithSky/Ks/files_red.txt
+   87  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG3-2.reg -d ZenithSky/Moffat/Ks_SG3_2.txt -t ZenithSky
+   88  kate ../Tilt_ZenithSky/Ks/files_red.txt
+   89  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG3-2.reg -d ZenithSky/Moffat/Ks_SG3_2.txt -t ZenithSky
+   90  kate ../Tilt_ZenithSky/Ks/files_red.txt
+   91  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c ZenithSky/region_SG3-2.reg -d ZenithSky/Moffat/Ks_SG3_2.txt -t ZenithSky
+   92  cd..
+   93  ll
+   94  ll Tilt_NGC1647/
+   95  cd commissioning
+   96  ./runStarfocus.py -s ../Tilt_ZenithSky/Ks/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Z_SG1_1.txt -t NGC1647
+   97  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Z_SG1_1.txt -t NGC1647
+   98  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Z_SG1_2.txt -t NGC1647
+   99  kate runStarfocus.py 
+  100  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Z_SG1_2.txt -t NGC1647
+  101  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-3.reg -d NGC1647/Moffat/Z_SG1_3.txt -t NGC1647
+  102  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-4.reg -d NGC1647/Moffat/Z_SG2_1.txt -t NGC1647
+  103  kate runStarfocus.py 
+  104  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Z_SG1_1.txt -t NGC1647
+  105  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Z_SG1_2.txt -t NGC1647
+  106  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-3.reg -d NGC1647/Moffat/Z_SG1_3.txt -t NGC1647
+  107  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-4.reg -d NGC1647/Moffat/Z_SG1_4.txt -t NGC1647
+  108  cd..
+  109  ll
+  110  ll Tilt_NGC1647
+  111  ll Z
+  112  ll Tilt_NGC1647/Z
+  113  cd commissioning
+  114  kate runStarfocus.py 
+  115  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Z_SG1_1.txt -t NGC1647
+  116  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Z_SG1_2.txt -t NGC1647
+  117  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-3.reg -d NGC1647/Moffat/Z_SG1_3.txt -t NGC1647
+  118  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG1-4.reg -d NGC1647/Moffat/Z_SG1_4.txt -t NGC1647
+  119  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-1.reg -d NGC1647/Moffat/Z_SG2_1.txt -t NGC1647
+  120  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-2.reg -d NGC1647/Moffat/Z_SG2_2.txt -t NGC1647
+  121  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-3.reg -d NGC1647/Moffat/Z_SG2_3.txt -t NGC1647
+  122  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-4.reg -d NGC1647/Moffat/Z_SG2_4.txt -t NGC1647
+  123  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG3-1.reg -d NGC1647/Moffat/Z_SG3_1.txt -t NGC1647
+  124  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG3-2.reg -d NGC1647/Moffat/Z_SG3_2.txt -t NGC1647
+  125  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG3-3.reg -d NGC1647/Moffat/Z_SG3_3.txt -t NGC1647
+  126  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG3-4.reg -d NGC1647/Moffat/Z_SG3_4.txt -t NGC1647
+  127  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG4-1.reg -d NGC1647/Moffat/Z_SG4_1.txt -t NGC1647
+  128  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG4-2.reg -d NGC1647/Moffat/Z_SG4_2.txt -t NGC1647
+  129  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG4-3.reg -d NGC1647/Moffat/Z_SG4_3.txt -t NGC1647
+  130  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG4-4.reg -d NGC1647/Moffat/Z_SG4_4.txt -t NGC1647
+  131  kate runStarfocus.py 
+  132  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-2.reg -d NGC1647/Moffat/Z_SG2_2.txt -t NGC1647
+  133  ./runStarfocus.py -s ../Tilt_NGC1647/Z/files_red.txt -c NGC1647/region_SG2-4.reg -d NGC1647/Moffat/Z_SG2_4.txt -t NGC1647
+  134  ./p_50_tiltcheck.py  -i ./NGC1647/Moffat/ 5
+  135  more ../Tilt_NGC1647/Z/files_red.txt
+  136  more ../Tilt_NGC1647/Y/files_red.txt
+  137  kate runStarfocus.py 
+  138  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Y_SG1_1.txt -t NGC1647
+  139  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Y_SG1_2.txt -t NGC1647
+  140  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG1-3.reg -d NGC1647/Moffat/Y_SG1_3.txt -t NGC1647
+  141  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG1-4.reg -d NGC1647/Moffat/Y_SG1_4.txt -t NGC1647
+  142  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG2-1.reg -d NGC1647/Moffat/Y_SG2_1.txt -t NGC1647
+  143  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG2-2.reg -d NGC1647/Moffat/Y_SG2_2.txt -t NGC1647
+  144  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG2-3.reg -d NGC1647/Moffat/Y_SG2_3.txt -t NGC1647
+  145  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG2-4.reg -d NGC1647/Moffat/Y_SG2_4.txt -t NGC1647
+  146  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG3-1.reg -d NGC1647/Moffat/Y_SG3_1.txt -t NGC1647
+  147  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG3-2.reg -d NGC1647/Moffat/Y_SG3_2.txt -t NGC1647
+  148  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG3-3.reg -d NGC1647/Moffat/Y_SG3_3.txt -t NGC1647
+  149  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG3-4.reg -d NGC1647/Moffat/Y_SG3_4.txt -t NGC1647
+  150  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG4-1.reg -d NGC1647/Moffat/Y_SG4_1.txt -t NGC1647
+  151  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG4-2.reg -d NGC1647/Moffat/Y_SG4_2.txt -t NGC1647
+  152  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG4-3.reg -d NGC1647/Moffat/Y_SG4_3.txt -t NGC1647
+  153  ./runStarfocus.py -s ../Tilt_NGC1647/Y/files_red.txt -c NGC1647/region_SG4-4.reg -d NGC1647/Moffat/Y_SG4_4.txt -t NGC1647
+  154  ./p_50_tiltcheck.py  -i ./NGC1647/Moffat/ 4
+  155  kate runStarfocus.py 
+  156  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Ks_SG1_1.txt -t NGC1647
+  157  more ../Tilt_NGC1647/Ks/files_red.txt
+  158  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG1-2.reg -d NGC1647/Moffat/Ks_SG1_2.txt -t NGC1647
+  159  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG1-3.reg -d NGC1647/Moffat/Ks_SG1_3.txt -t NGC1647
+  160  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG1-4.reg -d NGC1647/Moffat/Ks_SG1_4.txt -t NGC1647
+  161  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-1.reg -d NGC1647/Moffat/Ks_SG2_1.txt -t NGC1647
+  162  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-2.reg -d NGC1647/Moffat/Ks_SG2_2.txt -t NGC1647
+  163  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-3.reg -d NGC1647/Moffat/Ks_SG2_3.txt -t NGC1647
+  164  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-4.reg -d NGC1647/Moffat/Ks_SG2_4.txt -t NGC1647
+  165  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-1.reg -d NGC1647/Moffat/Ks_SG3_1.txt -t NGC1647
+  166  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-2.reg -d NGC1647/Moffat/Ks_SG3_2.txt -t NGC1647
+  167  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-3.reg -d NGC1647/Moffat/Ks_SG3_3.txt -t NGC1647
+  168  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-4.reg -d NGC1647/Moffat/Ks_SG3_4.txt -t NGC1647
+  169  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG4-1.reg -d NGC1647/Moffat/Ks_SG4_1.txt -t NGC1647
+  170  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG4-2.reg -d NGC1647/Moffat/Ks_SG4_2.txt -t NGC1647
+  171  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG4-3.reg -d NGC1647/Moffat/Ks_SG4_3.txt -t NGC1647
+  172  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG4-4.reg -d NGC1647/Moffat/Ks_SG4_4.txt -t NGC1647
+  173  kate runStarfocus.py 
+  174  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG1-1.reg -d NGC1647/Moffat/Ks_SG1_1.txt -t NGC1647
+  175  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-2.reg -d NGC1647/Moffat/Ks_SG2_2.txt -t NGC1647
+  176  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG2-3.reg -d NGC1647/Moffat/Ks_SG2_3.txt -t NGC1647
+  177  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-1.reg -d NGC1647/Moffat/Ks_SG3_1.txt -t NGC1647
+  178  ./runStarfocus.py -s ../Tilt_NGC1647/Ks/files_red.txt -c NGC1647/region_SG3-4.reg -d NGC1647/Moffat/Ks_SG3_4.txt -t NGC1647
+  179  ./p_50_tiltcheck.py  -i ./NGC1647/Moffat/ 1
+  180  kate runStarfocus.py 
+  181  more ../Tilt_M67/Ks/files_red.txt
+  182  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-1.reg -d M67/Moffat/Ks_SG1_1.txt -t M67
+  183  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-2.reg -d M67/Moffat/Ks_SG1_2.txt -t M67
+  184  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-3.reg -d M67/Moffat/Ks_SG1_3.txt -t M67
+  185  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-4.reg -d M67/Moffat/Ks_SG1_4.txt -t M67
+  186  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG2-1.reg -d M67/Moffat/Ks_SG2_1.txt -t M67
+  187  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG2-2.reg -d M67/Moffat/Ks_SG2_2.txt -t M67
+  188  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG2-3.reg -d M67/Moffat/Ks_SG2_3.txt -t M67
+  189  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG2-4.reg -d M67/Moffat/Ks_SG2_4.txt -t M67
+  190  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-1.reg -d M67/Moffat/Ks_SG3_1.txt -t M67
+  191  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-2.reg -d M67/Moffat/Ks_SG3_2.txt -t M67
+  192  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-3.reg -d M67/Moffat/Ks_SG3_3.txt -t M67
+  193  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-4.reg -d M67/Moffat/Ks_SG3_4.txt -t M67
+  194  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-1.reg -d M67/Moffat/Ks_SG4_1.txt -t M67
+  195  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-2.reg -d M67/Moffat/Ks_SG4_2.txt -t M67
+  196  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-3.reg -d M67/Moffat/Ks_SG4_3.txt -t M67
+  197  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-4.reg -d M67/Moffat/Ks_SG4_4.txt -t M67
+  198  kate runStarfocus.py 
+  199  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-1.reg -d M67/Moffat/Ks_SG1_1.txt -t M67
+  200  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-2.reg -d M67/Moffat/Ks_SG1_2.txt -t M67
+  201  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG1-4.reg -d M67/Moffat/Ks_SG1_4.txt -t M67
+  202  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG2-2.reg -d M67/Moffat/Ks_SG2_2.txt -t M67
+  203  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-2.reg -d M67/Moffat/Ks_SG3_2.txt -t M67
+  204  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-3.reg -d M67/Moffat/Ks_SG3_3.txt -t M67
+  205  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG3-4.reg -d M67/Moffat/Ks_SG3_4.txt -t M67
+  206  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-1.reg -d M67/Moffat/Ks_SG4_1.txt -t M67
+  207  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-2.reg -d M67/Moffat/Ks_SG4_2.txt -t M67
+  208  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-3.reg -d M67/Moffat/Ks_SG4_3.txt -t M67
+  209  ./runStarfocus.py -s ../Tilt_M67/Ks/files_red.txt -c M67/region_SG4-4.reg -d M67/Moffat/Ks_SG4_4.txt -t M67
+  210  ./p_50_tiltcheck.py  -i ./M67/Moffat/ 1
+  211  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/files_red.txt.bak
+  212  cd..
+  213  ll
+  214  ll Tilt_M67/
+  215  cd commissioning
+  216  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/files_red.txt.bak
+  217  ll ../Tilt_M67/Ks/
+  218  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/files_red.txt.bak
+  219  ls -la /data2/commissioning
+  220  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/files_red.txt.bak
+  221  whoami
+  222  touch no
+  223  rm no
+  224  ls -lh
+  225  cd ..
+  226  ls
+  227  ls -lh
+  228  cd Tilt_M67/
+  229  ls
+  230  ls -lh
+  231  cd ..
+  232  ls -lh
+  233  cd commissioning
+  234  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/files_red.txt.bak
+  235  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/asd
+  236  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/
+  237  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67
+  238  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks/asd
+  239  cp ../Tilt_M67/Ks/files_red.txt ../Tilt_M67/Ks
+  240  cd ..
+  241  cd Tilt_M67/67
+  242  cd Tilt_M67/
+  243  ls
+  244  ls -lh
+  245  mkdir Ks2
+  246  ls -lh
+  247  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG1-1.reg -d M67/Moffat/Ks2_SG1_1.txt -t M67
+  248  cd..
+  249  cd commissioning
+  250  kate ./runStarfocus.py
+  251  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG1-1.reg -d M67/Moffat/Ks2_SG1_1.txt -t M67
+  252  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG2-3.reg -d M67/Moffat/Ks2_SG2_3.txt -t M67
+  253  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG3-4.reg -d M67/Moffat/Ks2_SG3_4.txt -t M67
+  254  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG1-1.reg -d M67/Moffat/Ks2_SG1_1.txt -t M67
+  255  kate ./runStarfocus.py
+  256  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG3-4.reg -d M67/Moffat/Ks2_SG3_4.txt -t M67
+  257  ./runStarfocus.py -s ../Tilt_M67/Ks2/files_red.txt -c M67/region_SG4-1.reg -d M67/Moffat/Ks2_SG4_1.txt -t M67
+  258  ./runStarfocus.py -s ../Tilt_M67/H2/files_red.txt -c M67/region_SG4-1.reg -d M67/Moffat/H2_SG4_1.txt -t M67
+  259  ll M67/Moffa/ 
+  260  ll ../M67/Moffa/ 
+  261  ll ../M67/Moffat/ 
+  262  ll ../M67/Moffat
+  263  ll
+  264  ll M67/Moffat
+  265  ./p_50_tiltcheck.py  -i ./M67/Moffat/ 7
+  266  ./p_50_tiltcheck.py  -i ./NGC1647/Moffat/ 7
+  267  ./p_50_tiltcheck.py  -i ./ZenithSky/Moffat/ 7
+  268  ll ZenithSky/Moffat/
+  269  rm ../Zen Ks_SG1_3.txt
+  270  rm ZenithSky/Moffat/Ks_SG1_3.txt
+  271  ll ZenithSky/Moffat/
+  272  ./p_50_tiltcheck.py  -i ./ZenithSky/Moffat/ 7
+  273  ll ZenithSky/Moffat/
+  274  more Z_SG1_1.txt
+  275  more ZenithSky/Moffat/Z_SG1_1.txt
+  276  ll
+  277  cd -l
+  278  ll
+  279  ls -l
+  280  cd 
+  281  cd /data2/commissioning
+  282  ls
+  283  cd M67/
+  284  ls
+  285  more M67_J_D_F_BPM.txt 
+  286  cd
+  287  cd..
+  288  cd /data2/commissioning
+  289  ls
+  290  cd ZenithSky/
+  291  ls
+  292  ll
+  293  cd Moffat/
+  294  ls
+  295  cd..
+  296  ll
+  297  ls
+  298  cd..
+  299  ls
+  300  cd data1
+  301  ls
+  302  cd PANIC/
+  303  ls
+  304  cd..
+  305  ls
+  306  cd..
+  307  ls
+  308  cd data2/
+  309  ls
+  310  cd commissioning/M3
+  311  ls
+  312  cd..
+  313  ssh -X staff@panic35
+  314  ls
+  315  cd data2/commissioning
+  316  ls
+  317  cd M3
+  318  ls
+  319  ./get-centers.py SG4_4.reg 
+  320  cd..
+  321  ls
+  322  ./get-centers.py ./M3/SG4_4.reg 
+  323  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J12_SG1_1.txt -t M3
+  324  cd /data2/commissioning
+  325  ./runStarfocus.py
+  326  ./runStarfocus.py -h
+  327  python
+  328  cd
+  329  cd .iraf
+  330  ls
+  331  ls -lrt
+  332  vi papi_ql_user.cl
+  333  ls -l  /tmp/focus_seq_staff.txt
+  334  more /tmp/focus_seq_staff.txt
+  335  rm /tmp/focus_seq_staff.txt
+  336  vi papi_ql_user.cl
+  337  cp /home/panic/iraf/papi_ql_user.cl .
+  338  ls -lrt
+  339  cd
+  340  /data2/commissioning/runStarfocus.py -h
+  341  cd iraf
+  342  vi login.cl
+  343  /data2/commissioning/runStarfocus.py -h
+  344  cd
+  345  ls -lrt
+  346  cd PAPI/
+  347  ls
+  348  ls -lrt
+  349  cd ..
+  350  rm -rf PAPI
+  351  ls -lrt
+  352  rm -rf papiBare/
+  353  cd papi/
+  354  ls
+  355  ls -lrt
+  356  git remote -v
+  357  pwd
+  358  ssh panic22
+  359  ssh panic@panic22
+  360  ds9
+  361  exit
+  362  IRAF
+  363  CD..
+  364  cd..
+  365  iraf
+  366  cd.
+  367  cd..
+  368  cd.
+  369  cd..
+  370  ls
+  371  iraf
+  372  cd iraf
+  373  iraf
+  374  start_iraf
+  375  start_iraf &
+  376  ls -lrt
+  377  ds9 /data2/out/coadd1.fits
+  378  ds9 /data2/out/Q02/coadd1.fits
+  379  ds9 
+  380  ds9 /data2/out/Q02/HAWKI.2009-03-31T01:31:37.712_coadd.Q02.skysub.ast.fits
+  381  ds9 /data2/out/Q02/coadd1.fits
+  382  ds9 /data2/out/PANIC.2009-03-31T01:31:37.7120.fits
+  383  cd..
+  384  ls
+  385  konqueror_&
+  386  Konqueror 
+  387  konqueror &
+  388  start_ql &
+  389  start_ql 
+  390  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  391  ./runStarfocus.py -s /M3/Filter_J_12_22/Filter_J_12_22.txt -c /M3/Filter_J_12_22/region_SG1-1.reg -d /M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  392  cd data2/commissioning
+  393  ./runStarfocus.py -s /M3/Filter_J_12_22/Filter_J_12_22.txt -c /M3/Filter_J_12_22/region_SG1-1.reg -d /M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  394  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J12_SG1_1.txt -t M3
+  395  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  396  ./runStarfocus.py -s /M3/Filter_J_12_22/Filter_J_12_22.txt -c /M3/Filter_J_12_22/region_SG1-1.reg -d /M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  397  ./runStarfocus.py -s M3/Filter_J_12_22/Filter_J_12_22.txt -c M3/Filter_J_12_22/region_SG1-1.reg -d M3/Filter_J_12_22/J12_SG1_1.txt -t M3
+  398  kate ./runStarfocus.py
+  399  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  400  more ./M3/Filter_J_12_22/Filter_J_12_22.txt
+  401  ls -l /data2/commissioning/M3/data/TiltProcedure_March10_0017_D_BPM.fits
+  402  more ./M3/Filter_J_12_22/region_SG1-1.reg
+  403  more ./M3/Filter_J_12_22/J_SG1_1.txt
+  404  ./runStarfocus.py -h
+  405  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-1.reg -d ./M3/Filter_J_12_22/J_SG1_1.txt -t M3
+  406  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-2.reg -d ./M3/Filter_J_12_22/J_SG1_2.txt -t M3
+  407  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-3.reg -d ./M3/Filter_J_12_22/J_SG1_3.txt -t M3
+  408  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG1-4.reg -d ./M3/Filter_J_12_22/J_SG1_4.txt -t M3
+  409  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG2-1.reg -d ./M3/Filter_J_12_22/J_SG2_1.txt -t M3
+  410  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG2-2.reg -d ./M3/Filter_J_12_22/J_SG2_2.txt -t M3
+  411  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG2-3.reg -d ./M3/Filter_J_12_22/J_SG2_3.txt -t M3
+  412  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG2-4.reg -d ./M3/Filter_J_12_22/J_SG2_4.txt -t M3
+  413  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG3-1.reg -d ./M3/Filter_J_12_22/J_SG3_1.txt -t M3
+  414  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG3-2.reg -d ./M3/Filter_J_12_22/J_SG3_2.txt -t M3
+  415  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG3-3.reg -d ./M3/Filter_J_12_22/J_SG3_3.txt -t M3
+  416  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG3-4.reg -d ./M3/Filter_J_12_22/J_SG3_4.txt -t M3
+  417  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG4-1.reg -d ./M3/Filter_J_12_22/J_SG4_1.txt -t M3
+  418  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG4-2.reg -d ./M3/Filter_J_12_22/J_SG4_2.txt -t M3
+  419  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG4-3.reg -d ./M3/Filter_J_12_22/J_SG4_3.txt -t M3
+  420  ./runStarfocus.py -s ./M3/Filter_J_12_22/Filter_J_12_22.txt -c ./M3/Filter_J_12_22/region_SG4-4.reg -d ./M3/Filter_J_12_22/J_SG4_4.txt -t M3
+  421  kate ./runStarfocus.py
+  422  kate ./p_50_tiltcheck.py
+  423  ./p_50_tiltcheck.py  -i ./M3/Filter_J_12_22/ 3
+  424  ./p_50_tiltcheck.py  -h
+  425  ls -lrt
+  426  ls -lrt
+  427  pwd
+  428  ls -lrt
+  429  ps uax
+  430  ps -u
+  431  kill -9 
+  432  ps -u
+  433  exit
+  434  ls -lrt
+  435  cd .iraf
+  436  ls -lrt
+  437  vi papi_ql_user.cl
+  438  vi login.cl
+  439  ls -lrt
+  440  cd
+  441  cd bin/
+  442  ls -lrt
+  443  cd
+  444  panic
+  445  ls -lrt
+  446  git remote show
+  447  git remote -v show
+  448  git pull origin 
+  449  git stash git reset --hard.
+  450  git stash git reset --hard .
+  451  git reset --hard .
+  452  git reset --hard 
+  453  git pull origin 
+  454  ls -lrt
+  455  cd
+  456  vi papi/commissioning/runStarfocus.py bin/
+  457  cp  papi/commissioning/runStarfocus.py bin/
+  458  cd bin/
+  459  ls -lrt
+  460  cd ..
+  461  cd .iraf
+  462  ls -lrt
+  463  vi papi_ql_user.cl
+  464  ls -l /home/staff/bin/runStarfocus.py
+  465  cd
+  466  cd .iraf
+  467  ls -lrt
+  468  vi login.cl
+  469  i papi_ql_user.cl
+  470  vi papi_ql_user.cl
+  471  ls -lrt
+  472  vi login.cl
+  473  rm -rf /tmp/focus_seq_staff.txt 
+  474  cd
+  475  ls -lrt
+  476  panic
+  477  ls -lrt
+  478  vi QL4/mainGUI.py
+  479  rm -rf /tmp/focus.list
+  480  ls -l /tmp/focus.txt 
+  481  rm /tmp/focus.txt
+  482  ls -lrt
+  483  cd
+  484  vi bin/start_o
+  485  vi bin/start_ql
+  486  konqueror
+  487  exit
+  488  ls -lrt
+  489  /runStarfocus.py -s ./Y_Filter/Filter_Y.txt 
+  490  cd /data2
+  491  cd PANIC
+  492  ls
+  493  ls -lrt
+  494  vu runStarfocus.py 
+  495  vi runStarfocus.py
+  496  diff runStarfocus.py $HOME/bin/runStarfocus.py 
+  497  diff runStarfocus.py $HOME/papi/commissioning/runStarfocus.py
+  498  cp $HOME/papi/commissioning/runStarfocus.py .
+  499  ls -lrt
+  500  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  501  vi runStarfocus.py
+  502  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  503  vi runStarfocus.py
+  504  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  505  vi runStarfocus.py
+  506  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  507  vi runStarfocus.py
+  508  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  509  ls -l ./Y_Filter/Filter_Y.txt
+  510  vi runStarfocus.py
+  511  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  512  vi runStarfocus.py
+  513  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  514  ls -lrt
+  515  vi Y_Filter/Filter_Y
+  516  ./runStarfocus.py -s ./Y_Filter/Filter_Y -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  517  ls -lrt
+  518  ./runStarfocus.py
+  519  ls -lrt
+  520  vi ./Y_Filter/Y_SG1_1.txt
+  521  ls -lrt
+  522  ./runStarfocus.py -h
+  523  cd Y_Filter/
+  524  ls -lrt
+  525  pwd
+  526  ls -lrt
+  527  pwd
+  528  ls -lrt
+  529  pwd
+  530  ls -lrt
+  531  ls
+  532  cd..
+  533  ls
+  534  cd..
+  535  ls
+  536  cd data2/
+  537  ls
+  538  cd commissioning
+  539  ls
+  540  kate p_50_tiltcheck.py 
+  541  kate runStarfocus.py
+  542  cd..
+  543  ls
+  544  cd PANIC/
+  545  ls
+  546  cd..
+  547  ls
+  548  cd commissioning
+  549  ls
+  550  cd..
+  551  ls
+  552  cd PANIC
+  553  ls
+  554  ./get-centers.py ./Y_Filter/SG4_4.reg 
+  555  ./get-centers.py ./Y_Filter/region_SG4-4.reg 
+  556  ls
+  557  less region_SG1-1.reg
+  558  more region_SG1-1.reg
+  559  more ./Y_Filter/SG1_1
+  560  more ./Y_Filter/SG1_1.reg
+  561  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  562  kate runStarfocus.py
+  563  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-1.reg -d ./Y_Filter/Y_SG1_1.txt -t Y_Filter
+  564  ls
+  565  ls Y_Filter
+  566  cd Y_Filter
+  567  more Y_SG1_1.txt
+  568  konqueror &
+  569  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-2.reg -d ./Y_Filter/Y_SG1_2.txt -t Y_Filter
+  570  cd..
+  571  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-2.reg -d ./Y_Filter/Y_SG1_2.txt -t Y_Filter
+  572  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-3.reg -d ./Y_Filter/Y_SG1_3.txt -t Y_Filter
+  573  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG1-4.reg -d ./Y_Filter/Y_SG1_4.txt -t Y_Filter
+  574  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG2-1.reg -d ./Y_Filter/Y_SG2_1.txt -t Y_Filter
+  575  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG2-2.reg -d ./Y_Filter/Y_SG2_2.txt -t Y_Filter
+  576  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG2-3.reg -d ./Y_Filter/Y_SG2_3.txt -t Y_Filter
+  577  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG2-4.reg -d ./Y_Filter/Y_SG2_4.txt -t Y_Filter
+  578  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG3-1.reg -d ./Y_Filter/Y_SG3_1.txt -t Y_Filter
+  579  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG3-2.reg -d ./Y_Filter/Y_SG3_2.txt -t Y_Filter
+  580  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG3-3.reg -d ./Y_Filter/Y_SG3_3.txt -t Y_Filter
+  581  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG3-4.reg -d ./Y_Filter/Y_SG3_4.txt -t Y_Filter
+  582  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG4-1.reg -d ./Y_Filter/Y_SG4_1.txt -t Y_Filter
+  583  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG4-2.reg -d ./Y_Filter/Y_SG4_2.txt -t Y_Filter
+  584  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG4-3.reg -d ./Y_Filter/Y_SG4_3.txt -t Y_Filter
+  585  ./runStarfocus.py -s ./Y_Filter/Filter_Y.txt -c ./Y_Filter/region_SG4-4.reg -d ./Y_Filter/Y_SG4_4.txt -t Y_Filter
+  586  ./runStarfocus.py -s ./H13_Filter/Filter_H13_quitadas.txt -c ./H13_Filter/region_SG1-1.reg -d ./H13_Filter/H_SG1_1.txt -t H13_Filter.txt
+  587  ls la
+  588  ls -la
+  589  iraf
+  590  cl
+  591  exit
+  592  cd /data2
+  593  cd commissioning
+  594  ls -lrt
+  595  cd carmenes-detector/
+  596  ls
+  597  ls -lrt
+  598  cp -av /data/data2/commissioning/tilt_plots_M67/code .
+  599  cd fwhm/
+  600  ls
+  601  ls -lrt
+  602  python plot_single_plate.py
+  603  ls -lrt
+  604  cd data
+  605  ls
+  606  ls -lrt
+  607  vi plate1
+  608  cd ..
+  609  ls -lrt
+  610  plot_plates.py
+  611  ./plot_plates.py
+  612  cd
+  613  ls -lrt
+  614  exit
+  615  ls -lrt
+  616  cd Downloads/
+  617  ls
+  618  ls -rlt
+  619  okular "Principles of Optics - M.Born, E. Wolf.pdf"
+  620  okular "Smith, W.J. Modern Optical Engineering (MGH, 2000)(T)(640s).pdf" 
+  621  okular "feynman1_ch27_geometric_optics.pdf" 
+  622  okular "20140910 - PR1409-0002 - PR1409-0003.pdf" 
+  623  okular "Personalbogen ENGLISCH.pdf" 
+  624  ls -lrt
+  625  rm -rf Personalbogen\ ENGLISCH.pdf 
+  626  rm 20140910\ -\ PR1409-0002\ -\ PR1409-0003.pdf 
+  627  ls -lrt
+  628  rm CARMENES-TNO070.pdf 
+  629  okular CARMENES-FDR-01B-Science-Requirements.pdf 
+  630  rm CARMENES-FDR-01B-Science-Requirements.pdf 
+  631  ls -lrt
+  632  sftp jmiguel@udit22.iaa.es
+  633  rm art_PANIC.zip 
+  634  ls -lrt
+  635  cd fotos-echelle/
+  636  ls
+  637  cd fotos_echelle-21jul/
+  638  ls
+  639  ls -lrt
+  640  okular IMG_9496.CR2 
+  641  ls -lrt
+  642  cd ..
+  643  ls -lrt
+  644  cd
+  645  exit
+  646  ls- lrt
+  647  ls -lrt
+  648  cd papi/
+  649  ls -lrt
+  650  cd ..
+  651  ls- lrt
+  652  ls -lrt
+  653  mv papi/ papi.old
+  654  ls -lrt
+  655  pwd
+  656  cd iraf/
+  657  ls
+  658  ls -lrt
+  659  d
+  660  ls -lrt
+  661  cd ..
+  662  ls -lrt
+  663  pwd
+  664  rm -rf iraf
+  665  cd bin/
+  666  ls
+  667  ls -lrt
+  668  rm * 
+  669  ls -lrt
+  670  cd ..
+  671  ls -lrt
+  672  cd Downloads/
+  673  ls
+  674  ls -lrt
+  675  cd ..
+  676  ls -lrt
+  677  cd Desktop/
+  678  ls
+  679  ls -lrt
+  680  cd
+  681  ls -lrt
+  682  pwd
+  683  ls -lrt
+  684  su 
+  685  ls -lrt
+  686  cp /usr/local/papi/papi_setup.sh .
+  687  ls -lrt
+  688  vi papi_setup.sh
+  689  ls -lrt
+  690  ./papi_setup.sh 
+  691  ls -lrt
+  692  start_ql
+  693  ls -lrt
+  694  cd bin/
+  695  ls
+  696  ls -lrt
+  697  vi start_ql
+  698  cd
+  699  . .bashrc
+  700  echo $PAPI_HOME
+  701  vi .papirc
+  702  . .bashrc
+  703  echo $PAPI_HOME
+  704  start_ql
+  705  bg
+  706  ls -lrt
+  707  ./papi -h
+  708  papi -h
+  709  calDomeFlat 
+  710  calCombineFF
+  711  type calCombineFF
+  712  ls -l /home/staff/bin/calCombineFF
+  713  ls -l /usr/local/papi/reduce/calCombineFF.py
+  714  vi /usr/local/papi/reduce/calCombineFF.py
+  715  ls -lrt
+  716  vi .papirc
+  717  ls -lrt
+  718  vi papi_setup.sh
+  719  xterm
+  720  kate papi_setup.sh
+  721  bg
+  722  vi .bashrc
+  723  vi .papirc
+  724  . .papirc
+  725  . .papirc >> kk
+  726  more kk
+  727  rm kk
+  728  ls -lrt
+  729  vi .bashrc
+  730  echo "PAPI_HOME=$PAPI_HOME"
+  731  ls -lrt
+  732  rm -rf .iraf
+  733  rm iraf 
+  734  ls -lrt
+  735  rm -rf bin/
+  736  rm .papirc
+  737  vi .bashrc
+  738  . .bashrc
+  739  echo $PAPI_HOME
+  740  ls -lrt
+  741  ./papi_setup.sh 
+  742  ls -l /home/staff/bin/edhead
+  743  vi .bashrc
+  744  vi .papirc
+  745  vi .bashrc
+  746  exit
+  747  echo $PAPI_HOME
+  748  ls -lrt
+  749  vi .bashrc
+  750  vi .papirc
+  751  start_ql
+  752  vi .papirc
+  753  . .bashrc
+  754  start_ql
+  755  papi- h
+  756  papi -h
+  757  calCombineFF 
+  758  ls -lrt
+  759  vi .papirc
+  760  su
+  761  ls -lrt
+  762  rm -rf bin
+  763  rm -rf iraf
+  764  ls -lrt
+  765  vi .bashrc
+  766  cp .papirc papiKK
+  767  vi papiKK
+  768  echo $PAPI_HOME
+  769  sed -i "/PAPI_HOME=/c\PAPI_HOME=$PAPI_HOME" ~/papiKK
+  770  more papiKK
+  771  sed -i "/PAPI_HOME=/c\PAPI_HOME=$PAPI_HOME" ~/papiKK
+  772  more papiKK
+  773  vi papiKK
+  774  sed -i "/PAPI_HOME=/c\PAPI_HOME=$PAPI_HOME" ~/papiKK
+  775  vi papiKK
+  776  ls -lrt
+  777  rm papiKK 
+  778  ls -lrt
+  779  more ql_focus
+  780  rm ql_focus 
+  781  ls -lrt
+  782  ./papi_setup.sh 
+  783  ls -lrt
+  784  vi .papirc
+  785  start_ql
+  786  ls -lrt
+  787  ls- lrt
+  788  ls -lrt
+  789  papi -s /data1/PANIC/2015-11-30 -p
+  790  papi -s /data1/PANIC/2015-11-30 -S 82 82 
+  791  ds9 /data2/out/mDark_kOvkXc_29_2.fits
+  792  cd bin/
+  793  ls -lrt
+  794  vi start_ql
+  795  ls -lrt
+  796  cd
+  797  ls -lrt
+  798  mv papi_setup.sh papi_setup_user.sh
+  799  ls -lrt
+  800  diff papi_setup_user.sh
+  801  diff papi_setup_user.sh papi_setup_user.sh.1
+  802  vi papi_setup_user.sh
+  803  ls -lrt
+  804  vi .papirc
+  805  ls -lrt
+  806  rm papi_setup_user.sh.1
+  807  ls -lrt
+  808  rm -rf papi.old
+  809  ls -lrt
+  810  start_ql
+  811  ls -lrt
+  812  mkdir papi
+  813  cp -av /home/panic/DEVELOP/papi /home/staff/
+  814  cp -av /home/panic/DEVELOP/papi/ /home/staff/
+  815  ls -lrt
+  816  cd papi
+  817  ls
+  818  ls l-rt
+  819  ls -lrt
+  820  cd
+  821  ls l-rt
+  822  ls -lrt
+  823  rm -rf papi
+  824  cp -av /home/panic/DEVELOP/papi /home/staff/
+  825  ls -lrt
+  826  cd papi
+  827  ls
+  828  cd papi
+  829  ls
+  830  ls -lrt
+  831  cp -av /home/panic/DEVELOP/papi/ /home/staff/
+  832  rm papi
+  833  cp -av /home/panic/DEVELOP/papi/ /home/staff/
+  834  ls -l /home/panic/DEVELOP/papi
+  835  ls -l /home/panic/DEVELOP/papi/
+  836  ls l-rt
+  837  ls -lrt
+  838  exit
+  839  ls -lrt
+  840  pwd
+  841  cd /datos
+  842  cd /data1
+  843  ls
+  844  ls -lrt
+  845  cd PAC
+  846  cd PANIC
+  847  ls
+  848  ls -lrt
+  849  pwd
+  850  cd /data2
+  851  ls
+  852  ls -lrt
+  853  cd commissioning
+  854  ls
+  855  ls -lrt
+  856  pwd
+  857  cd /data1
+  858  ls
+  859  ls l-rt
+  860  ls -lrt
+  861  cd PANIC
+  862  ls
+  863  ls -lrt
+  864  cd 2015-06-15
+  865  ls
+  866  cd ..
+  867  cd 2014-12-05
+  868  ls
+  869  ls -lrt
+  870  python
+  871  chage
+  872  w
+  873  exit
+  874  ls -lrt
+  875  cd papi/
+  876  ls
+  877  ls -lrt
+  878  cd ..
+  879  ls -lrt
+  880  vi papi_setup_user.sh
+  881  ls -lrt
+  882  cd bin/
+  883  ls
+  884  cd ..
+  885  ls -lrt
+  886  cd /home/com
+  887  cd /data2/commissioning
+  888  ls
+  889  ls -lrt
+  890  cd ..
+  891  ls -lrt
+  892  rm -rf pruebaSCAMP/
+  893  rm -rf pruebaAFOSN/
+  894  rm -rf pruebaOSN/
+  895  ls -lrt
+  896  cd toESolano/
+  897  ls
+  898  ls -lrt
+  899  cd ..
+  900  ls -lrt
+  901  rm papi_2017-03-10T12\:44\:09.447796.log 
+  902  rm logfile 
+  903  ls -lrt
+  904  rm amps 
+  905  ls -l *.fits
+  906  rm *.fits
+  907  ls -lrt
+  908  rm texput.log 
+  909  ls -lrt
+  910  ls
+  911  ls l-rt
+  912  cd commissioning.bak/
+  913  ls
+  914  ls -lrt
+  915  cd ..
+  916  ls -lrt
+  917  cd commissioning
+  918  ls -lrt
+  919  find .  -name "*.py" 
+  920  ls -l *.oy
+  921  ls -l *.py
+  922  python runStarfocus
+  923  python runStarfocus.py
+  924  vi fwhm.py
+  925  ls -l *.py
+  926  vi runStarfocus.py
+  927  pwd
+  928  ls -lrt
+  929  ls *.py
+  930  ls -lrt *.py
+  931  cd M3
+  932  ls
+  933  find . -name "*.py"
+  934  cd ..
+  935  ls -lrt
+  936  cd tilt_plots_M67/
+  937  ls
+  938  ls -lrt
+  939  cd fwhm/
+  940  ls
+  941  ls l-rt
+  942  ls -lrt
+  943  cd ..
+  944  cd code/
+  945  ls
+  946  ls -lrt
+  947  pwd
+  948  ls l-rt
+  949  ls -lrt
+  950  cd ..
+  951  ls -lrt
+  952  more rsync.sh
+  953  cd zprime/
+  954  ls
+  955  ls -l 
+  956  cd ..
+  957  ls -lrt
+  958  vi code/plot_plates.py
+  959  ls
+  960  pwd
+  961  cd ..
+  962  ls l-rt
+  963  ls -lrt
+  964  find . -name "*.py"|more
+  965  ls -l *.py
+  966  ls -1 *.py
+  967  ls -lrt
+  968  du -js
+  969  du -hs
+  970  cd ..
+  971  cd
+  972  df -h
+  973  ls l-rt
+  974  ls -lrt
+  975  cd papi/
+  976  ls
+  977  ls -lrt
+  978  cd commissioning/
+  979  ls
+  980  ls -lrt
+  981  ls l-rt
+  982  exit
+  983  ls l-rt
+  984  ls -lrt
+  985  cd papi/
+  986  ls -lrt
+  987  python fits-process.py 
+  988  ls l-rt
+  989  cd ..
+  990  cd /data2
+  991  ls
+  992  cd commissioning
+  993  ls
+  994  ls -lrt
+  995  python runStarfocus
+  996  python runStarfocus.py
+  997  python get-centers.py
+  998  python
+  999  ls -lrt
+ 1000  exit
+ 1001  ls -lrt
+ 1002  history |more
+ 1003  history > history_staff_panic1.txt

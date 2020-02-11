@@ -30,25 +30,19 @@ import matplotlib
 # For 'TkAgg' backend (default) produces the crash.
 matplotlib.use('QT5Agg')
 
-
 import matplotlib.pyplot as plt
 from pyraf import iraf
 import papi.misc.display as display
-
 
 # Global variable !
 telescope = ""
 
 
-class IrafError(Exception):
-    """ Raised if some IRAF error happens """
-    pass
-
-
 def getBestFocusfromStarfocus(images, coord_file, log_file):
     """
     Calculate the average Full Width Half Max for the objects in image
-    at the coords specified in coord_file calling iraf.obsutil.psfmeasure.
+    at the coords specified in coord_file calling iraf.obsutil.psfmeasure,
+    interactively or non-interactively if coord_file is given.
 
     Paramaters
     ----------
@@ -84,11 +78,10 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
     locale.setlocale(locale.LC_NUMERIC, 'C')
 
     global telescope
-    
-    
+
     # Read NCOADDS of the images to set the SATURATION limit
     if os.path.isfile(images[1:]):
-        files = [line.replace("\n", "").replace('//','/')
+        files = [line.replace("\n", "").replace('//', '/')
                      for line in fileinput.input(images[1:])]
         with fits.open(files[0]) as hdu:
             if 'NCOADDS' in hdu[0].header:
@@ -106,12 +99,12 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
     
     print("SATUR_LEVEL =", satur_level)
     
-    if coord_file == "" or coord_file == None: 
+    if coord_file == "" or not coord_file:
         idisplay = "yes"
     else: 
         idisplay = "no"
         if not os.path.isfile(coord_file):
-            msg = "ERROR, cannot open file %s" %coord_file
+            msg = "ERROR, cannot open file %s" % coord_file
             raise Exception(msg)
     
     print("IDISPLAY=", idisplay)
@@ -139,7 +132,7 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         print("Could not open log file: %s" % log_file)
         raise e
                   
-    # Config and launch the iraf.starfocus task
+    # Config and launch the iraf.starfocus task (if coord_file, then non-interactive)
     try:
         iraf.noao(_doprint=0)
         iraf.obsutil(_doprint=0)
@@ -157,18 +150,18 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         starfocus.sbuffer = 10 
         starfocus.swidth= 10
         starfocus.saturation = satur_level
-        #starfocus.saturation = "INDEF"
+        # starfocus.saturation = "INDEF"
         starfocus.ignore_sat = "no"
         starfocus.imagecur = coord_file
         starfocus.display = idisplay
         starfocus.frame = 1
         starfocus.graphcur = "" #"/dev/null" 
         starfocus.logfile = log_file
-        res = starfocus(images, Stdout=1)[-1] # get last linet of output
+        res = starfocus(images, Stdout=1)[-1]   # get last linet of output
         numMatch = re.compile(r'(\d+(\.\d+)?)')
         match = numMatch.search(res)
         
-        best_focus = float (match.group(1))
+        best_focus = float(match.group(1))
         print("\n\nBest Focus (IRAF)= ", best_focus)
         return best_focus
     
@@ -179,6 +172,7 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
 
 def writeDataFile_old(log_file, data_file, target):
     """
+    NOT-USED
     Read iraf.starfocus log file and write a data file to be used
     later for the Tilt analysis (p_50_tiltcheck.py).
     """
@@ -187,9 +181,9 @@ def writeDataFile_old(log_file, data_file, target):
         # write log output to data file
         # parse backwards: look for best focus line and block with single results
         with open(log_file, "r") as f:
-            f.seek (0, 2)           # Seek @ EOF
+            f.seek(0, 2)           # Seek @ EOF
             fsize = f.tell()        # Get Size
-            f.seek (max (fsize-2**15, 0), 0) # Set pos @ last chars
+            f.seek(max(fsize-2**15, 0), 0)  # Set pos @ last chars
             lines = f.readlines()       # Read to end
         lines.reverse()
         fo = open(data_file, 'w')
@@ -214,6 +208,7 @@ def writeDataFile_old(log_file, data_file, target):
     else:
         print('Error, no data file given')
 
+
 def writeDataFile(best_focus, min_fwhm, avg_x, avg_y, 
                       data_file, target):
     """
@@ -221,7 +216,7 @@ def writeDataFile(best_focus, min_fwhm, avg_x, avg_y,
     later for the Tilt analysis (p_50_tiltcheck.py).
     """
     
-    if data:
+    if data_file:
         fo = open(data_file, 'w')
         if target:
             obj = target
@@ -229,14 +224,16 @@ def writeDataFile(best_focus, min_fwhm, avg_x, avg_y,
             print('WARNING: Object name not provided')
             obj = 'Unknowm'
         fo.write('# Object: %s\n' %obj)
-        line = " Average best focus of %f with FWHM of %f\n"%(best_focus, min_fwhm)
-        fo.write('#%s' %line)
-        line = "  Best focus estimate @ (%f, %f): FWHM=%f, m=0.0, f=%f\n"%(avg_x, avg_y, min_fwhm, best_focus)
+        line = " Average best focus of %f with FWHM of %f\n" % (best_focus, min_fwhm)
+        fo.write('#%s' % line)
+        line = "  Best focus estimate @ (%f, %f): FWHM=%f, m=0.0, f=%f\n" % \
+               (avg_x, avg_y, min_fwhm, best_focus)
         fo.write(line)
         fo.close()
         print('Data file written: %s' % data_file)
     else:
         print('Error, no data file given')
+
 
 def readStarfocusLog(log_file):
     """
@@ -247,10 +244,10 @@ def readStarfocusLog(log_file):
     
     # Read the last lines 
     with open(log_file, "r") as f:
-        f.seek (0, 2)           # Seek @ EOF
-        fsize = f.tell()        # Get Size
-        f.seek (max (fsize-2**15, 0), 0) # Set pos @ last chars
-        lines = f.readlines()       # Read to end
+        f.seek(0, 2)                    # Seek @ EOF
+        fsize = f.tell()                # Get Size
+        f.seek(max(fsize-2**15, 0), 0)  # Set pos @ last chars
+        lines = f.readlines()           # Read to end
     
     lines.reverse()
     my_lines = []
@@ -327,7 +324,6 @@ def getBestFocus(data, output_file):
     print("N_POINTS: ", len(fwhm_values))
     print("----------\n")
     
-    
     m_foc = good_focus_values.mean()
     good_focus_values = good_focus_values - m_foc
     z = np.polyfit(good_focus_values, fwhm_values, 2)
@@ -382,10 +378,11 @@ def getBestFocus(data, output_file):
         plt.show(block=True)
     
     # Print out Values
-    #for idx, foc_value in enumerate(good_focus_values):
+    # for idx, foc_value in enumerate(good_focus_values):
     #    sys.stdout.write("\nFoc. value: %s   -->  FWHM: %s"%(foc_value, fwhm_values[idx]))
     
     return (best_focus + m_foc), min_fwhm
+
 
 def runFocusEvaluation(source_file, coord_file, log_file):
     """
@@ -413,6 +410,7 @@ def runFocusEvaluation(source_file, coord_file, log_file):
     print("Now, our own fitting...\n")
     data = readStarfocusLog("/home/panic/iraf/starfocus.log")
     my_best_focus, min_fwhm  = getBestFocus(data, "starfocus.pdf")
+
 
 def writeValueForOT(best_focus):
     """
@@ -444,16 +442,14 @@ def writeValueForOT(best_focus):
     
     return ql_focus_text_file
 
-##############################################################################
 
-if __name__ == "__main__":
+##############################################################################
+def main(arguments=None):
     
-    usage = "usage: %prog [options] "
     desc = """Run IRAF.starfocus for a focus sequecen and return the best focus"""
 
     parser = argparse.ArgumentParser(description=desc)
-    
-                  
+
     parser.add_argument("-s", "--source",
                   action="store", dest="source_file",
                   help="Source file listing the filenames of input images.")
@@ -475,41 +471,49 @@ if __name__ == "__main__":
                   action="store", dest="target",
                   help="Object name for output data")
 
-    
     options = parser.parse_args()
     
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
        
-    # Choose the right execution
+    # Wrong number of args
     if not options.source_file and not options.coord_file and not options.log_file:
         parser.print_help()
         parser.error("incorrent number of arguments")
-    
-    # only read current log and compute BestFocus (used from QL)
+
+    #########
+    # QL-call
+    #########
+    # only read current log and compute BestFocus (used from QL, called from
+    # papi_ql_user.cl)
     elif not options.source_file and not options.coord_file and options.log_file:
         data = readStarfocusLog(options.log_file)
         my_best_focus, min_fwhm = getBestFocus(data, "starfocus.pdf")
-    
+
+    ########################
+    # USER-Full-interactive
+    # ######################
     # run iraf.starfocus and compute our own BestFocus
     elif options.source_file and options.coord_file and not options.data_file:
         try:
             bf = runFocusEvaluation(options.source_file, 
-                            options.coord_file, 
-                            options.log_file)
+                                    options.coord_file,
+                                    options.log_file)
         except Exception as e:
             print("ERROR running focus evaluation")
             raise e
-    
+
+    #######################
+    # USER-non-interactive (based on coord_file)
+    #######################
     # Complete execution (used for Tilt Analysis)
     else:
-        #display.startDisplay()
+        # display.startDisplay()
         # Run iraf.starfocus
         best_focus = getBestFocusfromStarfocus("@" + options.source_file, 
-                                            options.coord_file, 
-                                            options.log_file)
-        
+                                               options.coord_file,
+                                               options.log_file)
         
         # Compute our own BEST_FOCUS value and plot the fittting
         print("Now, our own fitting...\n")
@@ -519,10 +523,14 @@ if __name__ == "__main__":
         my_best_focus, min_fwhm = getBestFocus(data, plot_filename)
         
         d = np.array(data, dtype=np.float32)
-        avg_x = d[:,0].mean()
-        avg_y = d[:,1].mean()
+        avg_x = d[:, 0].mean()
+        avg_y = d[:, 1].mean()
         # Write values into data file for the Tilt analysis.
         writeDataFile(my_best_focus, min_fwhm, avg_x, avg_y, 
                       options.data_file, options.target)
         
     sys.exit(0)
+
+######################################################################
+if __name__ == "__main__":
+    sys.exit(main())

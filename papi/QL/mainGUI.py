@@ -3625,13 +3625,15 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             # copy list to file; if file exists, overwrite
             self.genFileList(my_files, text_file)
             try:
-                ## Approach-1: call directly to the python module runStarfocus.py
-                ## New approach (does not work well, after the (succesful) end 
-                ## of the script, the QL hang up!).
-                #focus.runFocusEvaluation(text_file, "", iraf_logfile)
+                #
+                # Approach-1: call directly to the python module runStarfocus.py
+                # New approach (does not work well, after the (succesful) end
+                # of the script, the QL hang up!).
+                # focus.runFocusEvaluation(text_file, "", iraf_logfile)
                 
-                ## Approach-2: call indirectly runStarfocus.py from the papi_ql_user.cl IRAF script
-                # if not started, launch DS9
+                # Approach-2: call indirectly runStarfocus.py from the
+                # papi_ql_user.cl IRAF script;
+                # If not started, launch DS9
                 display.startDisplay()
                 # Launch IRAF; note that next call is asynchronous, that is,
                 # it returns inmediately after launch IRAF.
