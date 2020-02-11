@@ -27,10 +27,10 @@ if __name__ == "__main__":
         x, y, fwhm = zip(*points)
         mymap = plt.cm.get_cmap('jet')
         # Normalize FWHM
-        print("FWHM[%d]=%s"%(nplate, fwhm))
-        fwhm /= np.max(np.abs(fwhm),axis=0)
+        print("FWHM[%d]=%s" % (nplate, fwhm))
+        fwhm /= np.max(np.abs(fwhm), axis=0)
         my_colors = mymap(fwhm)
-        norm = matplotlib.colors.Normalize(vmin = 0, vmax = 1, clip = False)
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=1, clip= False)
         ax.scatter(x, y, s=fwhm*100,  color=my_colors, cmap=mymap, alpha=1.0, edgecolors='None')
         #ax.plot(x, y, fwhm, 'o', **kwargs)
         ax.set_title("All plates")
