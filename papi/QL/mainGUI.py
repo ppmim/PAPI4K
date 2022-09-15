@@ -838,17 +838,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                                                    QFileDialog.ShowDirsOnly
                                                    | QFileDialog.DontResolveSymlinks)
         # source can only be a directory
-        
-        ###source = QFileDialog.getOpenFileNames( "Source data log (*.log)", 
-        ###                                       self.m_default_data_dir, self, 
-        ###                                       "Source Dialog","select source")
-        ## NOTE: 'source' can be a file or a directory
-        
+                
         if (not source):
             return
         else:
             dir = str(source) # required when QFileDialog.getExistingDirectory
-            ###dir = str(source[0]) # required when QFileDialog.getOpenFileNames
             if dir == self.m_outputdir:
                 self.logConsole.error("Error, Input and Output directories cannot be the same.")
                 return
@@ -1181,12 +1175,12 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             except Exception as e:
                 raise Exception("Error while checking_task_info_list: %s" % str(e))
             finally:
-                #Anyway, restore cursor
+                # Anyway, restore cursor
                 QApplication.restoreOverrideCursor()
                 self.m_processing = False
                 # Return to the previus working directory
                 os.chdir(self._ini_cwd)
-                #Good moment to update the master calibration files    
+                # Good moment to update the master calibration files    
                 self._update_master_calibrations()
 
             
@@ -1247,22 +1241,22 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             self.m_masterDark = master_dark[-1]
             self.lineEdit_masterDark.setText(self.m_masterDark)
             texp = self.outputsDB.GetFileInfo(self.m_masterDark)[4]
-            self.lineEdit_masterDark_texp.setText(texp)
-        #else: self.m_masterDark = None
+            self.lineEdit_masterDark_texp.setText(str(texp))
+        
         if len(master_flat) > 0: 
             self.m_masterFlat = master_flat[-1]
             self.lineEdit_masterFlat.setText(self.m_masterFlat)
             filter = self.outputsDB.GetFileInfo(self.m_masterFlat)[3]
             self.lineEdit_masterFlat_Filter.setText(filter)
-        #else: self.m_masterFlat = None
+        
         if master_bpm: 
             self.m_masterMask = master_bpm
             self.lineEdit_masterMask.setText(self.m_masterMask)
+        
         if master_nlc: 
             self.m_masterNLC = master_nlc
             self.lineEdit_masterNLC.setText(self.m_masterNLC)
             self.lineEdit_readout_mode.setText("unknown")
-        #else: self.m_masterMask = None
                 
 
     def checkEndObsSequence(self, filename):
@@ -1637,9 +1631,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         """
         Print on QL-console the basic information of the selected image.
         """
-        print("Image_info_slot")
         if self.m_listView_item_selected:
-            print("Image_info_slot -- 2")
             filename = self.m_listView_item_selected
             try:
                 # Get file info
@@ -2305,10 +2297,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         file is copied to the clipboard.
         """
 
-        textFile = QFileDialog.getOpenFileName( self,
+        textFile,_ = QFileDialog.getSaveFileName(self,
                                             "Select output text file",
                                             self.m_tempdir,   
-                                            "(*.txt*")
+                                            "(*.txt*)")
         textFile = str(textFile)
         if str(textFile):
             self.genFileList(self.m_popup_l_sel, textFile)
@@ -2653,14 +2645,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         """
         Called to select manually a master dark.
         """
-        source = QFileDialog.getOpenFileName( self,
+        source,_ = QFileDialog.getOpenFileName( self,
                                              "Select master DARK file", 
                                               self.m_default_data_dir, 
-                                              "(*.fit*")
+                                              "*.fit*")
 
         if str(source):
             fits = ClFits(str(source))
-            if fits.getType()!='MASTER_DARK' or \
+            if fits.getType()!='MASTER_DARK' and \
                 fits.getType()!='MASTER_DARK_MODEL':
                 res = QMessageBox.information(self, "Info", 
                                             "Selected frame does not look an MASTER DARK.\n Continue anyway?",
@@ -2676,7 +2668,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         """
         Called to select manually a master flat.
         """
-        source = QFileDialog.getOpenFileName( self,
+        source,_ = QFileDialog.getOpenFileName( self,
                                               "Select master FLAT file",
                                               self.m_default_data_dir, 
                                               "(*.fit*)")
@@ -2700,7 +2692,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         """
         Called to select manually a master BPM.
         """
-        source = QFileDialog.getOpenFileName( self,
+        source,_ = QFileDialog.getOpenFileName( self,
                                             "Select Master BPM",
                                             self.m_default_data_dir, 
                                             "(*.fit*)")
@@ -2713,7 +2705,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         """
         Called to select manually a master NLC.
         """
-        source = QFileDialog.getOpenFileName( self,
+        source,_ = QFileDialog.getOpenFileName( self,
                                             "Select Master NLC", 
                                             self.m_default_data_dir, 
                                             "(*.fit*)")
@@ -2951,7 +2943,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
 
         
         if len(self.m_popup_l_sel) > 1:
-            outfileName = QFileDialog.getSaveFileName(self,
+            outfileName, _ = QFileDialog.getSaveFileName(self,
                                                       "Choose a filename to save under",
                                                       self.m_outputdir + "/master_dflat.fits", 
                                                       "*.fits")
@@ -3006,7 +2998,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         flat_files=self.m_popup_l_sel,
                         master_dark_model=dark_model,
                         master_dark_list=darks,
-                        output_filename=str(outfileName))
+                        output_filename=str(outfileName[0]))
                     
                     thread = ExecTaskThread(self._task.createMaster,
                                                  self._task_info_list)
@@ -3898,7 +3890,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 else: file_list.append(file)
             
         # Select the name of the output result file
-        outfileName = QFileDialog.getSaveFileName(self,
+        outfileName, _ = QFileDialog.getSaveFileName(self,
                                                   "Choose a filename to save under",
                                                   self.m_outputdir + "/red_result.fits", 
                                                   "*.fits")

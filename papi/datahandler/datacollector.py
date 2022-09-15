@@ -140,13 +140,12 @@ class DataCollector (object):
         what kind of filename_filter is set.
         """
         
-        #a = [os.path.join(dirpath, s) for s in os.listdir(dirpath)
-        #    if os.path.isfile(os.path.join(dirpath, s))]
         a = [os.path.join(dirpath, s) for s in glob.glob(dirpath + "/" + self.filename_filter) \
               if os.path.isfile(os.path.join(dirpath, s)) and ( 
                  os.path.join(dirpath, s).endswith('.fits') or os.path.join(dirpath, s).endswith('.fit')) ]
          
         a.sort(key=lambda s: os.path.getmtime(s))
+        
         return a
        
     def __sortFilesMJD(self, i_files):

@@ -97,17 +97,17 @@ class LogSheet (object):
             logsheet.write("#-------------------------------------------------------------------------------------------------------------------------------------------------------------------\n") 
         
         # STEP 2: Sort out the files
-        id=0
+        id = 0
         sorted_list = {}
         for file in filelist:
             try:
-                fitsf = ClFits( file )
+                fitsf = ClFits(file)
                 sorted_list[fitsf.getDateTimeObs()] = fitsf
             except:
                 log.warning("Unexpected error reading file : `%s`. Skipped !" %file)
                 
-        keys = sorted_list.keys()
-        keys.sort()
+        keys = sorted(sorted_list)
+        
         if self.rows != None:
             min = self.rows[0]
             max = self.rows[1]
