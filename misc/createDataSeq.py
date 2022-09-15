@@ -162,7 +162,7 @@ if __name__ == "__main__":
                   
     parser.add_option("-t", "--seq_type", type="str",
                   action="store", dest="seq_type", default='SCIENCE',
-                  help="Tyep of the Data Sequence: DARK, SKY_FLAT, DOME_FLAT, FOCUS, SCIENCE")
+                  help="Type of the Data Sequence: DARK, SKY_FLAT, DOME_FLAT, FOCUS, SCIENCE")
     
     parser.add_option("-o", "--output_dir", type="str",
                   action="store", dest="output_dir", default="/tmp",

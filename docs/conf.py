@@ -33,7 +33,7 @@ sys.path.insert(0, '../')
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx',
               'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.imgmath',
               'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
-# extensions.append('sphinxext.numpydoc')
+# extensions.append('sphinx.ext.numpydoc')
 extensions.append('sphinx.ext.autosummary')
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,14 +50,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PAPI'
-copyright = u'2008-2020, J.M.Ibáñez-Mengual (IAA-CSIC)'
+copyright = u'2008-2022, J.M.Ibáñez-Mengual (IAA-CSIC)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '2.0'
+version = '3.0'
 from misc.version import __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
@@ -101,7 +101,7 @@ pygments_style = 'sphinx'
 # -----------------------------------------------------------------------------
 
 import glob
-#autosummary_generate = glob.glob("reference/*.rst")
+autosummary_generate = glob.glob("reference/*.rst")
 
 # Turn off numpydoc autosummary tables
 ###jmim##Turn off numpydoc flag to silence warnings 

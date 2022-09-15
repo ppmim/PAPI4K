@@ -26,7 +26,7 @@
 #
 # papi.py
 #
-# Last update 22/Jan/2020
+# Last update 15/Sep/2022
 #
 ################################################################################
 
@@ -48,15 +48,15 @@ import argparse
 import fileinput
 
 # Log
-from papi.misc.paLog import log
+from misc.paLog import log
 
 #PAPI packages 
-from papi.reduce.reductionset import ReductionSet, ReductionSetException
-from papi.misc.config import default_config_file, read_options
-from papi.misc.utils import clock
-from papi.misc.genLogsheet import LogSheet
-from papi.misc.check_papi_modules import check_modules
-from papi.misc.version import __version__
+from reduce.reductionset import ReductionSet, ReductionSetException
+from misc.config import default_config_file, read_options
+from misc.utils import clock
+from misc.genLogsheet import LogSheet
+from misc.check_papi_modules import check_modules
+from misc.version import __version__
 
 
 ################################################################################
@@ -202,11 +202,17 @@ def main(arguments=None):
                       default=False)
         
     init_options = parser.parse_args(args=arguments)
+
+    print("P1")
+
     
     # If no arguments, print help
     if len(arguments) < 1:
        parser.print_help()
        sys.exit(0)
+
+    print("P2")
+
 
     # Check required modules and versions
     if init_options.check_modules:
@@ -255,6 +261,7 @@ def main(arguments=None):
     
     rs_files = []
     
+
     # Read file or list-directory 
     if os.path.isfile(general_opts['source']):
         rs_files = [line.replace("\n", "").replace('//','/') 
