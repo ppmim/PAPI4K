@@ -563,10 +563,10 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         if self.proc_started:
             if self.comboBox_QL_Mode.currentText() == "None":
                 return
-            elif self.comboBox_QL_Mode.currentText().contains("Pre-reduction"):
+            elif "Pre-reduction" in self.comboBox_QL_Mode.currentText():
                 if end_seq: 
                     self.processFiles(seq)
-            elif self.comboBox_QL_Mode.currentText().contains("Lazy"):
+            elif "Lazy" in self.comboBox_QL_Mode.currentText():
                 if end_seq and seqType != "SCIENCE":
                     # Build master calibrations
                     self.processFiles(seq)
@@ -3975,17 +3975,19 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         QMessageBox.critical(self, "Error", msg)
                         self.logConsole.info(msg)
             
-                file_to_calib = res   
+                file_to_calib = res
+
             if file_to_calib: # fits.getType()=='SCIENCE': 
                 self.logConsole.info("File to calib: %s" % file_to_calib)
                 # Run astrometry parameters
                 out_file = self.m_outputdir + "/" + os.path.basename(file_to_calib.replace(".fits", ".wcs.fits"))
+                
                 # Catalog
-                if self.comboBox_AstromCatalog.currentText().contains("2MASS"): 
+                if "2MASS" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "2MASS"
-                elif self.comboBox_AstromCatalog.currentText().contains("USNO-B1"): 
+                elif "USNO-B1" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "USNO-B1"
-                elif self.comboBox_AstromCatalog.currentText().contains("GSC-2.2"): 
+                elif "GSC-2.2" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "GSC-2.2"
                 else: 
                     catalog = "2MASS"
@@ -4052,11 +4054,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 out_file = self.m_outputdir + "/" + \
                     os.path.basename(self.m_listView_item_selected.replace(".fits","_photo.pdf"))
                 # Catalog
-                if self.comboBox_AstromCatalog.currentText().contains("2MASS"): 
+                if "2MASS" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "2MASS"
-                elif self.comboBox_AstromCatalog.currentText().contains("USNO-B1"): 
+                elif "USNO-B1" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "USNO-B1"
-                elif self.comboBox_AstromCatalog.currentText().contains("GSC-2.2"): 
+                elif "GSC-2.2" in self.comboBox_AstromCatalog.currentText(): 
                     catalog = "GSC-2.2"
                 else: 
                     catalog = "2MASS"
@@ -4545,8 +4547,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QMessageBox.about(self,
                           "PANIC Quick-Look Tool",
 """
-PQL version: %s\nCopyright (c) 2009-2020 IAA-CSIC  - All rights reserved.\n
-Author: Jose M. Ibanez. (jmiguel@iaa.es)
+PQL version: %s\nCopyright (c) 2009-2022 IAA-CSIC  - All rights reserved.\n
+Author: Jose M. Ibanez-Mengual (jmiguel@iaa.es)
 Instituto de Astrofisica de Andalucia, IAA-CSIC
 
 This software is part of PAPI (PANIC Pipeline)

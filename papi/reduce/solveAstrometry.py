@@ -139,7 +139,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     -------
     Filename of solved file (filename.new.fits) 
     """
-
+    logging.debug("Entering solveField...")
     #
     # Create temporal and or output directory
     #    
@@ -155,6 +155,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     # the NAN values.
     MAX_N_NAN = 10000
     nan_replaced = False
+    print("Lets open file:", filename)
     with fits.open(filename, 'update') as hdu:
         n_nan = numpy.count_nonzero(numpy.isnan(hdu[extension].data))
         logging.info("Number of NANs found: %d" % n_nan)
@@ -202,9 +203,9 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
 
     # To optimize the finding and CPU time required
     if nx1 == 4096 and nx2 == 4096:
-        downsample = 2
+        downsample = 1
     else:
-        downsample = 2
+        downsample = 1
 
     #
     # We must distinguish different cases
@@ -478,7 +479,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     files_not_solved = []
     
     # args is the leftover positional arguments after all options have been processed
-    if not options.source_file or len(args) != 0:
+    if not options.source_file or len(sys.argv[1:]) < 1:
         parser.print_help()
         parser.error("incorrect number of arguments " )
     
