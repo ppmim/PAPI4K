@@ -79,7 +79,7 @@ def readHeader(filename, extension=1):
         not a MEF, then 'extesion' has no effect.
     
     """
-    
+        
     try:
         myfits = clfits.ClFits(filename)
     except Exception as e:
@@ -155,25 +155,28 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     # the NAN values.
     MAX_N_NAN = 10000
     nan_replaced = False
-    print("Lets open file:", filename)
-    with fits.open(filename, 'update') as hdu:
-        n_nan = numpy.count_nonzero(numpy.isnan(hdu[extension].data))
-        logging.info("Number of NANs found: %d" % n_nan)
-        if n_nan > MAX_N_NAN:
-            median = robust.r_nanmean(hdu[extension].data)
-            logging.info("Replacing NANs with median value : %f" % median)
-            p_nan = numpy.isnan(hdu[extension].data)
-            hdu[extension].data[p_nan] = median
-            hdu.flush()
-            hdu.close()
-            #fits.writeto(filename, hdu[extension].data, header=hdu[0].header, clobber=True)
-            nan_replaced = True
-            
+    try:
+        with fits.open(filename, 'update') as hdu:
+            n_nan = numpy.count_nonzero(numpy.isnan(hdu[extension].data))
+            logging.info("Number of NANs found: %d" % n_nan)
+            if n_nan > MAX_N_NAN:
+                median = robust.r_nanmean(hdu[extension].data)
+                logging.info("Replacing NANs with median value : %f" % median)
+                p_nan = numpy.isnan(hdu[extension].data)
+                hdu[extension].data[p_nan] = median
+                hdu.flush()
+                hdu.close()
+                #fits.writeto(filename, hdu[extension].data, header=hdu[0].header, clobber=True)
+                nan_replaced = True
+    except Exception as e:
+        print("Error...:%s"%str(e))
+
+    print("VAMOS!")        
+    
     #
     # Read header parameters
     #    
     (scale, ra, dec, instrument, is_science, nx1, nx2) = readHeader(filename, extension)
-
     # Whether no scale was found out and some was given as default, we use it
     if scale == -1 and pix_scale:
         scale = pix_scale
@@ -445,7 +448,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
                   help="Pixel scale of the images")
     
     parser.add_argument("-e", "--extension",
-                  action="store", dest="extension", type=float, default=0,
+                  action="store", dest="extension", type=int, default=0,
                   help="If file is a MEF, extension to be used for solving the field ("
                   "1=SG1, 2=SG2, 3=SG3, 4=SG4, 0=non MEF)")
                   
