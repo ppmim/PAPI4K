@@ -988,8 +988,8 @@ class MEF (object):
             # Numpy arrays : [y,x]  y=row, x=column 
             new_crpix_center = numpy.array ([[2132, 2132], [-81, 2132], [2132, -81],
                                         [-81, -81] ], numpy.float_)
-            for i in range (0, n_ext/2):
-                for j in range (0, n_ext/2):
+            for i in range (0, int(n_ext/2)):
+                for j in range (0, int(n_ext/2)):
                     log.debug("Reading quadrant-%d ..." % (i*2 + j))
                     # Check if we have a cube, then copy all the planes
                     if len(in_hdulist[0].data.shape)==2: 
