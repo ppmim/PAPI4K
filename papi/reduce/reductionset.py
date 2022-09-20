@@ -547,6 +547,8 @@ class ReductionSet(object):
         consecutive frames),if exceeded raise an exception 
         """
         
+        log.info("Checking that data properties matches ...")
+
         if file_list and len(file_list)>0:
             files_to_check = file_list
         else:
@@ -1441,7 +1443,9 @@ class ReductionSet(object):
             
         # Sort-out data files by obs-data (actually, not required when obs_mode='dither')
         out_files = self.sortOutData(out_files) 
-            
+        
+        log.info("SKY_FILTERED_FILES: %s" %str(out_files))
+
         return out_files
                                   
     
@@ -3234,14 +3238,14 @@ class ReductionSet(object):
         
         """
         
-        c_filter = ClFits(obj_frames[0]).getFilter()
+        self.m_filter = ClFits(obj_frames[0]).getFilter()
         log.info("#########################################")
         log.info("#### Starting Object Data Reduction #####")
         log.info("#### MODE = %s  ", self.red_mode)
         log.info("#### OUT_DIR = %s ",out_dir)
         log.info("#### OUT_FILE = %s ", output_file)
         log.info(" ----------------------------------")
-        log.info("#### FILTER = %s", c_filter)
+        log.info("#### FILTER = %s", self.m_filter)
         log.info("#### MASTER_DARK = %s ", master_dark)
         log.info("#### MASTER_FLAT = %s ", master_flat)
         log.info("#### MASTER_BPM = %s ", master_bpm)
@@ -3280,6 +3284,8 @@ class ReductionSet(object):
                 log.debug("Data checking was OK !")
             else:
                 raise Exception("Mismatch in data checking !")
+        else:
+            log.info("NO data Checking required...")
         
         ########################################################################
         # 00 - Sort out data by MJD (self.m_LAST_FILES)

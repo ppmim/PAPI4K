@@ -555,13 +555,16 @@ class ClFits (object):
             except KeyError:
                 log.warning('PAPITYPE/OBJECT/IMAGETYP keyword not found')
                 self.type = 'UNKNOW'
+
             # Find out whether is PANICv2 (H4RG detector)
             try:
                 self._is_panic_h4rg = False
                 if ('CAMERA' in myfits[0].header and
-                    'H4RG' in myfits[0].header.comments['CAMERA']):
+                    'H4RG' in myfits[0].header['CAMERA']):
                     self._is_panic_h4rg = True
                     log.info("Found H4RG detector")
+                else:
+                    log.info("NOT a H4RG !!!! ")
             except KeyError:
                 log.warning("CAMERA keyword not found")
 

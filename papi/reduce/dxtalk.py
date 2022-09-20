@@ -97,8 +97,11 @@ def remove_crosstalk(in_image, out_image=None, overwrite=False):
         if fits.getval(in_image, 'INSTRUME').lower()=='omega2000':
             return de_crosstalk_o2k(in_image, out_image, overwrite)
         elif fits.getval(in_image, 'INSTRUME').lower()=='panic':
-            # we suppose an image of one single detector.
-            return de_crosstalk_PANIC(in_image, out_image, overwrite)
+            if 'H4RG' in fits.getval(in_image, 'CAMERA'):
+                return de_crosstalk_PANIC_H4RG(in_image, out_image, overwrite)
+            elif 'H2RG' in fits.getval(in_image, 'CAMERA'): 
+                # we suppose an image of one single detector.
+                return de_crosstalk_PANIC(in_image, out_image, overwrite)
         else:
             log.error("Instrument is not supported !")
             raise Exception("Instrument is not supported !")
@@ -581,6 +584,90 @@ def de_crosstalk_PANIC(in_image, out_image=None, overwrite=False):
     
     return out_file
 
+
+def de_crosstalk_PANIC_H4RG(in_image, out_image=None, overwrite=False):
+    """
+    Remove cross-talk in PANIC  H4RG detector (4kx4k).
+    The H4RG is 4kx4k and has 64 horizontal stripes of 64 pixels
+    of width. So, the full detector is processed in the same way.
+    
+    The procedure does not need to read the DET_ID keyword to know the detector or how
+    to stripes are distributed along the detector. 
+    """
+    
+    log.debug("Start remove_crosstalk (PANIC_H4RG)")
+
+    if overwrite:
+        out_file = in_image
+    else:   
+        if not out_image:
+            out_file = in_image.replace(".fits", "_dx.fits")
+        else:
+            out_file = out_image
+            
+    try:
+        f_in = fits.open(in_image)
+        if len(f_in) == 1:
+            data_in = f_in[0].data
+        else:
+            log.errro("MEF files currently not supported !")
+            raise Exception("MEF files currently not supported !")
+            
+        if f_in[0].header['INSTRUME'].lower() != 'panic':
+            log.error("Instrument %s is not supported !"%f_in[0].header['INSTRUME'])
+            raise Exception("Instrument is not supported !")
+    except Exception as e:
+        log.error("Error openning FITS file : %s"%in_image)
+        raise e
+    
+    background = robust.r_nanmedian(data_in)
+    print("Image background estimation = ", background)
+
+    # All detectors have 32 vertical_stripes of 2048x64 (rows x columns) each one
+    # NOTE: in python, x=rows and y=columns
+    n_stripes = 64
+    width_st = 64
+    height_st = 4096
+    x_orig = 0
+    y_orig = 0
+    
+    cube = numpy.zeros([n_stripes, height_st, width_st], dtype=numpy.float32)
+    data_out = numpy.zeros([height_st, n_stripes * width_st], dtype=numpy.float32)
+    
+    for j in range (0,n_stripes):
+        cube [j] = data_in[x_orig : x_orig + height_st, 
+                           y_orig + j * width_st : y_orig + (j + 1) * width_st]
+
+    med_cube = robust.r_nanmedian(cube, 0)
+    median = robust.r_nanmedian(med_cube)
+    
+    for j in range(0, n_stripes):
+        # subtract cube_median and add constant (skybkg) to preserve original count level
+        data_out[x_orig : x_orig + height_st, 
+                 y_orig + j * width_st : y_orig + (j + 1) * width_st] = (cube[j] - med_cube) + background #median
+        
+
+    ### write FITS ###
+    
+    hdu = fits.PrimaryHDU()
+    hdu.data = data_out.astype('float32')
+    hdulist = fits.HDUList([hdu])
+    
+    hdr0 = fits.getheader(in_image)
+    hdr0.add_history('De-crosstalk procedure executed ')
+    hdr0.set('PAPIVERS', __version__, 'PANIC Pipeline version')
+    hdu.header = hdr0
+    
+    try:
+        hdulist.writeto(out_file, output_verify='ignore', overwrite=overwrite)
+        hdulist.close(output_verify='ignore')
+    except Exception as e:
+        raise e
+      
+    log.debug("End of remove_crosstalk (PANIC)")
+    
+    return out_file
+
 # main
 def main(arguments=None):
     
@@ -613,7 +700,7 @@ def main(arguments=None):
        parser.print_help()
        sys.exit(0)
        
-    if not options.input_image0:
+    if not options.input_image:
     # args is the leftover positional arguments after all options have been processed
         parser.print_help()
         parser.error("wrong number of arguments " )

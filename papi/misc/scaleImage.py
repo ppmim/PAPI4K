@@ -28,9 +28,15 @@ def scale_image(filename, scale_factor):
         img = fits.open(filename)
         wcs = astWCS.WCS(filename)
         d = img[0].data
+        if 'PIXSCALE' in img[0].header:
+            org_pixscale = img[0].header['PIXSCALE']
+        else:
+            org_pixscale = None
     except Exception as e:
         logging.error("Cannot open file: %s" % str(e))
         raise e
+    finally:
+        img.close()
 
     outfilename = os.path.basename(filename).replace(".fits", "_scaled.fits")
 
@@ -38,6 +44,9 @@ def scale_image(filename, scale_factor):
         scaled = astImages.scaleImage(d, wcs, float(scale_factor))
         astImages.saveFITS(outfilename, scaled['data'], scaled['wcs'])
         # TODO: update PIXSCALE and INSTRUME
+        if org_pixscale:
+            print("PIXSCALE=",org_pixscale)
+            fits.setval(outfilename, keyword="PIXSCALE", value=org_pixscale/float(scale_factor), ext=0)
     except Exception as ex:
         logging.error("Error scaling image: %s" % str(ex))
         raise

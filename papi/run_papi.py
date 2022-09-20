@@ -192,7 +192,7 @@ def main(arguments=None):
                   "dataset files (ot |filter)")
 
     parser.add_argument("-k", "--check_data",
-                  action="store_true", dest="check_data",
+                  action="store_true", dest="check_data", default=False,
                   help="if true, check data properties matching (type, expt, "
                   "filter, ncoadd, mjd)")
     
@@ -203,16 +203,12 @@ def main(arguments=None):
         
     init_options = parser.parse_args(args=arguments)
 
-    print("P1")
-
-    
+        
     # If no arguments, print help
     if len(arguments) < 1:
        parser.print_help()
        sys.exit(0)
-
-    print("P2")
-
+    
 
     # Check required modules and versions
     if init_options.check_modules:
@@ -231,7 +227,9 @@ def main(arguments=None):
     else:
         config_file = init_options.config_file
     
-        
+    
+    print("init_options:", init_options)
+
     # Now, we "mix" the invokation parameter values with the values in the 
     # config file, having priority the invokation values over config file values
     # Note: only values of the 'general' section can be invoked
@@ -252,7 +250,7 @@ def main(arguments=None):
     # print "options = ",options
 
     general_opts = options['general']
-    # print "GEN_OPTS",general_opts
+    print("GEN_OPTS",general_opts)
 
     if not general_opts['source'] or not general_opts['output_file'] \
         or not general_opts['output_dir'] or not general_opts['temp_dir']:
@@ -285,8 +283,8 @@ def main(arguments=None):
         return
    
     # Take only the rows(files) required
-    if (os.path.isfile(general_opts['source']) and init_options.rows != None):
-        if (init_options.rows[0]<0) or (init_options.rows[1]>len(rs_files)-1):
+    if os.path.isfile(general_opts['source']) and init_options.rows != None:
+        if (init_options.rows[0] < 0) or (init_options.rows[1] > len(rs_files) - 1):
             parser.error("wrong rows index values (0,%s)"%(len(rs_files)-1))
             parser.print_help()
         i = 0
@@ -308,6 +306,7 @@ def main(arguments=None):
     log.debug("   + Calibration library: %s",general_opts['ext_calibration_db'])
     log.debug("   + Reduction_mode: %s",general_opts['reduction_mode'])
     log.debug("   + Astrometric catalog: %s", options['astrometry']['catalog'])
+    log.debug("   + Check Data: %s", general_opts['check_data'])
     log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     
     # Create the RS (it works both simple FITS as MEF files)
