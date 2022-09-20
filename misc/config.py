@@ -736,6 +736,7 @@ def read_options(options, section, config_file = default_config_file()):
     fd = open(temp_filename, 'wt')
     temp_config.write(fd)
     fd.close()    
+    
     # Finally, parse the modified configuration file, as we would normally do
     options = read_config_file(temp_filename)
     #print "FILE=",temp_filename
@@ -745,7 +746,7 @@ def read_options(options, section, config_file = default_config_file()):
     # TODO: the above method has not still been thoroughly tested!!!!!!!
 
 if __name__ == "__main__":
-    f = "/home/jmiguel/DEVELOP/PAPI_v2/papi/config_files/papi.cfg"
+    f = "/home/jmiguel/DEVELOP/PAPI22/papi/config_files/papi.cfg"
     print(read_config_file(f))
         
     

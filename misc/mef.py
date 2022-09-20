@@ -207,7 +207,7 @@ class MEF (object):
                 log.warning("Some key cannot be copied into header")
             
             hdu[0].header.add_history("[MEF.doJoin] MEF created with files %s"%str(self.input_files))                            
-            hdu.writeto(out_filename, output_verify = 'ignore', clobber = True)
+            hdu.writeto(out_filename, output_verify = 'ignore', overwrite = True)
             hdu.close(output_verify = 'ignore')
             del hdu
             new_files.append(out_filename)
@@ -325,7 +325,7 @@ class MEF (object):
                 # delete some keywords not required anymore
                 del out_hdulist[0].header['EXTNAME']
                 out_hdulist.writeto(out_filenames[n],
-                        output_verify = 'ignore', clobber = True)
+                        output_verify = 'ignore', overwrite = True)
                 out_hdulist.close(output_verify = 'ignore')
                 del out_hdulist
                 log.info("File %s created"%(out_filenames[n]))
@@ -389,7 +389,7 @@ class MEF (object):
                                     )
                 out_hdulist.writeto(new_filename, 
                                     output_verify = 'ignore',
-                                    clobber=True)
+                                    overwrite=True)
                 del out_hdulist
                 log.info("MEF file created: %s" % new_filename) 
         
@@ -860,7 +860,7 @@ class MEF (object):
                 out_hdulist.append(h)
             
             out_hdulist.writeto(new_filename, output_verify = 'ignore', 
-                                clobber=True)
+                                overwrite=True)
             out_hdulist.close(output_verify = 'ignore')
             del out_hdulist
             out_filenames.append(new_filename)
@@ -1233,7 +1233,7 @@ class MEF (object):
      
                     # Now, write the new simple FITS file
                     out_hdulist.writeto (new_filename,
-                                         output_verify = 'ignore', clobber=True)
+                                         output_verify = 'ignore', overwrite=True)
                     out_hdulist.close(output_verify = 'ignore')
                     del out_hdulist
                     log.info ("FITS file %s created" % (out_filenames[n]))
