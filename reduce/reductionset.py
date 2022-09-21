@@ -414,7 +414,7 @@ class ReductionSet(object):
         # be executed from other thread than it was created.
         # --> It can be a <list of files> or a <directory name> having the files
         # Further info: http://stackoverflow.com/questions/393554/python-sqlite3-and-concurrency  
-        #               http://www.sqlite.org/cvstrac/wiki?p=MultiThreading
+        #               http://www.sqlite.org/cvstrac/wiki?p=MultiThreading    
         self.ext_db_files = []
         if external_db_files is None:
             if self.config_dict is not None:
@@ -423,6 +423,8 @@ class ReductionSet(object):
                     for ifile in os.listdir(cal_dir):
                         if ifile.endswith(".fits") or ifile.endswith(".fit"):
                             self.ext_db_files.append((cal_dir + "/" + ifile).replace('//','/'))
+                else:
+                    log.error("Cannot find calibration directory !")
         else:
             self.ext_db_files = external_db_files
 
@@ -480,21 +482,17 @@ class ReductionSet(object):
         if len(self.ext_db_files) > 0:
             log.info("Initializing External DataBase")
             try:
-                self.ext_db = DataSet(self.ext_db_files,
-                                                          instrument)
+                self.ext_db = DataSet(self.ext_db_files, instrument)
                 self.ext_db.createDB()
                 self.ext_db.load()
                 log.info("Calibration files found in External DB:")
-                self.ext_db.ListDataSet()
             except Exception as e:
                 log.error("Error while EXTERNAL data base initialization: \n %s" % str(e))
                 raise Exception("Error while EXTERNAL data base initialization")
-
-            # self.ext_db.ListDataSet()
         else:
             self.ext_db = None
-                
-        
+            
+
     def checkData(self, chk_shape=True, chk_filter=True, chk_type=True, 
                   chk_expt=True, chk_itime=True, chk_ncoadd=True, chk_cont=True,
                   chk_readmode=True, chk_instrument=True, file_list=None):
@@ -922,16 +920,22 @@ class ReductionSet(object):
         expTime = obj_frame.expTime()
         filter = obj_frame.getFilter()
         ncoadds = obj_frame.getNcoadds()
-        
-        # Init the DB (ext_db is always initialited whether db!=None)  
-        if self.db == None: 
-            self.__initDB()
 
+        
+        # Init the DB (ext_db is always initialited whether db!=None)
+        try:  
+            if self.db is None:
+                self.__initDB()
+        except Exception as e:
+            print(str(e))
+            raise e
+        
         # DARK - Does require equal EXPTIME and NCOADDS Master Dark ?
         # First, look for a DARK_MODEL
         master_dark = self.db.GetFilesT('MASTER_DARK_MODEL', -1) 
         if len(master_dark) == 0 and self.ext_db != None:
             master_dark = self.ext_db.GetFilesT('MASTER_DARK_MODEL', -1)
+        
         
         # Secondly (hopefully), try to find a MASTER_DARK with equal expTime
         if len(master_dark) == 0:
@@ -955,7 +959,9 @@ class ReductionSet(object):
                 log.info("Now, trying to find a (external) MASTER_TW_FLAT for filter %s" %filter)
                 master_flat = self.ext_db.GetFilesT('MASTER_TW_FLAT', -1, filter)
         
-        if self.ext_db: self.ext_db.ListDataSet()
+
+        if self.ext_db: 
+            self.ext_db.ListDataSet()
         
         # BPM
         master_bpm = self.db.GetFilesT('MASTER_BPM')
@@ -991,6 +997,20 @@ class ReductionSet(object):
             log.debug("Second BPM candidate: %s" % r_bpm)            
         else: 
             r_bpm = None
+
+
+        # very important to del the sqlite object, because
+        # we "can't pickle sqlite3.Connection objects" for multiprocessing
+        # I think it is new in Python3.6
+        # https://stackoverflow.com/questions/8804830/python-multiprocessing-picklingerror-cant-pickle-type-function
+        log.debug("Delete Databases !!")
+        if self.db is not None:
+            del self.db
+            self.db = None
+        
+        if self.ext_db is not None:
+            del self.ext_db
+            self.ext_db = None
 
         return r_dark, r_flat, r_bpm
         
@@ -1095,7 +1115,7 @@ class ReductionSet(object):
         
         
         # Sort out frames by FILTER
-        match_list=sorted(match_list, key=lambda data_file: data_file[1]) 
+        match_list = sorted(match_list, key=lambda data_file: data_file[1]) 
         
         return match_list # a list of tuples as (file,filter)
     
@@ -1128,6 +1148,7 @@ class ReductionSet(object):
             if stype != 'all':
                 seqs, seq_types = self.getOTSequences(show, stype)
             else:
+                if self.db is None: print("PASOOOO-001")
                 seqs, seq_types = self.getOTSequences(show)
         elif self.group_by == 'filter':
             if self.db is None:
@@ -1182,10 +1203,19 @@ class ReductionSet(object):
                     for file in seqs[k]:
                         log.debug("%s type = %s" %(file, self.db.GetFileInfo(file)[2]))
                 k += 1
+
         # very important to del the sqlite object, because
         # we "can't pickle sqlite3.Connection objects" for multiprocessing
         # I think it is new in Python3.6
-        del self.db
+        log.debug("Delete Databases !!")
+        if self.db is not None:
+            del self.db
+            self.db = None
+        
+        if self.ext_db is not None:
+            del self.ext_db
+            self.ext_db = None
+
         return seqs, seq_types
 
     def getOTSequences(self, show=True, stype=None):
@@ -1993,33 +2023,6 @@ class ReductionSet(object):
             log.debug("Calibration files created : %s", master_files)
             return master_files
         
-    def buildCalibrations_orig(self):
-        """
-        ANY MORE USED !!!
-        
-        Build the whole master calibration files from the currect calibrations 
-        files found in the data set (darks, flats).
-        """
-        
-        log.debug("Start builing the whole calibration files ...")
-        # If not initialized, Init DB
-        if self.db is None:
-            self.__initDB()
-        master_files = []
-        try:
-            master_files += self.buildMasterDarks()
-            master_files += self.buildMasterDomeFlats()
-            master_files += self.buildMasterTwFlats()
-            master_files += self.buildMasterSuperFlats()
-            master_files += self.buildGainMaps(type="all")
-        except Exception as e:
-            log.error("Some error while builing master calibration files...: %s", str(e))
-            raise e
-        
-        finally:
-            log.debug("Calibration files created : %s", master_files)
-            return master_files
-        
     def buildGainMaps(self, type="all"):
         """
         ANY MORE USED !!!
@@ -2116,7 +2119,7 @@ class ReductionSet(object):
             except Exception as e:
                 log.error("Some error while creating gainmap: %s",str(e))
                 raise e
-            if k<len(sorted_list):
+            if k < len(sorted_list):
                 # reset the new group
                 group = []
                 last_filter = sorted_list[k][1]
@@ -2124,7 +2127,9 @@ class ReductionSet(object):
         # insert products (gainmaps) into DB
         for f in l_gainmaps:
             self.db.insert(f)
-        self.db.ListDataSet()  
+        
+        self.db.ListDataSet()
+
         return l_gainmaps
     
 
@@ -2182,7 +2187,9 @@ class ReductionSet(object):
         # insert products (master darks) into DB
         for f in l_mdarks:
             self.db.insert(f)
+
         self.db.ListDataSet()         
+        
         return l_mdarks        
         
     def buildMasterDomeFlats(self):
@@ -2237,7 +2244,9 @@ class ReductionSet(object):
         # insert products (master dome flats) into DB
         for f in l_mflats:
             self.db.insert(f)
-        self.db.ListDataSet()  
+        
+        self.db.ListDataSet()
+
         return l_mflats
     
     def buildMasterTwFlats(self):
@@ -2295,7 +2304,7 @@ class ReductionSet(object):
                 log.error("but, proceding with next twflat group ...")
                 raise Exception("Cannot build master TwFlat: %s"%(str(e)))
             
-            if k<len(full_flat_list):
+            if k < len(full_flat_list):
                 # reset the new group
                 group = []
                 last_filter = full_flat_list[k][1]
@@ -2303,57 +2312,10 @@ class ReductionSet(object):
         # insert products (master twflats) into DB
         for f in l_mflats:
             self.db.insert(f)
+
         self.db.ListDataSet()
           
         return l_mflats
-    
-    def buildMasterSuperFlats(self):
-        """
-        ANY MORE USED !!!
-        
-        Look for science/sky files in the data set, group them by FILTER and
-        temporal proximity and then create the master superFlats, as many as
-        found groups.
-        
-        Return: A list of master SuperFlat created
-        
-        @todo: need to be tested 
-        """
-        
-        log.debug("Building Master SuperFlats...")
-        
-        # 1. Look for SCIENCE/SKY frames
-        full_file_list = self.getObjectSequences()
-        if len(full_file_list)<=0:
-            log.warning("No sequence science frames found")
-            return []
-            
-        l_mflats=[]       
-        for seq in full_file_list:
-            if len(seq)>1:
-                try:
-                    # Generate a random filename for the master super flat, to 
-                    # ensure we do not overwrite any file
-                    output_fd, output_path = tempfile.mkstemp(suffix='.fits', 
-                                                            dir=self.out_dir)
-                    os.close(output_fd)
-                    os.unlink(output_path) # we only need the name
-                    #outfile = self.out_dir+"/master_superflat_%s.fits"%last_filter # added as suffix (FILTER)
-                    superflat = SuperSkyFlat(seq, output_path, bpm=None,
-                        norm=False, temp_dir=self.temp_dir)
-                    out=superflat.create()
-                    l_mflats.append(out)
-                except Exception as e:
-                    log.error("Some error while creating master SuperFlat: %s",
-                        str(e))
-                    log.error("but, proceding with next group ...")
-                    #raise e
-                
-        # insert products (master SuperFlats) into DB
-        for f in l_mflats:
-            self.db.insert(f)
-        self.db.ListDataSet()  
-        return l_mflats  # a list of master super flats created
     
     def reduceSet(self, red_mode=None, seqs_to_reduce=None, 
                     types_to_reduce=['all']):
@@ -2437,10 +2399,10 @@ class ReductionSet(object):
                     # what it is very useful for the QL
                     failed_sequences +=1
                     failed_sequeces_files.append(seq)
-                    log.error("[reduceSet] Error, cannot reduce sequence : \n %s \n %s"%(str(seq),str(e)))
-                    if len(sequences)==1:
+                    log.error("[reduceSet] Error, cannot reduce sequence : \n %s \n %s"%(str(seq), str(e)))
+                    if len(sequences) == 1:
                         raise e
-                    elif len(sequences)>1:
+                    elif len(sequences) > 1:
                         log.debug("[reduceSet] Procceding to next sequence...")
                     
             k = k + 1
@@ -2858,7 +2820,9 @@ class ReductionSet(object):
                 dark, flat, bpm = None, None, None
                 if self.red_mode == 'quick' or self.red_mode == 'quick-lemon':
                     # Quick-Mode: optionally calibrations are used.
-                    if self.apply_dark_flat == 1 or self.apply_dark_flat == 2: 
+                    if self.apply_dark_flat == 1 or self.apply_dark_flat == 2:
+                        if self.db is None: print("ERRORRRRR!!!")
+                        else: print("TODO OK !!") 
                         dark, flat, bpm = self.getCalibFor(sequence)
                 else:
                     # Science-Mode: always calibration are required or at least tried to find !
@@ -2907,7 +2871,7 @@ class ReductionSet(object):
                     log.info("[reduceSeq] Entering PARALLEL data reduction ...")
                     try:
                         # Map the parallel process
-                        #n_cpus = self.config_dict['general']['ncpus'] #anymore used, instead cpu_count()
+                        # n_cpus = self.config_dict['general']['ncpus'] #anymore used, instead cpu_count()
                         # pool is defined at the end of the file, as a global variable
 
                         ##results = pprocess.Map(limit=n_cpus, reuse=1) 

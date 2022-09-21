@@ -307,7 +307,6 @@ def main(arguments=None):
     # Create the RS (it works both simple FITS as MEF files)
     try:
         rs = ReductionSet( rs_files, general_opts['output_dir'],
-                #out_file=general_opts['output_file'],
                 out_file=init_options.output_file,
                 obs_mode=general_opts['obs_mode'],
                 dark=general_opts['master_dark'], 

@@ -621,8 +621,7 @@ def de_crosstalk_PANIC_H4RG(in_image, out_image=None, overwrite=False):
         raise e
     
     background = robust.r_nanmedian(data_in)
-    print("Image background estimation = ", background)
-
+    
     # All detectors have 32 vertical_stripes of 2048x64 (rows x columns) each one
     # NOTE: in python, x=rows and y=columns
     n_stripes = 64
