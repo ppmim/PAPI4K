@@ -1055,20 +1055,20 @@ class DataSet(object):
         
             
     ############################################################    
-    def ListDataSet( self ):
+    def ListDataSet(self):
         """
         List all entries in the dataset
 
         Return 0 if all was successful, otherwise <0
         """
 
-        FIELD_MAX_WIDTH = 20
+        FIELD_MAX_WIDTH = 10
         cur = self.con.cursor()
         cur.execute("select * from dataset where type LIKE '%' order by ut_time","")
         
         # Print a header.
         for fieldDesc in cur.description:
-            print(fieldDesc[0].ljust(FIELD_MAX_WIDTH))
+            print(fieldDesc[0].ljust(FIELD_MAX_WIDTH), end=" ")
         print("\n") # Finish the header with a newline.
         print('-' * 120)
             
@@ -1078,24 +1078,24 @@ class DataSet(object):
         for row in cur:
             for fieldIndex in fieldIndices:
                 fieldValue = str(row[fieldIndex])
-                print(fieldValue.ljust(FIELD_MAX_WIDTH))
+                print(fieldValue.ljust(FIELD_MAX_WIDTH), end=" ")
                     
             print("\n")# Finish the row with a newline.
      
-    def ListDataSetNames( self ):
+    def ListDataSetNames(self):
         """
         List all entries in the dataset.
 
         Return 0 if all was successful, otherwise <0
         """
 
-        FIELD_MAX_WIDTH = 20
+        FIELD_MAX_WIDTH = 10
         cur = self.con.cursor()
         cur.execute("select filename from dataset where type LIKE '%' order by ut_time","")
         
         # Print a header.
         for fieldDesc in cur.description:
-            print(fieldDesc[0].ljust(FIELD_MAX_WIDTH))
+            print(fieldDesc[0].ljust(FIELD_MAX_WIDTH), end=" ")
         print("\n")# Finish the header with a newline.
         print('-' * 120)
             
@@ -1105,7 +1105,7 @@ class DataSet(object):
         for row in cur:
             for fieldIndex in fieldIndices:
                 fieldValue = str(row[fieldIndex])
-                print(fieldValue.ljust(FIELD_MAX_WIDTH))
+                print(fieldValue.ljust(FIELD_MAX_WIDTH), end=" ")
                     
             print("\n") # Finish the row with a newline.
   

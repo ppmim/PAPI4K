@@ -42,6 +42,8 @@ from astropy import wcs
 import astropy.io.fits as fits
 import numpy
 import papi.misc.robust as robust
+from papi.misc.paLog import log as logging
+
 
 try: 
     import clfits
@@ -61,7 +63,6 @@ except ImportError:
 # - log file
 
 
-#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def readHeader(filename, extension=1):
     """
@@ -171,7 +172,6 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     except Exception as e:
         print("Error...:%s"%str(e))
 
-    print("VAMOS!")        
     
     #
     # Read header parameters
@@ -459,12 +459,14 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
                                 
     options = parser.parse_args()
 
+    """
     # Logging setup
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         filename='/tmp/field-solver.log',
                         filemode='w')
+
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
@@ -477,7 +479,7 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
     
 
     logging.debug("Logging setup done !")
-    
+    """
     files_solved = []
     files_not_solved = []
     
