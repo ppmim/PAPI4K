@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #
-# Copyright (c) 2008-2015 IAA-CSIC  - All rights reserved. 
-# Author: Jose M. Ibanez. 
+# Copyright (c) 2008-2015 IAA-CSIC  - All rights reserved.
+# Author: Jose M. Ibanez.
 # Instituto de Astrofisica de Andalucia, IAA-CSIC
 #
 # This file is part of PAPI (PANIC Pipeline)
@@ -191,11 +191,6 @@ def main(arguments=None):
                   help="kind of data grouping (based on) to do with the"
                   "dataset files (ot |filter)")
 
-    parser.add_argument("-k", "--check_data",
-                  action="store_true", dest="check_data", default=False,
-                  help="if true, check data properties matching (type, expt, "
-                  "filter, ncoadd, mjd)")
-    
     parser.add_argument("-e", "--check",
                       action="store_true", dest="check_modules",
                       help="Check if versions of PAPI modules are right.",
@@ -324,7 +319,7 @@ def main(arguments=None):
                 config_dict=options)
     
         if init_options.print_seq:
-            rs.getSequences(show=True, stype=init_options.seq_type)
+            rs.getSequences(show=False, stype=init_options.seq_type)
         elif init_options.build_calibrations:
             rs.buildCalibrations()
         else:
@@ -347,7 +342,6 @@ def main(arguments=None):
                 rs.reduceSet(red_mode=general_opts['reduction_mode'], 
                              seqs_to_reduce=m_seqs_to_reduce,
                              types_to_reduce=stype)
-                
     except ReductionSetException as  e:
         log.error("Error during data reduction: %s " % str(e))
     

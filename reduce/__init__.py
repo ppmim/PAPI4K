@@ -19,8 +19,8 @@
 
 '''PANIC data processing system (PAPI)'''
 
-import logging
+#import logging
 
 # Top level NullHandler
-logging.getLogger("papi").addHandler(logging.NullHandler())
+#logging.getLogger("papi").addHandler(logging.NullHandler())
 

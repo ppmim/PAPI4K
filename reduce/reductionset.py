@@ -1099,7 +1099,7 @@ class ReductionSet(object):
         
         return match_list # a list of tuples as (file,filter)
     
-    def getSequences(self, show=True, stype='all'):
+    def getSequences(self, show=False, stype='all'):
         """
         Look for sequences (calib,science) in the current data set following the
         grouping criteria given by self.group_by and orderted by MJD.

@@ -289,9 +289,9 @@ class DataSet(object):
                 s_filter = "filter=?"
 
             s_select = "select filename from dataset where detector_id=? and  type=? and %s and %s and date=? and %s" %(s_texp,s_filter, s_run_id)
-            print(s_select)
+            # print(s_select)
             cur = self.con.cursor()
-            #cur.execute("select filename from dataset where detector_id=? and  type=? and texp>? and texp<?  and filter=? and date=? and run_id=?",
+            # cur.execute("select filename from dataset where detector_id=? and  type=? and texp>? and texp<?  and filter=? and date=? and run_id=?",
             #                 (detectorId, type, texp-ROUND, texp+ROUND, filter, date, runId))
             cur.execute(s_select,(detectorId, type, texp-ROUND, texp+ROUND, filter, date, runId))
             
@@ -415,7 +415,7 @@ class DataSet(object):
             
             s_select = "select filename from dataset where %s and %s and %s and %s and %s and %s and %s and %s order by mjd"\
                         %(s_detectorId, s_type, s_filter, s_texp, s_ar, s_dec, s_mjd, s_ncoadds)
-            print(s_select)
+            # print(s_select)
             
             cur = self.con.cursor()
             #cur.execute("select filename from dataset where detector_id=? and  type=? and texp>? and texp<?  and filter=? and date=? and run_id=?",
@@ -860,9 +860,11 @@ class DataSet(object):
         seq_list = [] # list of lists of files from each sequence
         seq_types =[] # list of types for each sequence
         for fits in rows:
-            print ("%s  %s  %s  %s  %s %s  %s  %s  %s" % (fits[0], fits[1], fits[2], # filename, ob_id, ob_pat
-                                       fits[3], fits[4], fits[5], fits[6], fits[7], # expn, nexp, filter, texp, type
-                                       fits[3]==fits[4])) # true/false
+            debug = False
+            if debug:
+                print ("%s  %s  %s  %s  %s %s  %s  %s  %s" % (fits[0], fits[1], fits[2], # filename, ob_id, ob_pat
+                                           fits[3], fits[4], fits[5], fits[6], fits[7], # expn, nexp, filter, texp, type
+                                           fits[3]==fits[4])) # true/false
             if fits[7].count('MASTER'):
                 print("--------> Found a MASTER calibration file; it will not be grouped !!!<----------")
                 continue
