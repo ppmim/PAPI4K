@@ -45,9 +45,31 @@ class ColorFormatter(logging.Formatter):
         return self.color(record.levelname) + retval + self.color()
 
 
+# define the global variable used whole around the PAPI sources
+log = logging.getLogger('PAPI')
+
+if (log.hasHandlers()):
+    log.handlers.clear()
+
+
+# Add a custom level for result messages
+RESULT_LEVEL_NUM = 60 
+#logging.addLevelName(RESULT_LEVEL_NUM, "RESULT")
+logging.addLevelName(RESULT_LEVEL_NUM, "RESULT")
+
+def result(self, message, *args, **kws):
+    # Yes, logger takes its '*args' as 'args'.
+    if self.isEnabledFor(RESULT_LEVEL_NUM):
+        self._log(RESULT_LEVEL_NUM, message, args, **kws) 
+
+#logging.Logger.result = result
+logging.Logger.result = result
+
+
 # We define two logging handlers (Console and File), each one can have
 # different properties (level, formater, ...)
-# Console
+
+### Console  ###
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG) # here we set the level for console handler
 # NOTE: Handler.setLevel() method, just as in logger objects, specifies the
@@ -56,71 +78,19 @@ console.setLevel(logging.DEBUG) # here we set the level for console handler
 # which severity of messages it will pass to its handlers. The level set in
 # each handler determines which messages that handler will send on.
 console.setFormatter(ColorFormatter('    [%(name)s]: %(asctime)s %(levelname)-8s %(module)s:%(lineno)d: %(message)s'))
-logging.getLogger('PAPI').addHandler(console)
-
-# Add a custom level for result messages
-RESULT_LEVEL_NUM = 60 
-logging.addLevelName(RESULT_LEVEL_NUM, "RESULT")
+log.addHandler(console)
 
 
-def result(self, message, *args, **kws):
-    # Yes, logger takes its '*args' as 'args'.
-    if self.isEnabledFor(RESULT_LEVEL_NUM):
-        self._log(RESULT_LEVEL_NUM, message, args, **kws) 
-logging.Logger.result = result
-
-# File
+### File ###
 datetime_str = str(datetime.datetime.utcnow()).replace(" ","T")
-
 file_hd = logging.FileHandler("/tmp/papi_" + datetime_str + ".log")
 # If we need to know later the filaname given--> paLog.file_hd.baseFilename
 file_hd.setLevel(logging.DEBUG)  # here we set the level for File handler
 formatter = logging.Formatter('[%(name)s]: %(asctime)s %(levelname)-8s %(module)s:%(lineno)d: %(message)s')
 file_hd.setFormatter(formatter)
-logging.getLogger('PAPI').addHandler(file_hd)
+#logging.getLogger('PAPI').addHandler(file_hd)
+log.addHandler(file_hd)
 
 # define the global log level
-logging.getLogger('PAPI').setLevel(logging.DEBUG)  # debug is the lowest level
-# define the global variable used whole around the PAPI sources
-log = logging.getLogger('PAPI')
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-# STUFF NOT USED 
-logging.basicConfig(level=logging.DEBUG,
-    format='%(asctime)s %(levelname)-8s %(module)s:%(lineno)d: %(message)s',
-    datefmt='%a, %d %b %Y %H:%M:%S',
-    filename='/tmp/panicTool.log',
-    filemode='w')
-#console = logging.StreamHandler()
-#console.setLevel(logging.DEBUG)
-#formatter = logging.Formatter('%(filename)s %(name)-12s: %(levelname)-8s %(message)s')
-# tell the handler to use this format
-#console.setFormatter(formatter)
-#logging.getLogger('').addHandler(console)
-log = logging.getLogger('panicQL.log')
-log.setLevel(logging.INFO)
-
-
-def initLog(log_filename, log_level):
-    "" actually not used ...""
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s %(levelname)-8s %(module)s:%(lineno)d: %(message)s',
-                        datefmt='%a, %d %b %Y %H:%M:%S',
-                        filename=log_filename,
-                        filemode='w')
-    
-"""
-
-
-
+#logging.getLogger('PAPI').setLevel(logging.DEBUG)  # debug is the lowest level
+log.setLevel(logging.DEBUG)  # debug is the lowest level
