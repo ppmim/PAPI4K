@@ -278,12 +278,12 @@ class MasterDomeFlat(object):
         log.debug("Combining Flat LAMP-OFF frames...")    
         flat_lampoff = self.__temp_dir + "/flat_lampOFF.fits"
         # misc.fileUtils.removefiles(flat_lampoff)
-        listToFile(domelist_lampoff, self.__temp_dir+"/files_off.list")
+        listToFile(domelist_lampoff, self.__temp_dir + "/files_off.list")
         # - Call IRAF task
         # Combine the images to find out the median using sigma-clip algorithm;
         # the input images are scaled to a common median, the pixels containing 
         # objects are rejected by an algorithm based on the measured noise (sigclip).
-        iraf.mscred.flatcombine(input="@"+(self.__temp_dir+"/files_off.list").replace('//','/'),
+        iraf.mscred.flatcombine(input="@"+(self.__temp_dir + "/files_off.list").replace('//','/'),
                         output=flat_lampoff,
                         combine='median',
                         ccdtype='',
@@ -340,10 +340,16 @@ class MasterDomeFlat(object):
                 msg = "Normalization of MEF master flat frame wrt chip %s. (MEDIAN=%d)"%(ext_name,median)
             elif ('INSTRUME' in f[0].header and f[0].header['INSTRUME'].lower() == 'panic'
                   and f[0].header['NAXIS1'] == 4096 and f[0].header['NAXIS2'] == 4096):
-                # It supposed to have a full frame of PANIC in one single 
-                # extension (GEIRS default). Normalize wrt detector SG1_1
-                median = np.median(f[0].data[200 : 2048-200, 2048+200 : 4096-200 ])
-                msg = "Normalization of (full) PANIC master flat frame wrt chip 1. (MEDIAN=%d)"%median
+                if 'H2RG' in f[0].header['CAMERA']:
+                    # It supposed to have a full frame of PANIC in one single 
+                    # extension (GEIRS default). Normalize wrt detector SG1_1
+                    median = np.median(f[0].data[200 : 2048-200, 2048+200 : 4096-200 ])
+                    msg = "Normalization of (full-H2RG) PANIC master flat frame wrt chip 1. (MEDIAN=%d)" % median
+                elif 'H4RG' in f[0].header['CAMERA']:
+                    # It supposed to have a full frame of PANIC-H4RG in one single 
+                    # extension; Normalize wrt center of detector.
+                    median = np.median(f[0].data[200 : 4096-200, 200 : 4096-200 ])
+                    msg = "Normalization of (full-H4RG) PANIC master flat frame (MEDIAN=%d)" % median
             else:
                 # Not MEF, not PANIC full-frame, but could be a PANIC subwindow
                 naxis1 = f[0].header['NAXIS1']
