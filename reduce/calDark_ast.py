@@ -251,17 +251,18 @@ class MasterDark(object):
             medians = []
             for i_frame in good_frames:
                 pf = fits.open(i_frame)
+                x1, y1 = pf[0].data.shape
                 if len(pf) == 1:
                     #print "mean=",numpy.mean(pf[0].data[512:1536,512:1536])
-                    medians.append(robust.r_nanmedian(pf[0].data[512:1536, 512:1536]))
+                    medians.append(robust.r_nanmedian(pf[0].data[int(x1*0.25) : int(y1*0.75), int(x1*0.25) : int(y1*0.75)]))
                 else:
                     print("MEF files now is supported !")
                     for i_ext in range(1, len(pf)):
-                        medians.append(robust.r_nanmedian(pf[i_ext].data[512 : 1536, 512 : 1536]))
+                        medians.append(robust.r_nanmedian(pf[i_ext].data[int(x1*0.25) : int(y1*0.75), int(x1*0.25) : int(y1*0.75)]))
                 
                 # Get some stats from master dark (mean/median/rms)
                 print("I_FRAME=", i_frame)
-                values = imstats(pf[1].data)
+                values = imstats(pf[0].data)
                 print("File: %s   min: %s   max: %s  mean: %s  std: %s"
                       % (i_frame, values[0], values[1], values[2], values[3]))
                 pf.close()
@@ -278,6 +279,7 @@ class MasterDark(object):
             print("------------------")
             pf = fits.open(self.__output_filename)
             values = imstats(pf[0].data)
+            pf.close()
             print("File: %s   min: %s   max: %s  mean: %s  std: %s"
                   % (self.__output_filename, values[0], values[1], values[2], values[3]))
 

@@ -94,9 +94,9 @@ def remove_crosstalk(in_image, out_image=None, overwrite=False):
     """
     
     try:
-        if fits.getval(in_image, 'INSTRUME').lower()=='omega2000':
+        if fits.getval(in_image, 'INSTRUME').lower() == 'omega2000':
             return de_crosstalk_o2k(in_image, out_image, overwrite)
-        elif fits.getval(in_image, 'INSTRUME').lower()=='panic':
+        elif fits.getval(in_image, 'INSTRUME').lower() == 'panic':
             if 'H4RG' in fits.getval(in_image, 'CAMERA'):
                 return de_crosstalk_PANIC_H4RG(in_image, out_image, overwrite)
             elif 'H2RG' in fits.getval(in_image, 'CAMERA'): 

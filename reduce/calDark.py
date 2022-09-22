@@ -279,13 +279,14 @@ class MasterDark(object):
             medians = []
             for i_frame in good_frames:
                 pf = fits.open(i_frame)
+                x1, y1 = pf[0].data.shape
                 if len(pf) == 1:
                     # print "mean=",numpy.mean(pf[0].data[512:1536,512:1536])
-                    medians.append(robust.r_nanmedian(pf[0].data[512 : 1536, 512 : 1536]))
+                    medians.append(robust.r_nanmedian(pf[0].data[int(x1*0.25) : int(y1*0.75), int(x1*0.25) : int(y1*0.75)]))
                 else:
-                    print("MEF files now is supported !")
+                    print("MEF files now are supported !")
                     for i_ext in range(1, len(pf)):
-                        medians.append(robust.r_nanmedian(pf[i_ext].data[512 : 1536, 512 : 1536]))
+                        medians.append(robust.r_nanmedian(pf[i_ext].data[int(x1*0.25) : int(y1*0.75), int(x1*0.25) : int(y1*0.75)]))
                 
                 # Get some stats from master dark (mean/median/rms)
                 print("I_FRAME=", i_frame)
@@ -295,7 +296,7 @@ class MasterDark(object):
                 for line in values:
                     print(line)
             print("-----------------------------------")
-            print("MEDIANS=", medians)
+            print("MEDIANS of center of detector (robust) =", medians)
             print("QC DARK MEAN =", numpy.mean(medians))
             print("QC DARK MED =", numpy.median(medians))
             print("QC DARK STDEV =", numpy.std(medians))

@@ -51,7 +51,7 @@ def createDataSeq(input_files, seq_type, overwrite=False, output_dir=None):
         list of FITS files
     seq_type: str
         Type of sequece to create (IMAGETYP):
-            DARK, SKY_FLAT, DOME_FLAT, FOCUS, SCIENCE
+            DARK, SKY_FLAT, DOME_FLAT_LAMP_ON, DOME_FLAT_LAMP_OFF, FOCUS, SCIENCE
     overwrite: bool
         True if input files are overwritten, otherwise new files are 
         created in 'output_dir'.
@@ -61,7 +61,7 @@ def createDataSeq(input_files, seq_type, overwrite=False, output_dir=None):
     """
     
     # Check of Seq. type
-    if seq_type not in ['DARK', 'SKY_FLAT', 'DOME_FLAT', 'FOCUS', 'SCIENCE']:
+    if seq_type not in ['DARK', 'SKY_FLAT', 'DOME_FLAT_LAMP_ON', 'DOME_FLAT_LAMP_OFF', 'FOCUS', 'SCIENCE']:
         msg = "Error, wrong Sequece type specified"
         log.error(msg)
         raise Exception(msg)
@@ -162,7 +162,7 @@ if __name__ == "__main__":
                   
     parser.add_option("-t", "--seq_type", type="str",
                   action="store", dest="seq_type", default='SCIENCE',
-                  help="Type of the Data Sequence: DARK, SKY_FLAT, DOME_FLAT, FOCUS, SCIENCE")
+                  help="Type of the Data Sequence: DARK, SKY_FLAT, DOME_FLAT_LAMP_ON, DOME_FLAT_LAMP_OFF, FOCUS, SCIENCE")
     
     parser.add_option("-o", "--output_dir", type="str",
                   action="store", dest="output_dir", default="/tmp",
