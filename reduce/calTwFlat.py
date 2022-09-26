@@ -540,12 +540,18 @@ class MasterTwilightFlat(object):
                 msg = "Normalization of MEF master flat frame wrt chip %s. (MEDIAN=%d)" % (ext_name, median)
             elif ('INSTRUME' in f[0].header and f[0].header['INSTRUME'].lower() == 'panic'
                   and f[0].header['NAXIS1'] == 4096 and f[0].header['NAXIS2'] == 4096):
-                # It supposed to have a full frame of PANIC in one single 
-                # extension (GEIRS default). Normalize wrt detector SG1_1
-                # Note that in Numpy, arrays are indexed as rows X columns (y, x),
-                # contrary to FITS standard (NAXIS1=columns, NAXIS2=rows).
-                median = robust.r_nanmedian(f[0].data[200 : 2048-200, 2048+200 : 4096-200 ])
-                msg = "Normalization of (full) PANIC master flat frame wrt chip 1. (MEDIAN=%d)" % median
+                if 'H2RG' in f[0].header['CAMERA']:
+                    # It supposed to have a full frame of PANIC in one single 
+                    # extension (GEIRS default). Normalize wrt detector SG1_1
+                    # Note that in Numpy, arrays are indexed as rows X columns (y, x),
+                    # contrary to FITS standard (NAXIS1=columns, NAXIS2=rows).
+                    median = robust.r_nanmedian(f[0].data[200 : 2048-200, 2048+200 : 4096-200 ])
+                    msg = "Normalization of (full) PANIC master flat frame wrt chip 1. (MEDIAN=%d)" % median
+                elif 'H4RG' in f[0].header['CAMERA']:
+                    # It supposed to have a full frame of PANIC-H4RG in one single 
+                    # extension; Normalize wrt center of detector.
+                    median = robust.r_nanmedian(f[0].data[200 : 4096-200, 200 : 4096-200 ])
+                    msg = "Normalization of (full-H4RG) PANIC master flat frame (MEDIAN=%d)" % median
             else:
                 # Not MEF, not PANIC full-frame, but could be a PANIC subwindow
                 naxis1 = f[0].header['NAXIS1']

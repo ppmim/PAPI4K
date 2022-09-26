@@ -423,8 +423,8 @@ class MasterDomeFlat(object):
         # Cleanup: Remove temporary files
         # misc.fileUtils.removefiles(flat_lampoff, flat_lampon, flat_diff)
         # Remove temp list files
-        removefiles(self.__temp_dir+"/files_off.list")
-        removefiles(self.__temp_dir+"/files_on.list")
+        removefiles(self.__temp_dir + "/files_off.list")
+        removefiles(self.__temp_dir + "/files_on.list")
 
         log.debug(t.tac() )
         log.debug('Saved master FLAT to %s' ,  self.__output_filename )
