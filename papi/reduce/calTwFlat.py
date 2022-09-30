@@ -208,6 +208,7 @@ class MasterTwilightFlat(object):
         if not os.path.exists(os.path.abspath(os.path.join(self.__output_filename, os.pardir))):
             log.error('Directory of combined FLAT frame does not exist')
             raise ExError('Directory of combined FLAT frame does not exist')
+        
         if not self.__output_filename :
             log.error('Combined FLAT frame not defined')
             raise ExError('Combined FLAT frame not defined')
@@ -227,13 +228,15 @@ class MasterTwilightFlat(object):
             raise e
         
         # Flats
-        try:
-            mef = MEF(framelist)
-            framelist = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
-        except Exception as e:
-            log.error("Error converting Flats to MEF file: %s", str(e))
-            raise e
-            
+        need_MEF = False
+        if need_MEF:
+            try:
+                mef = MEF(framelist)
+                framelist = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
+            except Exception as e:
+                log.error("Error converting Flats to MEF file: %s", str(e))
+                raise e
+        
         # STEP 1: Check the  TYPE(twilight) and FILTER, READEMODE of each Flat frame
         # If any frame on list missmatch the FILTER, then the master twflat will be aborted
         # EXPTIME do not need be the same, so EXPTIME scaling will be done
