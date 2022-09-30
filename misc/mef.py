@@ -470,7 +470,7 @@ class MEF (object):
         
         return n_ext, output_file
     
-    def convertGEIRSToMEF( self, out_filename_suffix = ".mef.fits",
+    def convertGEIRSToMEF(self, out_filename_suffix = ".mef.fits",
                            out_dir = None, copy_keyword = []):
         """ 
         Method used to convert a single FITS file (PANIC-GEIRS SEF) 
