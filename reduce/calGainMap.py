@@ -54,6 +54,7 @@ from papi.datahandler.clfits import ClFits, isaFITS
 from papi.reduce.calSuperFlat import SuperSkyFlat
 from papi.reduce.calTwFlat import MasterTwilightFlat
 from papi.reduce.calDomeFlat import MasterDomeFlat
+import papi.misc.robust as robust
 from papi.misc.version import __version__
 
 
@@ -292,8 +293,12 @@ class GainMap(object):
             extN = 1
         else:
             extN = 0
+        
         log.debug("STEP #1# - median computation")
-        if np.median(myflat[extN].data) > 100:
+        rmed = robust.r_nanmedian(myflat[extN].data)
+        log.debug("Median: %s", rmed)
+
+        if rmed > 10 or rmed < -10:
             # ##############################################################################
             # Normalize the flat (if MEF, all extension are normalized wrt extension/chip SG1)#
             # ##############################################################################
@@ -404,6 +409,7 @@ class GainMap(object):
                             else:
                                 dev[k*naxis1+l] = 0.0                       # already known badpix
             """
+            
             med = np.median(dev)
             sig = np.median(np.abs(dev - med)) / 0.6745
             lo = med - self.m_NSIG * sig
