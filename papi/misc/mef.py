@@ -549,10 +549,11 @@ class MEF (object):
             if len(in_hdulist) > 1 :
                 log.info("File %s is already a MEF file. No conversion required"%file)
                 # We copy, because if rename, then remove the original file.
-                #shutil.copyfile(file, new_filename)
+                # shutil.copyfile(file, new_filename)
                 out_filenames.append(file)
                 continue
-            
+            else:
+                log.info("File %s is not a MEF file." % file)
 
             # Check if is a cube 
             if len(in_hdulist[0].data.shape) != 2:
@@ -563,7 +564,6 @@ class MEF (object):
                 log.error('Error, file %s is not a full frame image', file)
                 raise MEF_Exception("Error, file %s is not a full frame image" % file)
 
-          
             # copy primary header from input file
             primaryHeader = in_hdulist[0].header.copy()
             out_hdulist = fits.HDUList()
@@ -599,8 +599,8 @@ class MEF (object):
             new_crpix_center = numpy.array ([[2132, 2132], [-81, 2132], [2132, -81], 
                                         [-81, -81] ], numpy.float_)
             
-            for i in range (0, n_ext / 2):
-                for j in range (0, n_ext / 2):
+            for i in range (0, int(n_ext / 2)):
+                for j in range (0, int(n_ext / 2)):
                     log.debug("Reading quadrant-%d ..." % (i*2 + j))
                     # Check if we have a cube of data
                     if len(in_hdulist[0].data.shape) == 2:

@@ -48,6 +48,7 @@ import pyraf
 from pyraf import iraf
 from iraf import noao
 from iraf import mscred
+#from iraf.imred import ccdred
 #from iraf import imred # conflict with mscred !!! but needed for ccdmask !!!
 
 
@@ -102,7 +103,7 @@ class BadPixelMask(object):
         
         if output_file == None:
             dt = datetime.datetime.now()
-            self.output_file = self.temp_dir + 'BadPixMask' + dt.strftime("-%Y%m%d%H%M%S")
+            self.output_file = self.temp_dir + 'BadPixMask' + dt.strftime("-%Y%m%d%H%M%S") + ".fits"
         else:
             self.output_file = output_file
                 

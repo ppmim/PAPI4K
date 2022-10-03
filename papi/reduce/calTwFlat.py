@@ -228,14 +228,15 @@ class MasterTwilightFlat(object):
             raise e
         
         # Flats
-        need_MEF = False
-        if need_MEF:
+        i_file = ClFits(framelist[0])
+        if i_file.mef:
             try:
                 mef = MEF(framelist)
                 framelist = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
             except Exception as e:
                 log.error("Error converting Flats to MEF file: %s", str(e))
                 raise e
+        del i_file
         
         # STEP 1: Check the  TYPE(twilight) and FILTER, READEMODE of each Flat frame
         # If any frame on list missmatch the FILTER, then the master twflat will be aborted
@@ -260,7 +261,7 @@ class MasterTwilightFlat(object):
             if f.mef:
                 log.debug("Found a MEF file")
                 try:
-                    for i in range(1,f.next + 1):
+                    for i in range(1, f.next + 1):
                         mean += robust.r_nanmean(myfits[i].data)
                     mean = float(mean / f.next)
                 except Exception as e:
@@ -312,7 +313,7 @@ class MasterTwilightFlat(object):
             else:
                 log.error("Frame %s skipped, either over or under exposed" %(iframe))
             
-            
+
         if len(good_frames) >= self.m_MIN_N_GOOD:
             log.info('Found %d flat frames with same filter [%s] and type:\n', len(good_frames), f_filter)
             for e in good_frames:
@@ -321,7 +322,7 @@ class MasterTwilightFlat(object):
             log.error("Error, not enough good frames, exiting....")
             raise Exception("Error, not enough good flat frames")
                 
-        #Clobber existing output images
+        # Clobber existing output images
         iraf.clobber = 'yes'
         
         # STEP 2: We subtract a proper MASTER_DARK, it is required for TWILIGHT
@@ -329,8 +330,8 @@ class MasterTwilightFlat(object):
         # Prepare input list on IRAF string format
             
         log.debug("Start Dark subtraction")
-        log.debug("Master Dark Model: %s"%self.__master_dark_model)
-        log.debug("Master Dark list: %s"%self.__master_dark_list)
+        log.debug("Master Dark Model: %s" % self.__master_dark_model)
+        log.debug("Master Dark list: %s" % self.__master_dark_list)
         # We have two option, use a DARK_MODEL or a MASTER_DARK for each skyflat (=TEXP)
         # 1- Try to read Master Dark Model
         use_dark_model = False
@@ -376,7 +377,7 @@ class MasterTwilightFlat(object):
             
         # Check MEF compatibility  - TO FIX !
         if not f.mef == cdark.mef:
-            log.error("Type mismatch with MEF files")
+            log.error("Type mismatch with MEF files. DARK and FLATs have different format")
             del cdark
             raise Exception("Type mismatch with MEF files")
         if f.mef:
@@ -448,13 +449,13 @@ class MasterTwilightFlat(object):
             
             # Write history
             if use_dark_model:
-                log.info("DARK_MODEL subtracted: %s"%self.__master_dark_model)
+                log.info("DARK_MODEL subtracted: %s" % self.__master_dark_model)
                 f[0].header.add_history('DarkMod subtracted %s (scaled)'
-                        %os.path.basename(self.__master_dark_model))
+                        % os.path.basename(self.__master_dark_model))
             else:
-                log.info("MASTER DARK subtracted: %s"%n_dark)
+                log.info("MASTER DARK subtracted: %s" % n_dark)
                 f[0].header.add_history('Dark subtracted %s'
-                        %os.path.basename(n_dark))
+                        % os.path.basename(n_dark))
                                              
             mdark.close()
             
