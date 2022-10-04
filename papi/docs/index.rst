@@ -38,8 +38,8 @@ This manual is a complete description of the data reduction recipes implemented
 by the PAPI pipeline, showing the status of the current pipeline version
 and describing data reduction process of the PANIC data using PAPI.
 
-Although PAPI was developed for the PANIC camera with **H2RG** detector, it as updated
-in 2020 to support the new **H4RG** detector integrated into PANIC.
+Although PAPI was developed for the PANIC camera with **H2RG** detector, it was updated
+in 2022 to support the new **H4RG** detector integrated into PANIC.
 
 Moreover, its development was initiated using data from Omega2000_ camera at
 the 3.5m CAHA telescope and HAWK-I_ camera at the VLT; thus, in principle it
@@ -97,6 +97,10 @@ from the European Union (FEDER) and the Spanish national budget, through the gra
 ICTS-2006-15, ICTS-2007-10, ICTS-2008-24, ICTS-2009-32 and the project 
 Intramural 200450E458 of the Spanish National Research Council."
     
+- Naranjo, V. et al. “PANIC-4K: upgrade with a HAWAII-4RG array.” Astronomical Telescopes + Instrumentation (2020).
+
+- Cárdenas Vázquez, María Concepción et al. “PANIC: A General-purpose Panoramic Near-infrared Camera for the Calar Alto Observatory.” Publications  of the Astronomical Society of the Pacific 130 (2017)
+
 - Ibáñez Mengual, J.M., Fernández, M., Rodríguez Gómez, J. R., García Segura, A. J., Storz, C., 
   "The PANIC software system", `Proc. SPIE 7740`_, 77402E (2010)
 
@@ -123,5 +127,7 @@ Documentation last updated on |today|
 .. _pdf: http://www.iaa.es/~jmiguel/PANIC/PAPI/PAPI.pdf
 .. _Proc. SPIE 7740 : http://proceedings.spiedigitallibrary.org/proceeding.aspx?articleid=751764
 .. _Proc. SPIE 8451: http://proceedings.spiedigitallibrary.org/proceeding.aspx?articleid=1363096
+.. _Proc. SPIE 2020: https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11454/2561424/PANIC-4K-upgrade-with-a-HAWAII-4RG-array/10.1117/12.2561424.full?SSO=1
+.. _Paper_PASP_2017: https://doi.org/10.1088/1538-3873/aa9884
 .. _OT: http://www.iaa.es/~agsegura/PANIC_OT/PANIC_Observation_Tool.html
 .. _Python: http://www.python.org
