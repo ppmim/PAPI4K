@@ -76,7 +76,7 @@ the next type of FITS files (in order of preference):
 
 |
 
-Beware that the order of the chip in the raw image produced is as described in
+In the case of the **4 x H2RG**, beware that the order of the chips in the raw image produced is as described in
 next figure:
 
 .. image:: _static/standard_full_q.jpg

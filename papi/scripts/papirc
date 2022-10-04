@@ -13,7 +13,7 @@ umask 002
 
 ### PAPI environment ###
 
-PAPI_HOME=${HOME}/DEVELOP/PAPI_v2/papi
+PAPI_HOME=${HOME}/papi
 PYTHONPATH=$PYTHONPATH:$PAPI_HOME
 PAPI_CONFIG=$PAPI_HOME/config_files/papi.cfg
 QT_GRAPHICSSYSTEM=native

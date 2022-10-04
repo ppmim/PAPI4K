@@ -2,10 +2,10 @@
 
 
 export QT_GRAPHICSSYSTEM=native
-QL_DIR=$PAPI_HOME/QL4
+QL_DIR=$PAPI_HOME/QL
 
 cd $QL_DIR
-pyuic4 $QL_DIR/panicQL.ui > $QL_DIR/panicQL.py
-pyrcc4 -o panicQL_resources_rc.py panicQL_resources.qrc
+# pyuic5 panicQL.ui > panicQL.py
+# pyrcc5 -o panicQL_resources_rc.py resources/panicQL_resources.qrc
 
-$QL_DIR/runQL.py  -c $QL_DIR/../config_files/papi.cfg
+python runQL.py  -c ../config_files/papi.cfg
