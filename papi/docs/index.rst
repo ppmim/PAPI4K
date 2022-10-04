@@ -97,9 +97,9 @@ from the European Union (FEDER) and the Spanish national budget, through the gra
 ICTS-2006-15, ICTS-2007-10, ICTS-2008-24, ICTS-2009-32 and the project 
 Intramural 200450E458 of the Spanish National Research Council."
     
-- Naranjo, V. et al. “PANIC-4K: upgrade with a HAWAII-4RG array.” Astronomical Telescopes + Instrumentation (2020).
+- Naranjo, V. et al. “PANIC-4K: upgrade with a HAWAII-4RG array.” Astronomical Telescopes + Instrumentation (2020), `Proc. SPIE 2020`_
 
-- Cárdenas Vázquez, María Concepción et al. “PANIC: A General-purpose Panoramic Near-infrared Camera for the Calar Alto Observatory.” Publications  of the Astronomical Society of the Pacific 130 (2017)
+- Cárdenas Vázquez, María Concepción et al. “PANIC: A General-purpose Panoramic Near-infrared Camera for the Calar Alto Observatory.” Publications  of the Astronomical Society of the Pacific 130 (2017), `Paper_PASP_2017`_
 
 - Ibáñez Mengual, J.M., Fernández, M., Rodríguez Gómez, J. R., García Segura, A. J., Storz, C., 
   "The PANIC software system", `Proc. SPIE 7740`_, 77402E (2010)

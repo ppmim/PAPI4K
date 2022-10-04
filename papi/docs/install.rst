@@ -22,18 +22,18 @@ Software Requirements
 
 Because PAPI is written mostly in Python_ and ANSI C, it can run on any platform
 that has the required Python modules and GCC compilier. However, it has been developed
-and deeply tested under `openSuSE`_ 15.1 and `Ubuntu`_ 19.1 x86_64 Linux OS.
-`Python 3.6.x <http://www.python.org>`_ or higher and the following packages
+and deeply tested under `openSuSE`_ 15.4 and `Ubuntu`_ 19.1 x86_64 Linux OS.
+`Python 3.7.x <http://www.python.org>`_ or higher and the following packages
 are required:
 
-    * `Astropy <http://www.astropy.org/>`_ (4.x)
-    * `NumPy <http://numpy.scipy.org/>`_ (> v1.18.x)
-    * `SciPy <http://www.scipy.org>`_ (> v1.4.x)
-    * `Matplotlib <http://matplotlib.org/>`_ (> v3.1.1)
+    * `Astropy <http://www.astropy.org/>`_ (4.3)
+    * `NumPy <http://numpy.scipy.org/>`_ (> v1.21.x)
+    * `SciPy <http://www.scipy.org>`_ (> v1.7.3)
+    * `Matplotlib <http://matplotlib.org/>`_ (> v3.5.2)
     * `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
     * `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
     * `x11iraf <http://iraf.noao.edu/iraf/ftp/iraf/x11iraf/x11iraf-v2.0BETA-bin.linux.tar.gz>`_ for xgterm
-    * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.14)
+    * `PyRAF <http://www.stsci.edu/resources/software_hardware/pyraf/stsci_python>`_ (> v2.1.15)
 
 The above packages are automatically included in the `Anaconda3`_ package, and then you do not need to install them manually.
 However, next tools need to be installed by the user following the instructions included in each package:
@@ -73,7 +73,7 @@ manager via pip. We recommend a fresh environment with only python installed. Vi
 
 1. Install `Anaconda3`_ (for Python 3.7), which include Conda manager::
 
-    $ sh Anaconda3-2019.10-Linux-x86_64.sh
+    $ sh Anaconda3-2022.05-Linux-x86_64.sh
 
 
 2. Create environment (papienv) and install PyRAF::
@@ -248,9 +248,11 @@ Please submit issues with the `issue tracker`_ on github.
 
 Release Notes
 -------------
+* 3.0.0 
+    - Fix many bugs and update to work H4RG detector on openSuSE15.4
 * 2.0.x
     - Support for new PANIC detector H4RG
-    - Support for Python 3.7.x and Conda environment
+    - Support for Python 3.7.x and Conda environment on openSuSE15.1
 
 * 1.2.x
     - Support for new MEF structure (Qi); old format (SGi_1) also supported

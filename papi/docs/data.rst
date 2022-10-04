@@ -7,11 +7,11 @@ are organized. However, for a deeper description, see the GEIRS_ manual.
 Detector
 --------
 The PANIC instrument had initially was mounted with a mosaic of four 2k x 2k
-HAWAII-2RG_ detectors. However, during 2020 a new single 4k x 4k HAWAII-4RG_ detector
+HAWAII-2RG_ detectors. However, during 2020 a new single (monolithic) 4k x 4k HAWAII-4RG_ detector
 was installed due to the damages in the HAWAII-2RG_.
 
 
- * The detector is an array (FPA) of four HAWAII-2RG_ detectors. The inter-chip
+ * H2RG: The detector is an array (FPA) of four HAWAII-2RG_ detectors. The inter-chip
    gap between the detectors is only 167 pixels (or 75 arcsec at the 2.2m telescope)
    and is filled by dithering with sufficient amplitude. For applications
    which image only 30x30 arcmin this design is ideal.
@@ -20,7 +20,7 @@ was installed due to the damages in the HAWAII-2RG_.
    A 4-pixel wide border is used as reference to correct for relatively slow bias
    drifts.
 
- * The HAWAII-4RG_ detector is a 4096x4096 pixels with 15um pixel pitch; it is
+ * H4RG: The HAWAII-4RG_ detector is a 4096x4096 pixels with 15um pixel pitch; it is
    the next generation, state-of-the-art readout integrated circuit for visible
    and infrared instrumentation in ground-based and space-based telescope applications.
 
@@ -52,18 +52,20 @@ the next type of FITS files (in order of preference):
    is the **default** and more wished saving mode.   
    This mode will also be used when the software or hardware sub-windowing is set and 
    the integrated option is selected. Then, there will be an extension for each sub-window.
+   (This mode makes sense only for the 4xH2RG)  
  
  - Non-integrated Multi-Extension-FITS (MEF): a unique FITS file with four extensions (MEF), 
    one per each detector (or window), having each extension N planes, where N is the number 
    of coadds (NCOADDS), ie. a cube of N planes.  
    This mode will be also used when the software or hardware subwindowing is set up and 
    the no-integrated option is selected.
+   (This mode makes sense only for the 4xH2RG) 
  
- - Single integrated FITS file: the four detectors are saved in single file and in a 
+ - Single integrated FITS file: the four H2RG detectors / single monolithic H4RG are/is saved in single file and in a 
    single extension FITS image (SEF). If the number of coadds (NCOADDS) is > 0, then 
    they are integrated (arithmetic sum) in a single frame.
 
- - Single non-integrated FITS-cube: the four detectors are saved in a single extension 
+ - Single non-integrated FITS-cube: the four detectors/single monolithic H4RG are/is saved in a single extension 
    FITS (SEF) file, and each individual exposition in a plane/layer of a cube. It means N 
    planes, where N is the number of coadds or expositions.
  
@@ -102,9 +104,11 @@ Q2 (ext. 2), Q3 (ext. 3) and Q4 (ext. 4).
 .. Note:: The above extension name and order are only valid from version GEIRS-r731M-18 onwards.
 
 
-Headers
-'''''''
-The header keywords currently used in a raw PANIC FITS file is as shown bellow:
+
+H2RG Header
+''''''''''''
+
+The header keywords currently used in a raw **H2RG** PANIC FITS file is as shown bellow:
 
 **Primary Header**
 
@@ -373,13 +377,170 @@ as each file is created. If these are not saved, neither PAPI nor PQL will work 
     IMAGETYP= 'SCIENCE '           / PANIC Image type
 
 
-HAWAII-2RG
+HAWAII-4RG
 **********
-    * TBC
+    * Hawaii-4RG is a monolithic IR detector, therefore neither quadrants nor MEF files do not make sense in that case.
 
-Headers
-'''''''
-    * TBC
+
+H4RG Header
+'''''''''''
+The header keywords currently used in a raw **H4RG** PANIC FITS file is as shown bellow:
+
+::
+
+  SIMPLE  =                    T
+  BITPIX  =                   32
+  NAXIS   =                    2 / 2
+  NAXIS1  =                 4096
+  NAXIS2  =                 4096
+  EXTEND  =                    T / FITS dataset may contain extensions
+  COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+  COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
+  BSCALE  =                   1.
+  BZERO   =                   0. / [adu] real = bzero + bscale*value
+  BUNIT   = 'adu     '           / [adu]
+  MJD-OBS =         59698.561326 / [d] Modified Julian Date of DATE-OBS
+  DATE-OBS= '2022-04-29T13:27:09.3989' / [d] UTC end of first frame read
+  DATE    = '2022-04-29T13:33:13' / file creation date (YYYY-MM-DDThh:mm:ss UT)
+  UT      =         48429.398901 / [s] 13:27:09.3989 UTC at end of first frame rea
+  LST     =         16354.189459 / [s] local sidereal time: 04:32:34 (EOread)
+  ALT     =            55.413811 / [deg] Altitude of the object above horizon
+  AZ      =           111.106918 / [deg] Azimuth (S=0, W=+90) of the object
+  PARANG  =            68.593735 / [deg] Parallactic angle
+  ORIGIN  = 'Centro Astronomico Hispano Aleman (CAHA)'
+  OBSERVER= 'my_observer'
+  TELESCOP= 'CA-3.5  '
+  FRATIO  = 'F/10    '           / [1]
+  OBSGEO-L=                8.724 / [deg] telesc. geodet. longit. 2015A&A..574A..36
+  OBSGEO-B=               49.396 / [deg] telesc. geodet. latit. 2015A&A..574A..36R
+  OBSGEO-H=                 560. / [m] above sea level 2015A&A..574A..36R
+  LAMPSTS = '        '           / calib. lamp
+  INSTRUME= 'PANIC   '           / PAnoramic Near Infrared camera for Calar Alto
+  CAMERA  = 'HgCdTe IR-Camera (1 H4RGs)'
+  PIXSCALE=             0.186667 / [arcsec/pix]
+  EGAIN1  =                   4. / [e-/adu] electrons/DN
+  ENOISE1 =                  16. / [e-] electrons/read ems=1
+  ROVER   = 'MPIA IR-ROelectronic Vers. 3.1' / Version det. electronics
+  WPOS    =                    5 / [ct] number of GEIRS wheels
+  W1POS   = 'Coldstop22'
+  W2POS   = 'Blank   '
+  W3POS   = 'Blank   '
+  W4POS   = 'Blank   '
+  W5POS   = 'Blank   '
+  FILTER  = 'NO      '           / filter macro name of filter combinations
+  STRT_INT=         48429.398901 / [s] 13:27:09.3989 start integration (UT)
+  STOP_INT=         48463.913569 / [s] 13:27:43.9136 stop integration (UT)
+  RA      =            13.856732 / [deg] R.A.: 00:55:25.6
+  DEC     =               49.296 / [deg] Dec.: +49:17:46
+  EQUINOX =                2000. / [a] Julian Epoch
+  AIRMASS =             1.214279 / [1] airmass
+  HA      =             54.29408 / [deg] H.A. '03:37:10.58'
+  T_FOCUS =                   0. / [mm] telescope focus
+  CASSPOS =                   0. / [deg] cassegrain position rel. to NSEW
+  OBJECT  = 'J005525+491745'     / telescope target
+  POINT_NO=                    0 / [ct] pointing counter
+  DITH_NO =                    0 / [ct] dither step
+  EXPO_NO =                   10 / [ct] exposure/read counter
+  FILENAME= 'OPT_FOCUS_DARK_01_0001.fits'
+  FILE_ID = 'Panic.2022-04-29T13:27:09.398_0001_001' / instru., time, image, windo
+  TPLNAME = '        '           / macro/template name
+  NQCHAN  =                   64 / [ct] output channels of each Hawaii chip
+  PTIME   =                    2 / pixel-time-base index
+  PREAD   =                10000 / [ns] pixel read selection
+  PSKIP   =                  150 / [ns] pixel skip selection
+  LSKIP   =                  201 / [ns] line skip selection
+  READMODE= 'continuous.sampling.read' / read cycle-type
+  IDLEMODE= 'wait    '           / idle to read transition
+  IDLETYPE= 'ReadWoConv'         / idle cycle-type
+  SAVEMODE= 'continuous.sampling.read' / save cycle-type
+  NEXP    =                    6 / cycle repeat count
+  CPAR1   =                    2 / cycle type parameter
+  ITIME   =             2.765469 / [s] scheduled integration time
+  CTIME   =             5.530939 / [s] read-mode cycle time
+  EMSAMP  =                    1 / [ct] electronic multi-sampling
+  NCOADDS =                    6 / [ct] coadds (total)
+  EXPTIME =            16.592816 / [s] total integ. time
+  FRAMENUM=                    1 / sum of 6 image(s)
+  SKYFRAME= 'unknown '
+  DETSEC  = '[1:4096,1:4096]'    / [pix] xrange and yrange of window
+  DATASEC = '[1:4096,1:4096]'    / [pix] xy-range of science data
+  DETSIZE = '[1:4096,1:4096]'    / [px] full size of the 4 detector mosaic
+  CHIPSIZX=                 4096 / [pix] single chip pixels in x
+  CHIPSIZY=                 4096 / [pix] single chip pixels in y
+  HINVDIR =                    0 / left-right directions of horiz. scanner
+  VINVDIR =                    0 / top-bottom directions of vert. scanner
+  DETROT90=                    2 / [ct] 90 deg SW image cw rotations
+  DETXYFLI=                    0 / [1] SW image flip (1=RightLeft, 2=UpDown)
+  B_EXT1  =             2.080078 / [V] external bias 2130
+  B_DSUB1 =             0.600179 / [V] det. bias voltage DSUB 1034
+  B_VREST1=              0.30009 / [V] det. bias voltage VRESET 517
+  B_VBIAG1=             2.199707 / [V] det. bias voltage VBIASGATE 3604
+  B_VNBIA1=                   0. / [V] det. bias voltage VNBIAS 0
+  B_VPBIA1=                   0. / [V] det. bias voltage VPBIAS 0
+  B_VNCAS1=                   0. / [V] det. bias voltage VNCASC 0
+  B_VPCAS1=                   0. / [V] det. bias voltage VPCASC 0
+  B_VBOUB1=                   0. / [V] det. bias voltage VBIASOUTBUF 0
+  B_REFSA1=                   0. / [V] det. bias voltage REFSAMPLE 0
+  B_REFCB1=                   0. / [V] det. bias voltage REFCOLBUF 0
+  TEMP_A  =            79.331001 / [K] Moly frame (-193.82 C)
+  TEMP_B  =            79.329002 / [K] Detector (-194 C)
+  PRESS1  =              4.0E-05 / [Pa] (4.000e-10 bar) , 'pressure1'
+  TEMPMON =                    8 / [ct] # of temp. monitrd 2022-04-29 13:30 loc. t
+  TEMPMON1=            99.503998 / [K] (-173.65 C) Cold plate
+  TEMPMON2=               108.75 / [K] (-164.40 C) Lens Mount 1
+  TEMPMON3=           102.010002 / [K] (-171.14 C) Charcoal
+  TEMPMON4=            77.526001 / [K] (-195.62 C) LN2 detector tank
+  TEMPMON5=           104.050003 / [K] (-169.10 C) Filter wheel housing
+  TEMPMON6=           105.139999 / [K] (-168.01 C) Preamps
+  TEMPMON7=            81.721001 / [K] (-191.43 C) LN2 main tank
+  TEMPMON8=           103.540001 / [K] (-169.61 C) Radiation shield
+  CREATOR = 'GEIRS : trunk-r799M-65 (Apr  7 2022, 14:12:56)'
+  PLX_API =                 8.23 / Major and Minor PLX API version
+  OS      = 'Linux irws1 5.3.18-150300.59.63-default #1 SMP Tue Apr 5 12:47:31 UT'
+  UUID    = 'e931efc4-c7c0-11ec-a4f3-90b11c480ad2' / Universally unique identifier
+  COMMENT = 'no comment'
+  OBSERVAT= 'CAHA    '           / Calar Alto, Andalucia, Spain, panic.caha.es
+  CHIPID  = '19908   '           / detect. HW ID
+  OPCYCL  =                   10 / Operation cycle number
+  OPDATE  = '2016-02-18T15:55:00' / UT-date of operation cycle start
+  MNTCYCL =                   20 / Mounting cycle number
+  MNTDATE = '2017-01-18T15:47:00' / UT-date of mounting cycle start
+  CUNIT1  = 'deg     '           / WCS units along axis 1
+  CUNIT2  = 'deg     '           / WCS units along axis 2
+  CTYPE1  = 'RA---TAN'           / WCS axis 1
+  CTYPE2  = 'DEC--TAN'           / WCS axis 2
+  CRVAL1  =     13.8567324535148 / [deg] RA in center
+  CRVAL2  =               49.296 / [deg] DEC in center
+  CD1_1   = -5.18518520726098E-05 / [deg/px] WCS matrix diagonal
+  CD2_2   = 5.18518520726098E-05 / [deg/px] WCS matrix diagonal
+  CD1_2   = -1.0634992634962E-14 / [deg/px] WCS matrix outer diagonal
+  CD2_1   = -1.0634992634962E-14 / [deg/px] WCS matrix outer diagonal
+  CRPIX1  =                 2049 / [px] RA and DEC center along axis 1
+  CRPIX2  =                 2049 / [px] RA and DEC center along axis 2
+  EOF00000=         48429.398866 / [s] 13:27:09.3988 UTC past midnight
+  EOF00001=         48433.443542 / [s] 13:27:13.4435 +4.04468 UTC past midnight
+  EOF00002=         48436.208914 / [s] 13:27:16.2089 +2.76537 UTC past midnight
+  EOF00003=         48438.974351 / [s] 13:27:18.9743 +2.76544 UTC past midnight
+  EOF00004=         48441.739649 / [s] 13:27:21.7396 +2.7653 UTC past midnight
+  EOF00005=         48444.506323 / [s] 13:27:24.5063 +2.76667 UTC past midnight
+  EOF00006=         48447.270818 / [s] 13:27:27.2708 +2.76449 UTC past midnight
+  EOF00007=         48450.036261 / [s] 13:27:30.0362 +2.76544 UTC past midnight
+  EOF00008=         48452.801598 / [s] 13:27:32.8015 +2.76534 UTC past midnight
+  EOF00009=         48455.567247 / [s] 13:27:35.5672 +2.76565 UTC past midnight
+  EOF00010=         48458.332675 / [s] 13:27:38.3326 +2.76543 UTC past midnight
+  EOF00011=         48461.098155 / [s] 13:27:41.0981 +2.76548 UTC past midnight
+  EOF00012=         48463.863639 / [s] 13:27:43.8636 +2.76548 UTC past midnight
+  OBS_TOOL= 'createDS'           / PANIC Observing Tool Software version
+  PROG_ID = '        '           / PANIC Observing Program ID
+  OB_ID   = '1       '           / PANIC Observing Block ID
+  OB_NAME = 'OB_dummy'           / PANIC Observing Block Name
+  OB_PAT  = 'unknown '           / PANIC Observing Block Pattern Type
+  PAT_NAME= 'unknown '           / PANIC Observing Sequence Pattern Name
+  PAT_EXPN=                    1 / PANIC Observing Exposition Number
+  PAT_NEXP=                    7 / PANIC Observing Number of Expositions
+  IMAGETYP= 'DARK    '           / PANIC Image type
+  END
+
 
 
 Data
