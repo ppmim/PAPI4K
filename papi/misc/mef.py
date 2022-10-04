@@ -237,7 +237,7 @@ class MEF (object):
             # Default set of keywords whether None were given.
             copy_keyword = ['DATE', 'OBJECT', 'DATE-OBS', 'RA', 'DEC', 'EQUINOX',
                     'BSCALE', 'BZERO',
-                    'RADECSYS', 'UTC', 'LST', 'UT', 'ST', 'AIRMASS', 'IMAGETYP', 
+                    'RADECSYS', 'UTC', 'LST', 'UT', 'ST', 'AIRMASS', 'IMAGETYP','CAMERA', 
                     'TELESCOP', 'INSTRUME', 'MJD-OBS', 'CTIME','ITIME','NCOADDS','EXPTIME',
                     'FILTER', 'FILTER1','FILTER2', 'HIERARCH ESO DET NDIT','NDIT',
                     'CASSPOS','PIXSCALE','PAPITYPE', 'PAPIVERS','OBSERVER','ORIGIN',

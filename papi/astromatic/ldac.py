@@ -34,7 +34,7 @@ class LDACCat(object):
 
     def __init__(self, hdu):
         self.hdu = hdu
-        self.current=0
+        self.current = 0
         
     def __len__(self):
         return self.hdu.header['NAXIS2'] # this way we prevent the error when there aren't any data row (naxis2=0)
@@ -90,7 +90,7 @@ class LDACCat(object):
     def filter(self, mask):
         return LDACCat(fits.BinTableHDU(data=self.hdu.data[mask],
                                           header=self.hdu.header))
-    def next(self):
+    def __next__(self):  # python 2 --> def next(self)
         if self.current >= self.__len__(): # len(self.hdu.data):
             raise StopIteration
         else:

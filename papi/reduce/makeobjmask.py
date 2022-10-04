@@ -49,7 +49,7 @@ import argparse
 import astropy.io.fits as fits
 
 from papi.misc.paLog import log
-import papi.astromatic.sextractor
+from papi.astromatic.sextractor import SExtractor
 import papi.astromatic.ldac
 from papi.datahandler.clfits import ClFits, isaFITS
 
@@ -104,7 +104,7 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
     
     f_out = open(outputfile, "w")
     
-    sex = papi.astromatic.SExtractor()
+    sex = SExtractor()
     n = 0
     
     for fn in files:
@@ -150,12 +150,12 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
             log.debug("Single point mask reduction")
             # NOTE we update/overwrite the image and don't create a new one
             myfits = fits.open(fn + ".objs", mode="update")
-            if len(myfits)>1: # is a MEF file
+            if len(myfits) > 1: # is a MEF file
                 next = len(myfits) - 1
             else: 
                 next = 1
             for ext in range(next):
-                if next==1: 
+                if next == 1: 
                     data = myfits[0].data
                 else: 
                     data = myfits[ext+1].data
@@ -166,15 +166,14 @@ def makeObjMask (inputfile, minarea=5, maxarea=0,  threshold=2.0,
                 try:
                     cat = papi.astromatic.ldac.openObjectFile(fn + ".ldac",
                                                          table='LDAC_OBJECTS')
-                    if len(cat)<=0:
-                      log.warning("No object found in catalog %s"%(fn + ".ldac")) 
+                    if len(cat) <= 0:
+                      log.warning("No object found in catalog %s" % (fn + ".ldac")) 
                       continue
                     for star in cat:
-                        if round(star['X_IMAGE'])<x_size and round(star['Y_IMAGE'])<y_size:
+                        if round(star['X_IMAGE']) < x_size and round(star['Y_IMAGE']) < y_size:
                             data[round(star['Y_IMAGE']),round(star['X_IMAGE'])] = 1 # Note: be careful with X,Y coordinates position
                 except Exception as e:
-                    print("Y_IMAGE=", star['Y_IMAGE'])
-                    print("X_IMAGE=", star['X_IMAGE'])
+                    print("ERROR reading LDAC file")
                     myfits.close(output_verify='ignore')
                     raise Exception("Error while creating single point object mask :%s"%str(e))
 
