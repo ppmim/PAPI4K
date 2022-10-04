@@ -48,7 +48,10 @@ import pyraf
 from pyraf import iraf
 from iraf import noao
 from iraf import mscred
-#from iraf.imred import ccdred
+
+# iraf.imred.ccdred.ccdmask
+#from iraf import imred
+#from iraf import ccdred
 #from iraf import imred # conflict with mscred !!! but needed for ccdmask !!!
 
 
@@ -110,7 +113,7 @@ class BadPixelMask(object):
         self.verbose = False
     
     def create(self):
-        # return self.create_IRAF()
+        #return self.create_IRAF()
         return self.create_simple()
         
     def create_IRAF(self):

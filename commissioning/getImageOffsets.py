@@ -232,8 +232,9 @@ if __name__ == "__main__":
     """ A plot of the dither pattern is also saved as offsets.png"""
 
     parser = argparse.ArgumentParser(description=desc)
+
     
-    parser.add_argument("-s", "--source", type="str",
+    parser.add_argument("-s", "--source", type=str,
                   action="store", dest="source_file",
                   help="Input text file with the list of FITS file to be analized.")
                   
@@ -249,14 +250,14 @@ if __name__ == "__main__":
                   action="store", dest="draw_scale", default=1.0,
                   help="Draw scale of detector (0.0-1.0) [default=%(default)s]")
 
-    parser.parse_args(args=arguments)
+    options = parser.parse_args()
     
     if len(sys.argv[1:]) < 1:
        parser.print_help()
        sys.exit(0)
         
     # args is the leftover positional arguments after all options have been processed 
-    if not options.source_file or not options.output_filename or len(args)!=0: 
+    if not options.source_file or not options.output_filename: 
         parser.print_help()
         parser.error("incorrect number of arguments " )
         

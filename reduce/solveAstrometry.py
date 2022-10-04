@@ -140,6 +140,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
     -------
     Filename of solved file (filename.new.fits) 
     """
+    
     logging.debug("Entering solveField...")
     #
     # Create temporal and or output directory

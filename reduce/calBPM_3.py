@@ -22,7 +22,7 @@
 #
 # PANICtool
 #
-# calBPM.py
+# calBPM_3.py -- based on http://www.gemini.edu/sciops/instruments/gsaoi/documents/GSAOI_BPM_forweb.pdf
 #
 # Created    : 22/05/2014    jmiguel@iaa.es
 # Last update: 22/05/2014    jmiguel@iaa.es
@@ -44,6 +44,7 @@ from optparse import OptionParser
 # Pyraf modules
 import pyraf
 from pyraf import iraf
+from iraf import mscred
 
 import astropy.io.fits as fits
 import numpy
@@ -218,17 +219,18 @@ class BadPixelMask(object):
             else: nx1,nx2 = flat[1].data.shape
             nbad_cold = numpy.zeros(nExt)
 
-            if self.dark_list==None:
+            if self.dark_list == None:
                 bpm = numpy.zeros([nExt, nx1, nx2], dtype=numpy.uint8)
                 nbad_hot = numpy.zeros(nExt)
 
-            # Loop over extensions
+            # Loop over extensions (~detectors)
             for i_nExt in range(0, nExt):
-                ext = i_nExt + int(nExt>1)
+                ext = i_nExt + int(nExt > 1)
                 if 'DET_ID' in flat[ext].header: 
                     det_id = flat[ext].header['DET_ID']
                 else: 
                     det_id = i_nExt+1
+
                 log.info("*** Detector %s"%det_id)
                 ## Note: robust mean is very similar to median
                 median = numpy.median(flat[ext].data)

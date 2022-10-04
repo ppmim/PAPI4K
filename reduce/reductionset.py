@@ -775,7 +775,7 @@ class ReductionSet(object):
                 kws_to_cp = ['DATE','OBJECT','DATE-OBS','RA','DEC','EQUINOX','LST',
                    'UT','AIRMASS','IMAGETYP','TELESCOP','INSTRUME','MJD-OBS',
                    'BSCALE', 'BZERO',
-                   'CTIME','ITIME','NCOADDS','EXPTIME','T_FOCUS','READMODE',
+                   'CTIME','ITIME','NCOADDS','EXPTIME','T_FOCUS','READMODE','CAMERA',
                    'FILTER', 'OBS_TOOL', 'PROG_ID', 'OB_ID', 
                    'OB_NAME', 'OB_PAT', 'PAT_NAME','PAT_EXPN', 'PAT_NEXP',
                    'CASSPOS','PIXSCALE', 'LAMP', 'DET_ID',
@@ -1445,7 +1445,7 @@ class ReductionSet(object):
                   
         
         print("SKY_FILTER_CMD = ", skyfilter_cmd)
-        print("CMD_ARGS = ", skyfilter_cmd.split())
+        # print("CMD_ARGS = ", skyfilter_cmd.split())
         args = skyfilter_cmd.split()
         
         output_lines = []
@@ -1688,7 +1688,7 @@ class ReductionSet(object):
       
       return offsets
     
-    def getPointingOffsets (self, images_in=None, 
+    def getPointingOffsets(self, images_in=None, 
                             p_offsets_file='/tmp/offsets.pap'):
         """
         Derive pointing offsets between each image using SExtractor OBJECTS 
