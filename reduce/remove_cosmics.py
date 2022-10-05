@@ -54,12 +54,21 @@ import sys
 import argparse
 
 import astropy.io.fits as fits
+from astropy.io.fits import PrimaryHDU, HDUList
 from ccdproc import cosmicray_lacosmic
-
+import numpy as np
 # Logging
 from papi.misc.paLog import log
 from papi.misc.version import __version__
 
+
+def tofits(filename, data, hdr=None, clobber=False):
+    """simple pyfits wrapper to make saving fits files easier."""
+    hdu = PrimaryHDU(data)
+    if not (hdr is None):
+        hdu.header += hdr
+    hdulist = HDUList([hdu])
+    hdulist.writeto(filename, clobber=clobber, output_verify='ignore')
 
 def remove_cr(in_image, out_image=None, overwrite=False, want_mask=False):
     """
@@ -109,19 +118,22 @@ def remove_cr(in_image, out_image=None, overwrite=False, want_mask=False):
     try:
         # Read the FITS :
 
-        newdata, mask = cosmicray_lacosmic(f_in[0].data, sigclip=5)
-
+        newdata, crmask = cosmicray_lacosmic(f_in[0].data, sigclip=5)
+        
         # Write the cleaned image into a new FITS file, conserving the
         # original header
-        fits.writeto(out_file, newdata, f_in[0].header)
+        # NOTE 5-Oct-2022: due to a bug in cosmicray_lacosmic, the return value 'newdata' 
+        # is a  astropy.units.quantity.Quantity.
+        fits.writeto(out_file, newdata.value, f_in[0].header)
+
         # Add keyword
         fits.setval(out_file, keyword="PAPIVERS",
                         value=__version__, comment="PANIC Pipeline version")
         
         # If you want the mask, here it is :
         if want_mask:
-            cosmicray_lacosmic.tofits("mask.fits", mask, f_in[0].header)
-            # (c.mask is a boolean numpy array, that gets converted here
+            tofits(in_image[:-4] + 'lamask.fits', np.array(crmask, dtype=np.uint8), hdr=f_in[0].header.copy())
+            # (crmask is a boolean numpy array, that gets converted here
             # to an integer array)
 
     except Exception as e:
