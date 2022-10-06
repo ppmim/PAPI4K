@@ -1580,7 +1580,7 @@ class ReductionSet(object):
                         %(listfile, gain_ext[n][0], hwidth, file_pos, self.out_dir, fix_type)
             print("CMD=", cmd)
             e = runCmd( cmd )
-            if e==1: # success
+            if e == 1: # success
                 fname = self.out_dir + "/" + os.path.basename(obj_ext[n][file_pos-1].replace(".fits", (".fits.skysub")))
                 out_ext.append(fname)  
             else:
