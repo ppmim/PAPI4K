@@ -83,6 +83,14 @@ manager via pip. We recommend a fresh environment with only python installed. Vi
     $ conda activate papienv
     $ conda install python=3.7 iraf-all pyraf-all
 
+2.1 IRAF setup::
+
+    $ mkdir $HOME/iraf
+    $ cd $HOME/iraf
+    $ mkiraf (xgterm)
+    $ cp -av /home/panic/anaconda3/envs/papi37/bin/xgterm /usr/local/bin/
+    $ mkdir $HOME/tmp $HOME/bin
+
 .. warning::
 
     Due to Python 3.x incompatibilities present in several tasks, `STScI`_ recommends to install IRAF alongside Python 2.7.
@@ -102,14 +110,22 @@ This command only needs to be executed one time per terminal session::
 
 4. Install Third Party tools:
 
-First we need to install next modules required for those third party tools::
+First, and for **openSuSE15.4** we need to install next modules required for those third party tools::
 
+    $ sudo zypper install git git-core
     $ sudo zypper install libXmu6-32bit libncurses5-32bit
     (for IRAF 32-bit compatibility)
-    $ sudo zypper install libXt-devel libnsl-devel cfitsio-devel
-    $ sudo zypper install python2-devel
+    $ sudo zypper install libXt-devel
+    $ sudo zypper install libnsl-devel
+    (for Montage3.3)
+    $ sudo zypper install cfitsio-devel
+    $ sudo zypper install ghc-bzlib-conduit-devel cairo-devel
+    $ sudo zypper install fftw3-devel libplplot17
+    $ sudo zypper install openblas-common-devel
+    $ sudo zypper install curl libcurl-devel plplot-devel
+    $ sudo zypper libjpeg8-devel
+    $ sudo zypper python3-devel
     (required for astrometry.net)
-
 
  Montage
  '''''''
@@ -119,8 +135,9 @@ First we need to install next modules required for those third party tools::
     $ tar -xvzf Montage_v3.3.tar.gz
     $ cd Montage_v3.3
     $ make
-    $ export PATH=$PATH:/home/panic/Software/PAPI/Montage_v3.3/bin
-
+    $ cp -av Montage_v3.3/bin/* /usr/local/bin/Montage_v3.3/bin
+    $ export PATH=$PATH:/usr/local/bin/Montage_v3.3/bin
+    
  DS9
  '''
 
@@ -157,32 +174,49 @@ And then update and config file::
    /usr/local/astrometry/etc/astrometry.cfg
 
 
-  Astromatic.net
-  ''''''''''''''
+  Astromatic suite
+  ''''''''''''''''
 
-    $ sudo zypper install fftw3-devel
-    $ sudo zypper install libplplot16
-    $ sudo zypper install cblas-devel
+Two options:
+
+a) install packages:: 
 
     $ rpm -i swarp-2.38.0-1.x86_64.rpm
     $ rpm -i sextractor-2.19.5-1.x86_64.rpm
     $ rpm -i --nodpes scamp-2.0.4-1.x86_64.rpm
 
-    $ sudo ln -s /usr/lib64/libqhull.so.7 /usr/lib64/libqhull.so.5
-    $ sudo ln -s /usr/lib64/libplplot.so.16 /usr/lib64/libplplotd.so.11
+b) download sources, compile and install (prefered)::
+
+    * Sextractor from source (2.25) *
+    sh autogen.sh
+    ./configure --enable-openblas
+    make; sudo make install
+
+
+    * SCAMP (2.10) *
+    sh autogen.sh
+    ./configure --enable-openblas
+    make; sudo make install
+
+    * SWARP (2.41.5) *
+    git clone https://github.com/astromatic/swarp.git
+    sh autogen.sh
+    ./configure
+    make; sudo make install
+
 
 PAPI Installation
 -----------------
 
-To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.1.0``::
+To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.2.0``::
 
-    $ pip install git+https://github.com/ppmim/PAPI.git@2.1.0
+    $ pip install git+https://github.com/ppmim/PAPI.git
 
 The latest development version (from ``master``) can also be installed from Github::
 
     $ pip install git+https://github.com/ppmim/PAPI.git
 
-As can a particular commit hash::
+Or as a particular commit hash::
 
     $ pip install git+https://github.com/ppmim/PAPI.git@3f03323c
 
