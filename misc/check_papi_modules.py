@@ -27,14 +27,14 @@ def testmodule(modulename, moduleversion):
     
     try:
         mod = __import__(modulename)
-        refversion = string.split(moduleversion, ".")
+        refversion = moduleversion.split(".")
         if modulename == "PyQt5.QtCore":
             cv = mod.QtCore.PYQT_VERSION_STR
-            currversion = string.split(cv , ".")
+            currversion = cv.split(".")
             currversion = [ a.split('-')[0] for a in currversion ]
         else:
             cv = mod.__version__
-            currversion = string.split(cv , ".")
+            currversion = cv.split(".")
             currversion = [ a.split('-')[0] for a in currversion ]
 
         if list(map(int, currversion)) < list(map(int, refversion)):
@@ -43,11 +43,11 @@ def testmodule(modulename, moduleversion):
         else:
             print("Your version %s of '%s' is fine!\n" %
                   (cv, modulename))
-    except:
+    except Exception as ex:
         print(probbold)
         print(probbold +
-              "PROBLEM: You do not have the Python module '%s' installed!\n" %
-              (modulename) + reset)
+              "PROBLEM: You do not have the Python module '%s' installed! (%s)\n" %
+              (modulename, ex) + reset)
 
 
 def check_modules():
@@ -59,9 +59,9 @@ def check_modules():
     print("\n")
     print(bold + "Checking Python Version:" + reset)
     print("PAPI needs Python Version 3.Y with Y>=6")
-    pyversion = sys.version.split()[0].split('.')
+    pyversion = sys.version.split()[0].split('.')[:2]
 
-    if list(map(int, pyversion)) >= [3, 7] or list(map(int, pyversion)) < [3, 2, 0]:
+    if list(map(int, pyversion)) > [3, 7] or list(map(int, pyversion)) < [3, 2]:
         print(probbold + "PROBLEM: You have Python V%s.%s\n"
                           % (pyversion[0], pyversion[1]) + reset)
         print("\n")
@@ -72,10 +72,10 @@ def check_modules():
     # ----------------------------------------------------
     # Define the Python modules, and the versions we need
     # ----------------------------------------------------
-    PAPImodules = { 'numpy': '1.6', 'pyraf' : '1.1',
-                   'matplotlib' : '0.98.1', 'scipy': '0.10', 
+    PAPImodules = { 'numpy': '1.20', 'pyraf' : '2.1',
+                   'matplotlib' : '3.5.0', 'scipy': '1.7', 
                    'PyQt5.QtCore': '5.8',
-                   'astropy': '0.3', 'montage_wrapper': '0.9.8' }
+                   'astropy': '4.3', 'montage_wrapper': '0.9.8' }
     
     # -----------------
     # Check the modules

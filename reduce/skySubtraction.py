@@ -110,10 +110,8 @@ def do_skySubtration(in_filelist, out_dir=None, n_nearest=1,
 if __name__ == "__main__":
     
     usage = "usage: %prog [options]"
-    desc = """Subtract sky-background from the input image
-
-TO BE COMPLETED !!!!
-"""
+    desc = """Subtract sky-background from the input image"""
+    
     parser = OptionParser(usage, description=desc)
     
     parser.add_option("-i", "--input_file",
