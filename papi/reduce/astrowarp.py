@@ -156,22 +156,24 @@ def initWCS(input_image, pixel_scale):
         
         # Check whether CRPIXn need to be updated because of some kind of border
         # was added around the image during a previus coadd.
-        try:
-            if 'CRPIX1' in header and header['NAXIS1'] > 2048:
-                log.info("Updating CRPIX1 taking into account border pixels due to coadd")
-                log.debug("NAXIS1=%s  CRPIX1=%s"%(header['NAXIS1'],header['CRPIX1']))
-                value = header['CRPIX1'] + (header['NAXIS1']-2048)/2
-                header.set('CRPIX1', value)
-                log.debug("VALUE1=%s" % value)
+        correct_crpix = False
+        if correct_crpix:
+            try:
+                if 'CRPIX1' in header and header['NAXIS1'] > 2048:
+                    log.info("Updating CRPIX1 taking into account border pixels due to coadd")
+                    log.debug("NAXIS1=%s  CRPIX1=%s"%(header['NAXIS1'],header['CRPIX1']))
+                    value = header['CRPIX1'] + (header['NAXIS1']-2048)/2
+                    header.set('CRPIX1', value)
+                    log.debug("VALUE1=%s" % value)
 
-            if 'CRPIX2' in header and header['NAXIS2'] > 2048:
-                log.info("Updating CRPIX2 taking into account border pixels due to coadd")
-                value = header['CRPIX2'] + (header['NAXIS2']-2048)/2            
-                header.set('CRPIX2', value)
-                log.debug("VALUE2=%s" % value)
-        except Exception as e:
-            log.critial("[initWCS] Error updating header: %s" % str(e))
-            raise e
+                if 'CRPIX2' in header and header['NAXIS2'] > 2048:
+                    log.info("Updating CRPIX2 taking into account border pixels due to coadd")
+                    value = header['CRPIX2'] + (header['NAXIS2']-2048)/2            
+                    header.set('CRPIX2', value)
+                    log.debug("VALUE2=%s" % value)
+            except Exception as e:
+                log.critial("[initWCS] Error updating header: %s" % str(e))
+                raise e
 
     fits_file[0].header.set('PAPIVERS', __version__, 'PANIC Pipeline version') 
     
