@@ -160,7 +160,7 @@ extern float *readfits(char *fn, int *nx, int *ny, float *bkg, float *sig)
 
 
     } else {                                  /* can't convert to float type */
-        eprintf("readfits: expected bitpix 16, -32 or 32\n");
+        eprintf("readfits: expected bitpix 16, -32 or 32 (%d)\n", bitpix);
     }
 
     free(hdr);
