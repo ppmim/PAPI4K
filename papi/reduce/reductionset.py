@@ -1576,7 +1576,7 @@ class ReductionSet(object):
             # Call external app skyfilter (irdr)
             hwidth = self.HWIDTH
             
-            cmd = self.m_irdr_path + "/skyfilter_single %s %s %d nomask none %d %s %d"\
+            cmd = self.m_irdr_path + "/skyfilter_single %s %s %s nomask none %s %s %s"\
                         %(listfile, gain_ext[n][0], hwidth, file_pos, self.out_dir, fix_type)
             print("CMD=", cmd)
             e = runCmd( cmd )
