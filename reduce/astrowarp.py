@@ -1041,7 +1041,7 @@ in principle previously reduced, but not mandatory.
     
     # args is the leftover positional arguments after all options have been
     # processed
-    if not options.source_file or not options.output_filename or len(args)!=0: 
+    if not options.source_file or not options.output_filename: 
         parser.print_help()
         parser.error("incorrect number of arguments " )
     

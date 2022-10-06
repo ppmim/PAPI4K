@@ -13,8 +13,8 @@ modhead /tmp/master_DOME_FF_H.fits filter H
 python reduce/applyDarkFlat.py -s /opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4k.txt -d /opt/PANIC_DATA/PAPI_TEST/DARK_MODEL/masterDM.fits -f /tmp/master_DOME_FF_H.fits
 python reduce/calBPM_2.py -s /opt/PANIC_DATA/PAPI_TEST/dome_seq.txt -D /tmp/masterDark_2_1.fits
 python reduce/calBPM_3.py -d /opt/PANIC_DATA/PAPI_TEST/dark_seq.txt -f /opt/PANIC_DATA/PAPI_TEST/dome_seq.txt -o /tmp/bpm.fits
-python skySubtraction.py  -i /opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4k.txt -c ../config_files/papi.cfg -o /tmp/
+python reduce/skySubtraction.py  -i /opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4k.txt -c ../config_files/papi.cfg -o /tmp/
+python reduce/montage.py -l /opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4k.txt
 
 #
 python reduce/solveAstrometry.py -s /opt/PANIC_DATA/focus_0024.fits
-/opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled
