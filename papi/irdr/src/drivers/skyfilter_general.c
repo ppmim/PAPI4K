@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     int nsky=0;
     float avgscale = 0.0;
     
-    if (argc != 6)
+    if (argc != 7)
         usage();
 
     if (!strcmp(argv[4], "mask"))
