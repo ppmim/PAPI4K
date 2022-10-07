@@ -84,7 +84,7 @@ def getItimesNcoadds(path, output_file, recursive=False):
             elif read_mode == 'fast-reset-read.read':
                 read_mode = 'rrr-mpia'
             elif read_mode == 'continuous.sampling.read':
-                read_mode = 'continuous.sampling.read' 
+                read_mode = 'cntsr' 
             else:
                 print("Read mode [%s] not recognized. Skipping file %s" %(read_mode,my_file))
                 continue
