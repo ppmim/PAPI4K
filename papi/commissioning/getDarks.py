@@ -79,12 +79,25 @@ def getItimesNcoadds(path, output_file, recursive=False):
             
             # Read-Mode
             read_mode = my_fits[0].header['READMODE']
+
             if read_mode == 'line.interlaced.read': 
                 read_mode = 'lir'
             elif read_mode == 'fast-reset-read.read':
                 read_mode = 'rrr-mpia'
             elif read_mode == 'continuous.sampling.read':
-                read_mode = 'cntsr' 
+                read_mode = 'cntsr'
+            elif read_mode == 'fast-reset.read':
+                read_mode = 'rr-mpia'
+            elif read_mode == 'o2.single.corr.read':
+                read_mode = 'o2scr'
+            elif read_mode == 'reset.level.read':
+                read_mode = 'rlr'
+            elif read_mode == 'reset.read.read':
+                read_mode = 'rrr'
+            elif read_mode == 'o2.double.corr.read':
+                read_mode = 'o2dcr'
+            elif read_mode == 'fast.end-corr-dcr.read':
+                read_mode = 'fecr'    
             else:
                 print("Read mode [%s] not recognized. Skipping file %s" %(read_mode,my_file))
                 continue
@@ -151,8 +164,12 @@ for the files of a given directory to know the DARKs required for them."""
     if not options.source_file or not options.output_file:
         parser.print_help()
         parser.error("incorrent number of arguments")
-        
-    n = getItimesNcoadds(options.source_file, options.output_file)
-    print("%d types found" % n)
+    
+    try:    
+        n = getItimesNcoadds(options.source_file, options.output_file)
+    except Exception as ex:
+        print("Error reading FITS files: %s" %str(ex))
+
+    print("%d types found !" % n)
     
     sys.exit()
