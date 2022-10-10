@@ -37,8 +37,8 @@ import matplotlib.patches as patches
 from papi.datahandler.clfits import ClFits
 
 
-def draw_offsets(offsets, pix_scale = 0.45, scale_factor=1.0):
-    
+def draw_offsets_H2RG(offsets, pix_scale = 0.45, scale_factor=1.0):
+
     fig2 = plt.figure()
     ax2 = fig2.add_subplot(111, aspect='equal')
     max_x = numpy.abs(offsets[: , 0]).max()
@@ -81,20 +81,47 @@ def draw_offsets(offsets, pix_scale = 0.45, scale_factor=1.0):
             ax2.annotate('%s'%detector_id, xy=(x,y), xytext=(x,y), size=8)
         detector_id+=1
         
-    """
+    plt.show(block=True)
+    fig2.savefig('offsets.png', dpi=360, bbox_inches='tight')
+
+
+def draw_offsets_H4RG(offsets, pix_scale = 0.45, scale_factor=1.0):
+
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111, aspect='equal')
+    max_x = numpy.abs(offsets[: , 0]).max()
+    max_y = numpy.abs(offsets[: , 1]).max()
+    detector_id = 1
+    # The width of the rectangle simulate the full detector with the gap (4096x4096 + 167) 
+    r_width = 4096 / 1.0 * pix_scale * scale_factor
+    plt.xlim(offsets[: , 0].min() - (4096) / 2.0 * pix_scale - 100, offsets[: , 0].max() + (4096) / 2.0 * pix_scale + 100)
+    plt.ylim(offsets[: , 1].min() - (4096) / 2.0 * pix_scale - 100, offsets[: , 1].max() + (4096) / 2.0 * pix_scale + 100)
+    plt.xlabel("RA (arcsec)")
+    plt.ylabel("Dec (arcsec)")
+    plt.title("Ditther offsets (magnification = %02.1f, pix_scale = %02.2f)" % (scale_factor, pix_scale))
+    plt.grid()
+    
+    # To align offsets with sky-orientation
+    offsets = offsets * (-1)
+    print("offsets =", offsets)
+    
+    q_width = 4096 * pix_scale * scale_factor
+    
+    # Draw offsets for detector
+    step = 0
     for x,y in offsets:
-        print "X=%s , Y=%s" % (x, y)
+        print("STEP=%d, X=%s , Y=%s" % (step, x, y))
         ax2.add_patch(
             patches.Rectangle(
-                (x - r_width / 2.0, y - r_width / 2.0),
-                r_width,
-                r_width,
+                (x - q_width / 2.0, y - q_width / 2.0),
+                q_width,
+                q_width,
                 fill=True, alpha=0.3  # remove background
             )
         )
-        ax2.annotate('%s'%i, xy=(x,y), xytext=(x,y), size=8)
-        i+=1
-    """    
+        ax2.annotate('%s'%step, xy=(x,y), xytext=(x,y), size=8)
+        step +=1
+        
     plt.show(block=True)
     fig2.savefig('offsets.png', dpi=360, bbox_inches='tight')
 
@@ -275,6 +302,16 @@ if __name__ == "__main__":
             pix_scale = hdu[0].header['PIXSCALE']
         else:
             pix_scale = options.pix_scale
+
+        if 'CAMERA' in hdu[0].header:
+            if 'H2RG' in hdu[0].header['CAMERA']:
+                is_H2RG = True
+            else:
+                # lets suppose is a monolithic detector (ie.: H4RG)
+                is_H2RG = False
+        else:
+            is_H2RG = False
+
             
     try:    
         offsets = getWCSPointingOffsets(files, options.output_filename)
@@ -282,7 +319,11 @@ if __name__ == "__main__":
         log.error("Error, cannot find out the image offsets. %s",str(e))
     
     # Draw plot with dither pathern
-    draw_offsets(offsets, pix_scale, options.draw_scale)
+    if is_H2RG:
+        draw_offsets_H2RG(offsets, pix_scale, options.draw_scale)
+    else:
+        draw_offsets_H4RG(offsets, pix_scale, options.draw_scale)
+
     
     # Print out the offset matrix
     numpy.set_printoptions(suppress=True)
