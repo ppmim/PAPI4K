@@ -93,7 +93,7 @@ from papi.astromatic.sextractor import SExtractor
 from papi.photo.photometry import doPhotometry
 from papi.reduce.correctNonLinearity import NonLinearityCorrection
 from papi.misc.createDataSeq import createDataSeq
-from papi.commissioning.getImageOffsets import getWCSPointingOffsets, draw_offsets
+from papi.commissioning.getImageOffsets import getWCSPointingOffsets, draw_offsets_H2RG, draw_offsets_H4RG
 from papi.misc.version import __version__
 import papi.misc.display as display
 
@@ -2328,9 +2328,20 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     pix_scale = hdu[0].header['PIXSCALE']
                 else:
                     pix_scale = self.config_opts['general']['pix_scale']
-            
+
+                if 'CAMERA' in hdu[0].header:
+                    if 'H2RG' in hdu[0].header['CAMERA']:
+                        is_H2RG = True
+                    else:
+                        # lets suppose is a monolithic detector (ie.: H4RG)
+                        is_H2RG = False
+                else:
+                    is_H2RG = False
+
             # Draw plot with dither pathern
-            draw_offsets(offsets, pix_scale, 1.0)
+            if is_H2RG: draw_offsets_H2RG(offsets, pix_scale, 1.0)
+            else: draw_offsets_H4RG(offsets, pix_scale, 1.0)
+
 
     def MEF2Single_slot(self):
         """
