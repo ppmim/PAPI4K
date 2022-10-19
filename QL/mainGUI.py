@@ -1162,7 +1162,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                             # Cannot identify the type of the results...for sure
                             # something was wrong...
                             # Anycase, we show it !
-                            self.logConsole.info("Value returned : " % str(self._task_info._return))
+                            self.logConsole.info("Value returned : %s" % str(self._task_info._return))
 
                             #self.logConsole.error("No processing results obtained !")
                     else:

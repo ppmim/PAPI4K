@@ -428,9 +428,10 @@ def writeValueForOT(best_focus):
 
     from os.path import expanduser
     home = expanduser("~")
-    ql_focus_text_file = home + "/tmp/ql_focus"
-
-    if not os.path.isdir(home + "/tmp"):
+    tmp_dir = os.getenv("TMPDIR")
+    ql_focus_text_file = tmp_dir + "/ql_focus"
+    
+    if not os.path.isdir(tmp_dir):
         msg = "tmp directory %s not found. Using %s directory"
         sys.stderr.write(msg % (home + "/tmp", home ))
         ql_focus_text_file = home + "/ql_focus"

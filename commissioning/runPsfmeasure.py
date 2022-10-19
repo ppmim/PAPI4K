@@ -40,7 +40,7 @@ def getAverageFWHMfromPsfmeasure(images, coord_file, log_file):
         psfmeasure.coords = "mark1"
         psfmeasure.wcs = "world"
         psfmeasure.display = "no"
-        psfmeasure.size = "GFWHM"
+        psfmeasure.size = "FWHM"
         psfmeasure.radius = 15
         psfmeasure.sbuffer = 5 
         psfmeasure.swidth = 5
