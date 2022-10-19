@@ -408,7 +408,9 @@ def runFocusEvaluation(source_file, coord_file, log_file):
     
     # Compute our own BEST_FOCUS value and plot the fittting
     print("Now, our own fitting...\n")
-    data = readStarfocusLog("/home/panic/iraf/starfocus.log")
+    home = expanduser("~")
+    try:
+    data = readStarfocusLog(home + "/iraf/starfocus.log")
     my_best_focus, min_fwhm  = getBestFocus(data, "starfocus.pdf")
 
 
@@ -431,7 +433,7 @@ def writeValueForOT(best_focus):
     tmp_dir = os.getenv("TMPDIR")
     ql_focus_text_file = tmp_dir + "/ql_focus"
     
-    if not os.path.isdir(tmp_dir):
+    if tmp_dir==None or not os.path.isdir(tmp_dir):
         msg = "tmp directory %s not found. Using %s directory"
         sys.stderr.write(msg % (home + "/tmp", home ))
         ql_focus_text_file = home + "/ql_focus"
