@@ -1766,10 +1766,9 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 for file in seq:
                     (date, ut_time, type, filter, texp, detector_id, run_id, 
                      ra, dec, object, mjd, nexp, ncoadds, itime) = self.inputsDB.GetFileInfo(file)
-                    #nCoadd = fits.getval(file, "NCOADDS", ext=0)
                     if file == seq[0]:
-                        #nCoadd = fits.getval(file, "NCOADDS", ext=0)
                         nObject = fits.getval(file,"OBJECT", ext=0)
+                        header = fits.getheader(file)
                         #the first time, fill the "tittle" of the group 
                         elem.setText(0, "TYPE="+str(seq_types[k]) +
                                      "  ** FILTER=" + str(filter) + 
@@ -1781,8 +1780,30 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     e_child.setText(0, str(file))
                     e_child.setText(1, str(type))
                     e_child.setText(2, str(filter))
-                    nimg = nexp / ncoadds # if >1, then number of layers of the cube
-                    tfile = nimg * texp 
+                    
+                    # Check if the files belongs to a set of individuals not integrated
+                    header = fits.getheader(file)
+                    try:
+                        framenum_com = header.comments['FRAMENUM'].split()
+                    except Exception as ex:
+                        log.error("Cannot read FRAMENUM from header")
+                        framenum_com = ""                       
+                    # case A: 'contains 1 .. X'
+                    if framenum_com[0] == 'contains': # it is a cube (not integrated)
+                        nimg = nexp / ncoadds # if >1, then number of layers of the cube
+                        tfile = nimg * texp       
+                    # case B: 'of X saved'
+                    elif framenum_com[0] == 'of': # it is an individual file (not integrated)
+                        tfile = texp
+                        nimg = 1  
+                    # case C: 'sum of X image(s)'
+                    elif framenum_com[0] == 'sum': # it is an integrated file
+                        tfile = texp
+                        nimg = 1
+                    else:
+                        tfile = texp
+                        nimg = 1
+                    # 
                     elem.setText(3, str(nimg))
                     e_child.setText(4, str(tfile))
                     e_child.setText(5, str(date) + "::" + str(ut_time))
@@ -1842,9 +1863,30 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 elem.setText(0, str(file))
                 elem.setText(1, str(type))
                 elem.setText(2, str(filter))
-                #elem.setSizeHint(2, QSize(2,2))
-                nimg =  nexp / ncoadds # if >1, then number of layers of the cube
-                tfile = nimg * texp 
+
+                # Check if the files belongs to a set of individuals not integrated
+                header = fits.getheader(file)
+                try:
+                    framenum_com = header.comments['FRAMENUM'].split()
+                except Exception as ex:
+                    log.error("Cannot read FRAMENUM from header")
+                    framenum_com = ""                       
+                # case A: 'contains 1 .. X'
+                if framenum_com[0] == 'contains': # it is a cube (not integrated)
+                    nimg = nexp / ncoadds # if >1, then number of layers of the cube
+                    tfile = nimg * texp       
+                # case B: 'of X saved'
+                elif framenum_com[0] == 'of': # it is an individual file (not integrated)
+                    tfile = texp
+                    nimg = 1  
+                # case C: 'sum of X image(s)'
+                elif framenum_com[0] == 'sum': # it is an integrated file
+                    tfile = texp
+                    nimg = 1
+                else:
+                    tfile = texp
+                    nimg = 1
+
                 elem.setText(3, str(nimg))
                 elem.setText(4, str(tfile))
                 elem.setText(5, str(date) + "::" + str(ut_time))
@@ -1869,8 +1911,30 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     elem.setText(0, str(file))
                     elem.setText(1, str(type.split()[0]))
                     elem.setText(2, str(filter.split()[0]))
-                    nimg = nexp / ncoadds # if >1, then number of layers of the cube
-                    tfile = nimg * texp 
+
+                    # Check if the files belongs to a set of individuals not integrated
+                    header = fits.getheader(file)
+                    try:
+                        framenum_com = header.comments['FRAMENUM'].split()
+                    except Exception as ex:
+                        log.error("Cannot read FRAMENUM from header")
+                        framenum_com = ""                       
+                    # case A: 'contains 1 .. X'
+                    if framenum_com[0] == 'contains': # it is a cube (not integrated)
+                        nimg = nexp / ncoadds # if >1, then number of layers of the cube
+                        tfile = nimg * texp       
+                    # case B: 'of X saved'
+                    elif framenum_com[0] == 'of': # it is an individual file (not integrated)
+                        tfile = texp
+                        nimg = 1  
+                    # case C: 'sum of X image(s)'
+                    elif framenum_com[0] == 'sum': # it is an integrated file
+                        tfile = texp
+                        nimg = 1
+                    else:
+                        tfile = texp
+                        nimg = 1
+                    # 
                     elem.setText(3, str(nimg))
                     elem.setText(4, str(tfile))
                     elem.setText(5, str(date) + "::" + str(ut_time))

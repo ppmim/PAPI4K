@@ -60,7 +60,17 @@ def getItimesNcoadds(path, output_file, recursive=False):
         return 0
      
     file_types = []
-    fd = open(output_file + "_tmp_", "w+")
+    # output pathname
+    home = os.path.expanduser("~")
+    tmp_dir = os.getenv("TMPDIR")
+    full_output_file = tmp_dir + "/" + output_file
+    
+    if tmp_dir==None or not os.path.isdir(tmp_dir):
+        msg = "TMPDIR directory %s not found. Using %s directory\n"
+        sys.stderr.write(msg % (tmp_dir, home ))
+        full_output_file = home + "/" + output_file
+
+    fd = open(full_output_file + "_tmp_", "w+")
     fd.write("# READMODE\tITIME\tNCOADDS\tSAVEMODE\n")
      
     for my_file in filelist:
@@ -128,7 +138,8 @@ def getItimesNcoadds(path, output_file, recursive=False):
             print("Error while reading file: %s\n %s"%(my_file,str(e)))
 
     fd.close()
-    shutil.move(output_file + "_tmp_", output_file)
+    shutil.move(full_output_file + "_tmp_", full_output_file)
+    print("Output file %s written" % full_output_file)
     
     return len(file_types)
     
