@@ -12,11 +12,12 @@ import argparse
 import sys
 import fileinput
 import locale
+from os.path import expanduser
 
 # To avoid conflict with QL-Focus_Evaluation
 try:
-    if os.path.exists(os.path.expanduser("~") + "/iraf/focus_seq.txt"):
-        os.unlink(os.path.expanduser("~") + "/iraf/focus_seq.txt")
+    if os.path.exists(expanduser("~") + "/iraf/focus_seq.txt"):
+        os.unlink(expanduser("~") + "/iraf/focus_seq.txt")
         print("Deleted file ~/iraf/focus_seq.txt")
 except Exception as e:
     print("Error, cannot delete ~/iraf/focus_seq.txt")
@@ -118,9 +119,9 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         print("IMTDEV=", os.environ['IMTDEV'])
     
     if 'PYRAF_NO_DISPLAY' in os.environ:
-        print("QUE PASAAAAAAAAAAAAA -- PYRAF_NO_DISPLAY=", os.environ['PYRAF_NO_DISPLAY'])
+        print("DEBUG -- PYRAF_NO_DISPLAY=", os.environ['PYRAF_NO_DISPLAY'])
     if 'PYTOOLS_NO_DISPLAY' in os.environ:
-        print("QUE PASAAAAAAAAAAAAA -- PYTOOLS_NO_DISPLAY=", os.environ['PYTOOLS_NO_DISPLAY'])
+        print("DEBUG -- PYTOOLS_NO_DISPLAY=", os.environ['PYTOOLS_NO_DISPLAY'])
     
     print("LOG_FILE=", log_file)
         
@@ -168,46 +169,6 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
     except Exception as e:
         print("Error running IRAF.starfocus: %s" % str(e))
         raise e
-
-
-def writeDataFile_old(log_file, data_file, target):
-    """
-    NOT-USED
-    Read iraf.starfocus log file and write a data file to be used
-    later for the Tilt analysis (p_50_tiltcheck.py).
-    """
-    
-    if data_file:
-        # write log output to data file
-        # parse backwards: look for best focus line and block with single results
-        with open(log_file, "r") as f:
-            f.seek(0, 2)           # Seek @ EOF
-            fsize = f.tell()        # Get Size
-            f.seek(max(fsize-2**15, 0), 0)  # Set pos @ last chars
-            lines = f.readlines()       # Read to end
-        lines.reverse()
-        fo = open(data_file, 'w')
-        if target:
-            obj = target
-        else:
-            print('WARNING: Object name not provided')
-            obj = 'Unknowm'
-        fo.write('# Object: %s\n' %obj)
-        while not lines[0].strip().startswith('Average'):
-            lines.pop(0)
-        line = lines.pop(0)
-        fo.write('#%s' %line)
-        while not lines[0].strip().startswith('Best'):
-            lines.pop(0)
-        k = lines.index('\n')
-        for i in range(k):
-            if lines[k -i -1].strip().startswith('Best'):
-                fo.write(lines[k - i - 1])
-        fo.close()
-        print('Data file written: %s' %data_file)
-    else:
-        print('Error, no data file given')
-
 
 def writeDataFile(best_focus, min_fwhm, avg_x, avg_y, 
                       data_file, target):
@@ -266,6 +227,9 @@ def readStarfocusLog(log_file):
             # Heading line
             continue
         elif line.strip().startswith('Best'):
+            # End reading
+            break
+        elif line.strip().startswith('Average'):
             # End reading
             break
         elif len(line.split()) == 0: 
@@ -410,9 +374,11 @@ def runFocusEvaluation(source_file, coord_file, log_file):
     print("Now, our own fitting...\n")
     home = expanduser("~")
     try:
-    data = readStarfocusLog(home + "/iraf/starfocus.log")
-    my_best_focus, min_fwhm  = getBestFocus(data, "starfocus.pdf")
-
+        data = readStarfocusLog(home + "/iraf/starfocus.log")
+        my_best_focus, min_fwhm  = getBestFocus(data, "starfocus.pdf")
+    except Exception as ex:
+        print("Error while computing best focus: %s" % str(ex))
+    
 
 def writeValueForOT(best_focus):
     """
@@ -428,14 +394,13 @@ def writeValueForOT(best_focus):
     
     """
 
-    from os.path import expanduser
     home = expanduser("~")
     tmp_dir = os.getenv("TMPDIR")
     ql_focus_text_file = tmp_dir + "/ql_focus"
     
     if tmp_dir==None or not os.path.isdir(tmp_dir):
-        msg = "tmp directory %s not found. Using %s directory"
-        sys.stderr.write(msg % (home + "/tmp", home ))
+        msg = "tmp directory %s not found. Using %s directory\n"
+        sys.stderr.write(msg % (tmp_dir, home ))
         ql_focus_text_file = home + "/ql_focus"
 
     with open(ql_focus_text_file, "w") as text_file:
