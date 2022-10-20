@@ -63,12 +63,13 @@ def getItimesNcoadds(path, output_file, recursive=False):
     # output pathname
     home = os.path.expanduser("~")
     tmp_dir = os.getenv("TMPDIR")
-    full_output_file = tmp_dir + "/" + output_file
     
     if tmp_dir==None or not os.path.isdir(tmp_dir):
         msg = "TMPDIR directory %s not found. Using %s directory\n"
         sys.stderr.write(msg % (tmp_dir, home ))
         full_output_file = home + "/" + output_file
+    else:
+        full_output_file = tmp_dir + "/" + output_file
 
     fd = open(full_output_file + "_tmp_", "w+")
     fd.write("# READMODE\tITIME\tNCOADDS\tSAVEMODE\n")
