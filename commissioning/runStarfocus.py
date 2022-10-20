@@ -396,12 +396,13 @@ def writeValueForOT(best_focus):
 
     home = expanduser("~")
     tmp_dir = os.getenv("TMPDIR")
-    ql_focus_text_file = tmp_dir + "/ql_focus"
-    
+        
     if tmp_dir==None or not os.path.isdir(tmp_dir):
         msg = "tmp directory %s not found. Using %s directory\n"
         sys.stderr.write(msg % (tmp_dir, home ))
         ql_focus_text_file = home + "/ql_focus"
+    else:
+        ql_focus_text_file = tmp_dir + "/ql_focus"
 
     with open(ql_focus_text_file, "w") as text_file:
         # best_focus [microns] are written to
