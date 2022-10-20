@@ -1787,7 +1787,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         framenum_com = header.comments['FRAMENUM'].split()
                     except Exception as ex:
                         log.error("Cannot read FRAMENUM from header")
-                        framenum_com = ""                       
+                        framenum_com = ["NOT_FOUND"]                       
                     # case A: 'contains 1 .. X'
                     if framenum_com[0] == 'contains': # it is a cube (not integrated)
                         nimg = nexp / ncoadds # if >1, then number of layers of the cube
@@ -1870,7 +1870,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     framenum_com = header.comments['FRAMENUM'].split()
                 except Exception as ex:
                     log.error("Cannot read FRAMENUM from header")
-                    framenum_com = ""                       
+                    framenum_com = ["NOT_FOUND"]
+
                 # case A: 'contains 1 .. X'
                 if framenum_com[0] == 'contains': # it is a cube (not integrated)
                     nimg = nexp / ncoadds # if >1, then number of layers of the cube
@@ -1918,7 +1919,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         framenum_com = header.comments['FRAMENUM'].split()
                     except Exception as ex:
                         log.error("Cannot read FRAMENUM from header")
-                        framenum_com = ""                       
+                        framenum_com = ["NOT_FOUND"]                       
                     # case A: 'contains 1 .. X'
                     if framenum_com[0] == 'contains': # it is a cube (not integrated)
                         nimg = nexp / ncoadds # if >1, then number of layers of the cube
