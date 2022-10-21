@@ -15,16 +15,6 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
+echo "Activating PAPI environment..."
 conda activate papi
-
-# Launch QL
-
-export QT_GRAPHICSSYSTEM=native
-QL_DIR=$PAPI_HOME/QL
-
-cd $QL_DIR
-# pyuic5 panicQL.ui > panicQL.py
-# pyrcc5 -o panicQL_resources_rc.py resources/panicQL_resources.qrc
-
-python runQL.py  -c ../config_files/papi.cfg
+cd ~/QL_INSTALL/PAPI22/papi

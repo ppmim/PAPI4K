@@ -33,10 +33,12 @@ from papi.misc.paLog import log
 from papi.misc.version import __version__
 
 
-def collapse(frame_list, out_dir="/tmp"):
+def collapse(frame_list, out_dir="/tmp", mean=False):
     """
     Collapse (add them up arithmetically) a (list) of data cubes into a single 
     2D image. Files can be MEF or Single.
+
+    If mean = True, the collapse use the mean value instead of the arithmetic sum.
 
     Return a list with the new collapsed frames. If no collapse is required, file
     will be created as well.
@@ -57,7 +59,7 @@ def collapse(frame_list, out_dir="/tmp"):
         if len(f) > 1 and len(f[1].data.shape) == 3:
             try:
                 log.info("Collapsing a MEF cube %s" % frame_i)
-                out = collapse_mef_cube(frame_i, t_filename)
+                out = collapse_mef_cube(frame_i, t_filename, mean)
                 new_frame_list.append(out)
             except Exception as e:
                 log.error("Some error collapsing MEF cube: %s" % str(e))
@@ -73,8 +75,13 @@ def collapse(frame_list, out_dir="/tmp"):
             new_frame_list.append(frame_i)
         else:            
             # Suppose we have single CUBE file ...
-            out_hdulist = fits.HDUList()               
-            prihdu = fits.PrimaryHDU (data=f[0].data.sum(0), header=f[0].header)
+            out_hdulist = fits.HDUList()
+            if mean:
+                log.debug("Averaging data cube...")
+                prihdu = fits.PrimaryHDU (data=f[0].data.mean(0), header=f[0].header)    
+            else:
+                log.debug("Adding data cube...")               
+                prihdu = fits.PrimaryHDU (data=f[0].data.sum(0), header=f[0].header)
             prihdu.scale('float32') 
             # Updating PRIMARY header keywords...
             prihdu.header.set('NCOADDS', f[0].data.shape[0])
@@ -107,7 +114,7 @@ def collapse(frame_list, out_dir="/tmp"):
     return new_frame_list
 
 
-def collapse_mef_cube(inputfile, out_filename=None):
+def collapse_mef_cube(inputfile, out_filename=None, mean=False):
     """
     Collapse each of the extensions of a MEF file
     """
@@ -123,7 +130,13 @@ def collapse_mef_cube(inputfile, out_filename=None):
  
     # Sum each extension
     for ext in range(1,len(f)):
-        hdu = fits.ImageHDU(data=numpy.float32(f[ext].data.sum(0)),
+        if mean:
+            log.debug("Averaging data cube...")
+            hdu = fits.ImageHDU(data=numpy.float32(f[ext].data.mean(0)),
+                            header=f[ext].header)
+        else:
+            log.debug("Adding data cube...")
+            hdu = fits.ImageHDU(data=numpy.float32(f[ext].data.sum(0)),
                             header=f[ext].header)
         #hdu.scale('float32') --> bug con astropy 1.3 !!! 
         out_hdulist.append(hdu)    
@@ -241,6 +254,10 @@ def main(arguments=None):
                   help="output directory (default = %(default)s)",
                   default="/tmp")
 
+    parser.add_argument("-M", "--mean",
+                  action="store_true", dest="mean", default=False,
+                  help="Compute the Average of the cube instead of the Sum [default=%(default)s]")
+
     options = parser.parse_args()
     
     if len(sys.argv[1:]) < 1:
@@ -268,7 +285,7 @@ def main(arguments=None):
 
         try:
             frames = [options.input_image]
-            print(collapse(frames, options.output_dir))
+            print(collapse(frames, options.output_dir, options.mean))
         except Exception as e:
             log.info("Some error while collapsing image to 2D: %s" % str(e))
             sys.exit(0)
@@ -284,13 +301,16 @@ def main(arguments=None):
         try:
             frames = [line.replace("\n", "") for line in 
                       fileinput.input(options.input_image_list)]
-            print(collapse(frames, options.output_dir))
+            print(collapse(frames, options.output_dir, options.mean))
         except Exception as e:
             log.info("Some error while collapsing images: %s" % str(e))
             sys.exit(0)
             
     elif options.input_single_image_list:
         try:
+            if options.mean:
+                log.error("Sorry, mean option is not implemented yet for this mode!")
+                sys.exit(0)
             frames = [line.replace("\n", "") for line in 
                       fileinput.input(options.input_single_image_list)]
             print(collapse_distinguish(frames, options.output_file))
