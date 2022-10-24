@@ -178,7 +178,7 @@ class ApplyDarkFlat(object):
                 dark_time = cdark.expTime()
                 dark_ncoadd = cdark.getNcoadds()
                 if (not self.__force_apply and cdark.getType() != 'MASTER_DARK' and 
-                    cdark.getType() != 'MASTER_DARK_MODEL'):
+                    cdark.getType() != 'MASTER_DARK_MODEL' and cdark.getType() != 'DARK'):
                     log.error("File %s does not look a neither MASTER_DARK nor MASTER_DARK_MODEL",self.__mdark)
                     raise Exception("File %sdoes not look a neither MASTER_DARK nor MASTER_DARK_MODEL"%self.__mdark)
                 

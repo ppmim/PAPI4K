@@ -2123,8 +2123,13 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         self.collapseCubeAct = QAction("Collapse Cube", self,
             #shortcut="Ctrl+j",
-            statusTip="Collapse FITS with a cube of N layers.", 
+            statusTip="Collapse a set of FITS cubes of N layers.", 
             triggered=self.collapseCube_slot)
+
+        self.meanCubeAct = QAction("Mean Cube", self,
+            #shortcut="Ctrl+j",
+            statusTip="Collapse a set of FITS cubes of N layers using mean", 
+            triggered=self.collapse_mean_Cube_slot)
         
         self.createDataSeqAct = QAction("Create DataSeq", self,
             #shortcut="Ctrl+j",
@@ -2229,6 +2234,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             subMenu_fits.addAction(self.splitMEFAct)
             subMenu_fits.addAction(self.splitSingleAct)
             subMenu_fits.addAction(self.collapseCubeAct)
+            subMenu_fits.addAction(self.meanCubeAct) 
             subMenu_fits.addAction(self.createDataSeqAct)
             
             
@@ -2564,7 +2570,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
     
     def collapseCube_slot(self):
         """
-        Collapse a FITS cube of N layers or planes. No recentering or layers 
+        Collapse a FITS cube of N layers or planes. No recentering of layers 
         is done. FITS can be MEF or SEF.
         """
         
@@ -2584,6 +2590,28 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         
         QApplication.restoreOverrideCursor()
     
+    def collapse_mean_Cube_slot(self):
+        """
+        Collapse a FITS cube of N layers or planes using mean. No recentering of layers 
+        is done. FITS can be MEF or SEF.
+        """
+        
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        
+        for file in self.m_popup_l_sel:
+            try:
+                new_file = collapse([file], out_dir=self.m_outputdir, mean=True)[0]
+            except Exception as e:
+                msg = "Cannot split file %s. Maybe it's not a Cube file"%(file, str(e))
+                log.debug(msg)
+                QMessageBox.critical(self, "Error", msg)
+                self.logConsole.info(msg)
+            else:
+                line = "File generated: %s" % new_file
+                self.logConsole.info(line)
+        
+        QApplication.restoreOverrideCursor()
+
     def selected_file_slot(self, listItem):
         """
         To know which item is selected 

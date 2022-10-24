@@ -54,7 +54,10 @@ def collapse(frame_list, out_dir="/tmp", mean=False):
 
     for frame_i in frame_list:
         f = fits.open(frame_i)
-        t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_coadd.fits")
+        if mean:
+            t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_avg.fits")
+        else:
+            t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_coadd.fits")
         # First, we need to check if we have MEF files
         if len(f) > 1 and len(f[1].data.shape) == 3:
             try:
@@ -143,7 +146,10 @@ def collapse_mef_cube(inputfile, out_filename=None, mean=False):
     
     # Now, write the new collapsed file
     if out_filename is None:
-        outfile = inputfile.replace(".fits", "_coadd_%s.fits" % str(f[1].data.shape[0]).zfill(3))
+        if mean:
+            outfile = inputfile.replace(".fits", "_avg_%s.fits" % str(f[1].data.shape[0]).zfill(3))
+        else:
+            outfile = inputfile.replace(".fits", "_coadd_%s.fits" % str(f[1].data.shape[0]).zfill(3))
     else:
         outfile = out_filename 
     out_hdulist.writeto(outfile, output_verify='ignore', overwrite=True)
