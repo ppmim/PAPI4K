@@ -109,7 +109,7 @@ def readHeader(filename, extension=1):
         return scale, ra, dec, instrument, is_science, naxis1, naxis2
         
     
-def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
+def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0, downsample=1):
     """
     Do astrometric calibration to the given filename using Astrometry.net 
     function 'solve-field'.
@@ -207,9 +207,9 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0):
 
     # To optimize the finding and CPU time required
     if nx1 == 4096 and nx2 == 4096:
-        downsample = 1
+        downsample = 2
     else:
-        downsample = 1
+        downsample = downsample
 
     #
     # We must distinguish different cases
@@ -361,7 +361,7 @@ def calc(args):
     return solveField(*args)
 
 
-def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
+def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0, downsample=1):
     """
     Run a parallel proceesing to solve astrometry for the input files taking
     advantege of multi-core CPUs.
@@ -380,7 +380,7 @@ def runMultiSolver(files, out_dir, tmp_dir, pix_scale=None, extension=0):
     solved = []
     for file in files:
         logging.debug("File: %s" % file)
-        red_parameters = (file, out_dir, tmp_dir, pix_scale, extension)
+        red_parameters = (file, out_dir, tmp_dir, pix_scale, extension, downsample)
         try:
             # Instead of pool.map() that blocks until
             # the result is ready, we use pool.map_async()
@@ -443,10 +443,13 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
                   action="store", dest="temp_dir", default="/tmp",
                   help="Place all temp files in the specified directory [default: %(default)s]")
     
-    
     parser.add_argument("-p", "--pixel_scale",
                   action="store", dest="pixel_scale", type=float, 
                   help="Pixel scale of the images")
+
+    parser.add_argument("-d", "--downsample",
+                  action="store", dest="downsample", type=int, default=2, 
+                  help="Downsample the image by factor (int>0) before running solve")
     
     parser.add_argument("-e", "--extension",
                   action="store", dest="extension", type=int, default=0,
@@ -460,27 +463,6 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
                                 
     options = parser.parse_args()
 
-    """
-    # Logging setup
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='/tmp/field-solver.log',
-                        filemode='w')
-
-    # define a Handler which writes INFO messages or higher to the sys.stderr
-    console = logging.StreamHandler()
-    console.setLevel(logging.DEBUG)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    # add the handler to the root logger
-    logging.getLogger('').addHandler(console)
-    
-
-    logging.debug("Logging setup done !")
-    """
     files_solved = []
     files_not_solved = []
     
@@ -514,7 +496,8 @@ in principle previously reduced, but not mandatory; Astromety.net tool is used.
                                       options.output_dir,
                                       options.temp_dir,
                                       options.pixel_scale,
-                                      options.extension)
+                                      options.extension,
+                                      options.downsample)
         for file in filelist:
             ren_file = os.path.join(options.output_dir,
                     os.path.basename(os.path.splitext(file)[0] + ".ast.fits"))
