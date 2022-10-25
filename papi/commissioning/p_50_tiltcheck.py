@@ -130,7 +130,7 @@ def loadfiledata(filter):
                 obj = tokens[1][:-1]
                 tokens = lines[1].split()
                 focus[dataindex(iSG, iq)] = float(tokens[5])
-                # read table data
+                # read table data (x,y,m)
                 convfunc = lambda s: s.strip('(),:m=')
                 data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], converters={4: convfunc, 5: convfunc, 7: convfunc})
                 # calculate relative flux and weighted pixel positions
@@ -176,6 +176,7 @@ if ifilter in range(1, 7):
     # load data from text files
     pr('# Loading input file data')
     obj, subquads, pxi, pxj, focus = loadfiledata(filter)
+    pr(pxi)
     if pxi.count() == 0:
         raise IOError('No input files found, aborting')
     pr('# Object: %s' %obj)

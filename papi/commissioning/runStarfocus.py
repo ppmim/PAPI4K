@@ -232,6 +232,9 @@ def readStarfocusLog(log_file):
         elif line.strip().startswith('Average'):
             # End reading
             break
+        elif line.strip().startswith('Focus'):
+            # End reading
+            break
         elif len(line.split()) == 0: 
             # Blank line
             continue
@@ -290,11 +293,15 @@ def getBestFocus(data, output_file):
     
     m_foc = good_focus_values.mean()
     good_focus_values = good_focus_values - m_foc
-    z = np.polyfit(good_focus_values, fwhm_values, 2)
-    print("Fit = %s  \n" % str(z))
-    # Note that poly1d returns polynomials coefficients, in increasing powers !
-    pol = np.poly1d(z)
-    
+    try:
+        z = np.polyfit(good_focus_values, fwhm_values, 2)
+        print("Fit = %s  \n" % str(z))
+        # Note that poly1d returns polynomials coefficients, in increasing powers !
+        pol = np.poly1d(z)
+    except Exception as ex:
+        print("Error computing best focus. Maybe due to wrong data in starfocus.log: %s"%str(ex))
+        sys.exit(0)
+        
     xp = np.linspace(np.min(good_focus_values ) - 0.5, 
                      np.max(good_focus_values ) + 0.5, 500) # number or points to interpolate
 
