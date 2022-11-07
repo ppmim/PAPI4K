@@ -224,6 +224,70 @@ def collapse_distinguish(frame_list, out_filename="/tmp/collapsed.fits"):
     log.info("FITS file %s created" % (out_filename))
      
     return out_filename
+
+
+def create_cube(frame_list, out_filename="/tmp/cube.fits"):
+    """
+    Create a cube (not sum) from a set of individual files (not cubes).
+
+    Return the name of the output file (cube) created.
+    
+    Curretly not used from PAPI, **only** from command-line.
+
+    """
+
+    log.debug("Starting create_cube() method ....")
+    
+    new_frame_list = [] 
+    if frame_list is None or len(frame_list) == 0 or frame_list[0] is None:
+        return []
+
+    for frame_i in frame_list:
+        f = fits.open(frame_i)
+        # First, we need to check if we have MEF files
+        if len(f) > 1 and len(f[1].data.shape) == 3:
+            log.error("MEF-cubes files cannot be converted to cubes. First need to be split !")
+            raise Exception("MEF-cubes files cannot be converted to cubes. First need to be split !")
+        elif len(f)>1 and len(f[1].data.shape)==2:
+            log.error("Not implemented yet.")
+            raise Exception("MEF-2D files cannot be converted to a cube. Not implemented yet.")
+        elif len(f)==1 and len(f[0].data.shape)==2:
+            log.debug("Found a 2D-image: %s:" % frame_i)
+            new_frame_list.append(frame_i)
+            if len(new_frame_list) == 1:
+                i = 0
+                # First image
+                cube = numpy.zeros((len(frame_list), 
+                                    f[0].header['NAXIS1'], 
+                                    f[0].header['NAXIS2']), 
+                                    dtype=f[0].data.dtype)
+                header1 = f[0].header
+            cube[i,:,:] = f[0].data[:,:]
+            i += 1
+        f.close()
+        
+    # Now, save the collapsed set of files in a new single file        
+    out_hdulist = fits.HDUList()
+                   
+    prihdu = fits.PrimaryHDU (data = cube, header = header1)
+    #prihdu.scale('float32') bug con astropy 1.3 !!! 
+        
+    # Updating PRIMARY header keywords...
+    prihdu.header.set('NAXIS3', len(new_frame_list))
+    # prihdu.header.set('EXPTIME', header1['EXPTIME']*len(new_frame_list))
+    prihdu.header.set('PAPIVERS', __version__, "PANIC Pipeline version")
+    
+    out_hdulist.append(prihdu)    
+    #out_hdulist.verify ('ignore')
+    # Now, write the new single FITS file
+    out_hdulist.writeto(out_filename, output_verify='ignore', overwrite=True)
+    
+    out_hdulist.close(output_verify='ignore')
+    del out_hdulist
+    log.info("FITS CUBE file %s created" % (out_filename))
+     
+    return out_filename
+
     
 ################################################################################
 # main
@@ -248,7 +312,7 @@ def main(arguments=None):
     
     parser.add_argument("-l", "--input_single_image_list",
                   action="store", dest="input_single_image_list", 
-                  help="input image list (text file) of a set of single images (non MEF) to be collapsed into a single 2D coadded image")
+                  help="input image list (text file) of a set of single images (non MEF) to be collapsed (or cubed) into a single 2D coadded image")
 
     parser.add_argument("-o", "--output_file",
                   action="store", dest="output_file", 
@@ -263,6 +327,11 @@ def main(arguments=None):
     parser.add_argument("-M", "--mean",
                   action="store_true", dest="mean", default=False,
                   help="Compute the Average of the cube instead of the Sum [default=%(default)s]")
+
+    parser.add_argument("-c", "--cube",
+                  action="store_true", dest="cube", default=False,
+                  help="Build a cube from the image list of individual files (input_single_image_list) [default=%(default)s]")
+
 
     options = parser.parse_args()
     
@@ -317,9 +386,13 @@ def main(arguments=None):
             if options.mean:
                 log.error("Sorry, mean option is not implemented yet for this mode!")
                 sys.exit(0)
+
             frames = [line.replace("\n", "") for line in 
                       fileinput.input(options.input_single_image_list)]
-            print(collapse_distinguish(frames, options.output_file))
+            if options.cube:
+                create_cube(frames, options.output_file)
+            else:
+                collapse_distinguish(frames, options.output_file)
         except Exception as e:
             log.info("Some error while collapsing set of images to single image: %s" % str(e))
             sys.exit(0)
