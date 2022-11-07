@@ -3684,7 +3684,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         elif msgBox.clickedButton() == button_sex: self.focus_eval_sex()
         else: pass
         """
-        
+
     def focus_eval_iraf(self):
         """
         Run the focus evaluation procedure of a set of files of focus serie.
