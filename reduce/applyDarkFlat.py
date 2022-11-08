@@ -335,7 +335,7 @@ class ApplyDarkFlat(object):
                         # Get DARK
                         if self.__mdark is not None:
                             if (not self.__force_apply and 
-                                (not numpy.isclose(time_scale, 1.0, atol=1e-02) 
+                                (not numpy.isclose(time_scale, 1.0, atol=1e-01) 
                                  or f_ncoadd != dark_ncoadd)
                                 ): # for dark_model time_scale==-1
                                 log.debug("Dark EXPTIME or NCOADD mismatch ! looking for DarkModel ...")
@@ -374,7 +374,7 @@ class ApplyDarkFlat(object):
                         # Get DARK
                         if self.__mdark != None:
                             if (not self.__force_apply and 
-                                (not numpy.isclose(time_scale, 1.0, atol=1e-02) 
+                                (not numpy.isclose(time_scale, 1.0, atol=1e-01) 
                                  or f_ncoadd != dark_ncoadd)
                                 ): # for dark_model time_scale==-1
                                 
