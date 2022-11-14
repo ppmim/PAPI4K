@@ -18,3 +18,9 @@ python reduce/montage.py -l /opt/PANIC_DATA/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4
 
 #
 python reduce/solveAstrometry.py -s /opt/PANIC_DATA/focus_0024.fits
+
+
+
+# panic22
+
+python run_papi.py -c config_files/papi.cfg -s /data1/PANIC/SIMU_4k/sci_H/Q1/scaled/ -S 0 0 -d /data2/out/  -t /data2/tmp/
