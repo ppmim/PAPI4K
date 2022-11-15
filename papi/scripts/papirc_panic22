@@ -1,0 +1,35 @@
+# Sample .bashrc for PANIC software
+
+test -s ~/.alias && . ~/.alias || true
+
+
+# To give all access permissions to the group and allow other 
+# users read and write permission
+# This subtracts 002 from the sytem defaults to give a default 
+# access permission for your files of 664 (rw-rw-r--) and for 
+# your directories of 775 (rwxrwxr-x)
+
+umask 002
+
+### PAPI environment ###
+
+# PAPI_HOME=${HOME}/papi
+PAPI_HOME=/data1/ICS/QL_INSTALL/PAPI22/papi
+PYTHONPATH=$PYTHONPATH:$PAPI_HOME/..
+PAPI_CONFIG=$PAPI_HOME/config_files/papi.cfg
+QT_GRAPHICSSYSTEM=native
+KDE_FORK_SLAVES=1
+ASTROMETRY=/usr/local/astrometry/bin
+
+# Proxy required for cdsclient at MPIA
+if [[ ($HOST =~ panic22) || ($HOST =~ panic35) ]] ; then
+    export http_proxy=derfel.caha.es:3128
+fi
+
+
+MONTAGE=/usr/local/bin/Montage_v3.3/bin/
+PATH=$PATH:$ASTROMETRY:$HOME/bin:$MONTAGE
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
+
+export PYTHONPATH PAPI_HOME PAPI_CONFIG http_proxy ASTROMETRY
+export LD_LIBRARY_PATH QT_GRAPHICSSYSTEM KDE_FORK_SLAVES PATH MONTAGE
