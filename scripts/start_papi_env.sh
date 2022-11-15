@@ -17,4 +17,5 @@ unset __conda_setup
 # <<< conda initialize <<<
 echo "Activating PAPI environment..."
 conda activate papi
-cd ~/QL_INSTALL/PAPI22/papi
+# cd ~/QL_INSTALL/PAPI22/papi
+cd $PAPI_HOME
