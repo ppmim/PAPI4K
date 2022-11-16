@@ -16,7 +16,7 @@
 # for each filter selection. New executions add log entries in existing
 # files.
 #
-# usage: p_50_tiltcheck.py [-h] [-i INPUT] [-o OUTPUT] [--nolog] {1,2,3,4,5,6,7}
+# usage: p_51_tiltcheck.py [-h] [-i INPUT] [-o OUTPUT] [--nolog] {1,2,3,4,5,6,7}
 # 
 # positional arguments:
 #   {1,2,3,4,5,6,7}       Select filter: (1)Ks (2)H (3)J (4)Y (5)Z (6)H2 (7)All
@@ -39,9 +39,11 @@
 #	1) Added fit of all filters
 # 1.1 26/01/2015 BD Update
 #	1) Added shim calculation for all filters
-#
-_name = 'p_50_tiltcheck.py'
-_version = '1.1'
+# 1.2 16/11/2022 JM Update for PANICv2
+#   2) TBD modifications for commissioning of PANICv2
+
+_name = 'p_51_tiltcheck.py'
+_version = '1.2'
 #########################################################################
 import numpy as np
 import os
