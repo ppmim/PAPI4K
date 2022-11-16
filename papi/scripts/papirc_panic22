@@ -16,7 +16,7 @@ umask 002
 # PAPI_HOME=${HOME}/papi
 PAPI_HOME=/data1/ICS/QL_INSTALL/PAPI22/papi
 PYTHONPATH=$PYTHONPATH:$PAPI_HOME/..
-PAPI_CONFIG=$PAPI_HOME/config_files/papi.cfg
+PAPI_CONFIG=$PAPI_HOME/config_files/papi_panic22.cfg
 QT_GRAPHICSSYSTEM=native
 KDE_FORK_SLAVES=1
 ASTROMETRY=/usr/local/astrometry/bin
