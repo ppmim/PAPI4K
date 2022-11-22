@@ -58,6 +58,7 @@ def collapse(frame_list, out_dir="/tmp", mean=False):
             t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_avg.fits")
         else:
             t_filename = out_dir + "/" + os.path.basename(frame_i).replace(".fits", "_coadd.fits")
+        
         # First, we need to check if we have MEF files
         if len(f) > 1 and len(f[1].data.shape) == 3:
             try:
@@ -85,10 +86,14 @@ def collapse(frame_list, out_dir="/tmp", mean=False):
             else:
                 log.debug("Adding data cube...")               
                 prihdu = fits.PrimaryHDU (data=f[0].data.sum(0), header=f[0].header)
+            
             prihdu.scale('float32') 
             # Updating PRIMARY header keywords...
             prihdu.header.set('NCOADDS', f[0].data.shape[0])
-            prihdu.header.set('EXPTIME', f[0].header['EXPTIME'] * f[0].data.shape[0])
+            if mean:
+                prihdu.header.set('EXPTIME', f[0].header['EXPTIME'])
+            else:
+                prihdu.header.set('EXPTIME', f[0].header['EXPTIME'] * f[0].data.shape[0])                
             prihdu.header.set('PAPIVERS', __version__, "PANIC Pipeline version")
             # Weird case (OmegaCass), but it produce a fail with WCS lib
             if 'CTYPE3' in prihdu.header:
@@ -127,7 +132,10 @@ def collapse_mef_cube(inputfile, out_filename=None, mean=False):
     out_hdulist = fits.HDUList()
     prihdu = fits.PrimaryHDU (data = None, header = f[0].header)
     prihdu.header.set('NCOADDS', f[1].data.shape[0])
-    prihdu.header.set('EXPTIME', f[0].header['EXPTIME']*f[1].data.shape[0])
+    if mean:
+        prihdu.header.set('EXPTIME', f[0].header['EXPTIME'])
+    else:
+        prihdu.header.set('EXPTIME', f[0].header['EXPTIME']*f[1].data.shape[0])
     prihdu.header.set('PAPIVERS', __version__, "PANIC Pipeline version")
     out_hdulist.append(prihdu)    
  
