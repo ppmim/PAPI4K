@@ -3485,6 +3485,20 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         else:
             bpm_mode = 'none'
         
+        # Finally, ask if we want to force the apply (not checking EXPTIME, NCOADDS, FILTER)
+        msgBox = QMessageBox()
+        msgBox.setText("        *** Apply MODE ***      ")
+        msgBox.setInformativeText("Do you want to FORCE the apply if some [EXPTIME, NCOADDS, FILTER] mismatch ?")
+        button_yes = msgBox.addButton("Yes", QMessageBox.ActionRole)
+        button_no = msgBox.addButton("No", QMessageBox.ActionRole)
+        msgBox.setDefaultButton(button_yes)
+        msgBox.exec()
+        if msgBox.clickedButton() == button_yes:
+            force_apply = True
+        elif msgBox.clickedButton() == button_no:
+            force_apply = False
+        else:
+            force_apply = False
                     
         # Now, start dark subtraction and Flat-Fielding...
         if len(self.m_popup_l_sel) > 0 :
@@ -3515,7 +3529,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     
                     # Show message with calibrations found
                     # Ask for confirmation
-                    msg = "DARK= %s \n FLAT= %s \n BPM= %s" % (mDark, mFlat, mBPM)
+                    msg = "DARK= %s \n FLAT= %s \n BPM= %s \n Force_Apply= %s \n" % (mDark, mFlat, mBPM, force_apply)
                     resp = QMessageBox.information(self, "Info",
                         "Calibrations found are: \n %s" % msg,
                                      QMessageBox.Ok, QMessageBox.Cancel)
