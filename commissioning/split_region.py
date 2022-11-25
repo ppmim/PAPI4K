@@ -5,6 +5,7 @@
 # Author: Jose M. Ibanez (c) 2014
 # Email: jmiguel@iaa.es
 # License: GNU GPLv3
+# Update: 25-Nov-2022: rename filenames;
 
 import numpy as np
 import sys
@@ -15,6 +16,8 @@ def get_stars_regions_centers(path):
     """
     Compute the center of the set of stars of each of the 16 regions
     on the 4kx4k PANIC field and split the 4kx4k region into 16 files
+
+    OLD rutine, for PANICv2 we use split_region_file()
     """
     
     coords_matrix = np.loadtxt(path)
@@ -144,6 +147,8 @@ def split_region_file(ds9_region_file):
     """
     Split a ds9 region file into N(=16) region files.
 
+    Note: new routine used for PANICv2
+
     Parameters
     ----------
     ds9_region_file: str 
@@ -192,7 +197,10 @@ def split_region_file(ds9_region_file):
             print("Center of region [%s] = (%f, %f)" % (r, x, y))
             # print "Points of region :",p_regions[i]
             # Write points into a file
-            filename = "region_%s.reg" % r
+            # filename = "region_%s.reg" % r
+            # We do not use SGi_j filename suffix anymore; now region_i.reg (i=1,..16) 
+            preffix = ds9_region_file.split('.')[0]
+            filename = preffix + "_region_%s.reg" % reg2sg[r]
             f = open(filename, "w")
             for p in p_regions[i]:
                 f.write("%s %s\n" % (p[0], p[1]))
