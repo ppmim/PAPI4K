@@ -120,26 +120,26 @@ def loadfiledata(filter):
     focus = np.ma.masked_all(16)
     obj = '--'
     for r in range(1, 17):
-            datafilename = '%s_Region_%1i.txt' %(filter, r)
-            subquads[dataindex(r)] = 'R_%1i' %(r)
-            try:
-                datafile = open(os.path.join(inputpath, datafilename), 'r')
-            except IOError:
-                pr('WARNING: input file %s not found!' %datafilename)
-            else:
-                lines = datafile.readlines()
-                # read header data: object, best focus
-                tokens = lines[0].split(': ')
-                obj = tokens[1][:-1]
-                tokens = lines[1].split()
-                focus[dataindex(r)] = float(tokens[5])
-                # read table data (x,y,m)
-                convfunc = lambda s: s.strip('(),:m=')
-                data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], converters={4: convfunc, 5: convfunc, 7: convfunc})
-                # calculate relative flux and weighted pixel positions
-                flux = 10**(data[:, 2] / -2.5)
-                pxi[dataindex(r)] = (data[:, 0] * flux).sum() / flux.sum()
-                pxj[dataindex(r)] = (data[:, 1] * flux).sum() / flux.sum()
+        datafilename = '%s_Region_%1i.txt' %(filter, r)
+        subquads[dataindex(r)] = 'R_%1i' %(r)
+        try:
+            datafile = open(os.path.join(inputpath, datafilename), 'r')
+        except IOError:
+            pr('WARNING: input file %s not found!' %datafilename)
+        else:
+            lines = datafile.readlines()
+            # read header data: object, best focus
+            tokens = lines[0].split(': ')
+            obj = tokens[1][:-1]
+            tokens = lines[1].split()
+            focus[dataindex(r)] = float(tokens[5])
+            # read table data (x,y,m)
+            convfunc = lambda s: s.strip('(),:m=')
+            data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], converters={4: convfunc, 5: convfunc, 7: convfunc})
+            # calculate relative flux and weighted pixel positions
+            flux = 10**(data[:, 2] / -2.5)
+            pxi[dataindex(r)] = (data[:, 0] * flux).sum() / flux.sum()
+            pxj[dataindex(r)] = (data[:, 1] * flux).sum() / flux.sum()
     
     return obj, subquads, pxi, pxj, focus
 
