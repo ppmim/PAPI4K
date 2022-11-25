@@ -4,9 +4,9 @@
 # Instrument tilt adjustment: coordinate calculation, plane fit, and shim
 # changes
 #
-# It requires the input files named 'FILTERNAME_SGX_X.txt' for the
+# It requires the input files named 'FILTERNAME_X.txt' for the
 # individual filters and the four detectors+sub-quadrants (e.g.
-# Ks_SG1_3.txt). They have to be placed in the input path (optional
+# Ks_1.txt). They have to be placed in the input path (optional
 # argument). In case one file is not found, the area is skipped.
 # These files contain the output from the starfocus log (Best focus
 # estimate ) and must have two header lines of the form
@@ -66,11 +66,12 @@ outputpath = args.output
 writelog = not args.nolog
 
 # FPA gap size / px
-FPAgap = 167
+FPAgap = 0
 # Radial magnification FS-FPA
 FPAscale = 0.49647
 # Scale M2 to FS
 M2scale = 5.35
+M2scale_for_t35 = 8.13 # not used, but in future needs
 
 filters = ['Ks', 'H', 'J', 'Y', 'Z', 'H2', 'All']
 filter = filters[ifilter - 1]
@@ -156,11 +157,9 @@ def convertdata(pxi, pxj, focus):
     '''
     # FPA xy in mmm
     FPAx = pxi.copy()
-    FPAx[pxi <= 2048.5] = (-2048.5 + pxi[pxi <= 2048.5] - 0.5 * FPAgap) * 0.018
-    FPAx[pxi > 2048.5] = (-2048.5 + pxi[pxi > 2048.5] + 0.5 * FPAgap) * 0.018
+    FPAx[pxi <= 2048.5] = (-2048.5 + pxi[pxi <= 2048.5]) * 0.015
     FPAy = pxj.copy()
-    FPAy[pxj <= 2048.5] = (-2048.5 + pxj[pxj <= 2048.5] - 0.5 * FPAgap) * 0.018
-    FPAy[pxj > 2048.5] = (-2048.5 + pxj[pxj > 2048.5] + 0.5 * FPAgap) * 0.018
+    FPAy[pxj <= 2048.5] = (-2048.5 + pxj[pxj <= 2048.5]) * 0.015
     FSx = FPAx / FPAscale
     FSy = FPAy / FPAscale
     FSz = focus * M2scale

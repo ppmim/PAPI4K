@@ -146,6 +146,8 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         starfocus.coords = "mark1"
         starfocus.wcs = "world" 
         starfocus.size = "MFWHM"
+        # Usually the value starfocus.scale = 1 to measure sizes in pixels or if starfocus.scale = 'image pixel scale value' 
+        # in arc seconds per pixel
         starfocus.scale = 1
         starfocus.radius = 5
         starfocus.sbuffer = 10 
@@ -271,22 +273,26 @@ def getBestFocus(data, output_file):
     
     if telescope == 'CA-2.2':
         foclimits = [-1, 27]
-        pix_scale = 0.45
+        pix_scale = 0.375
         print("Assuming CA-2.2 TELESCOPE")
     elif telescope == 'CA-3.5':
         foclimits = [10, 60]
-        pix_scale = 0.23
+        pix_scale = 0.192
         print("Assuming CA-3.5 TELESCOPE")
     else:
         print("Asumming CA-2.2 TELESCOPE")
         foclimits = [-1, 27]
-        pix_scale = 0.45
+        pix_scale = 0.375
         
     d = np.array(data, dtype=np.float32)
     good_focus_values = d[:, 3] # focus
+    
+    # The FWHM units are adjusted by the pixel scale factor; 
+    # Usually the value starfocus.scale = 1 to measure sizes in pixels or if starfocus.scale = 'image pixel scale value' 
+    # in arc seconds per pixel
     fwhm_values = d[:, 4] # PSF-value (MFWHM, GFWHM, FWHM, ...)
     
-    
+
     print("\n---------")
     print("N_POINTS: ", len(fwhm_values))
     print("----------\n")
@@ -327,11 +333,11 @@ def getBestFocus(data, output_file):
     plt.plot(good_focus_values + m_foc, fwhm_values, '.')
     plt.plot(xp + m_foc, pol(xp), '-')
     plt.axvline(best_focus + m_foc, ls='--', c='r')
-    plt.title("Best Focus=%6.3f mm - FWHM=%6.3f pix / %2.2f\"" 
+    plt.title("Best Focus=%6.3f mm - FWHM=%6.3f pix / %2.2f arcsec"
         %((best_focus + m_foc), min_fwhm , min_fwhm * pix_scale))
     
     plt.xlabel("T-FOCUS (mm)")
-    plt.ylabel("FWHM (pixels)")
+    plt.ylabel("FWHM (pixels)") # startfocus.scale = 1
     plt.xlim(np.min(good_focus_values + m_foc) - 0.1, np.max(good_focus_values + m_foc) + 0.1)
     plt.ylim(np.min(fwhm_values) - 1, np.max(fwhm_values) + 1 )
     if pol[2] < 0:
