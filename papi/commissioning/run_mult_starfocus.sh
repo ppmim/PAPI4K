@@ -11,7 +11,7 @@ for i in {1..3}
 do
 	echo "FILTER: ${FILTER}"
 	echo "REGION file: ${OBJ_NAME}/${FILTER}_Region_${i}.reg"
-        echo "$BIN_STAR_FOCUS -s ${OBJ_NAME}/${FILTER}/files_reduced.txt -c ${OBJ_NAME}/${FILTER}_Region_${i}.reg -d ${OBJ_NAME}/${FILTER}_Region_${i}.txt -t ${OBJ_NAME}" 
+    echo "$BIN_STAR_FOCUS -s ${OBJ_NAME}/${FILTER}/files_reduced.txt -c ${OBJ_NAME}/${FILTER}_Region_${i}.reg -d ${OBJ_NAME}/${FILTER}_Region_${i}.txt -t ${OBJ_NAME}" 
 	$BIN_STAR_FOCUS -s ${OBJ_NAME}/${FILTER}/files_reduced.txt -c ${OBJ_NAME}/${FILTER}_Region_${i}.reg -d ${OBJ_NAME}/${FILTER}_Region_${i}.txt -t ${OBJ_NAME}
 done
 
