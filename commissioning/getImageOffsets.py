@@ -85,14 +85,19 @@ def draw_offsets_H2RG(offsets, pix_scale = 0.45, scale_factor=1.0):
     fig2.savefig('offsets.png', dpi=360, bbox_inches='tight')
 
 
-def draw_offsets_H4RG(offsets, pix_scale = 0.45, scale_factor=1.0):
+def draw_offsets_H4RG(offsets, pix_scale = 0.375, scale_factor=1.0):
+
+    # To align offsets with sky-orientation
+    offsets[:, 1] = offsets[:, 1] * (-1)
+    # offsets = offsets * (-1)
+    print("offsets =", offsets)
 
     fig2 = plt.figure()
     ax2 = fig2.add_subplot(111, aspect='equal')
     max_x = numpy.abs(offsets[: , 0]).max()
     max_y = numpy.abs(offsets[: , 1]).max()
-    detector_id = 1
-    # The width of the rectangle simulate the full detector with the gap (4096x4096 + 167) 
+
+    # The width of the rectangle simulate the full detector (4096 x 4096) 
     r_width = 4096 / 1.0 * pix_scale * scale_factor
     plt.xlim(offsets[: , 0].min() - (4096) / 2.0 * pix_scale - 100, offsets[: , 0].max() + (4096) / 2.0 * pix_scale + 100)
     plt.ylim(offsets[: , 1].min() - (4096) / 2.0 * pix_scale - 100, offsets[: , 1].max() + (4096) / 2.0 * pix_scale + 100)
@@ -102,8 +107,8 @@ def draw_offsets_H4RG(offsets, pix_scale = 0.45, scale_factor=1.0):
     plt.grid()
     
     # To align offsets with sky-orientation
-    offsets = offsets * (-1)
-    print("offsets =", offsets)
+    # offsets = offsets * (-1)
+    # offsets[:, 0] = offsets[:, 0] * (-1)
     
     q_width = 4096 * pix_scale * scale_factor
     
@@ -164,7 +169,7 @@ def getWCSPointingOffsets(images_in,
 
       
       # Very important the pixel scale in order to find out good offsets values !!
-      pix_scale = 0.233
+      pix_scale = 0.375 # arcsec/px @ T2.2m; 0.192 @ T3.5m
       # Init variables
       i = 0 
       offsets_mat = None
@@ -197,7 +202,7 @@ def getWCSPointingOffsets(images_in,
       try:
             ref = ClFits(ref_image)
             # If present, pix_scale in header is prefered
-            pix_scale = 0.233 # ref.pixScale
+            pix_scale = 0.375 # ref.pixScale
             print("-->PIXSCALE = ", pix_scale)
             ra0 = ref.ra    
             dec0 = ref.dec
@@ -270,8 +275,8 @@ if __name__ == "__main__":
                   help="Output file to write the offset matrix")
     
     parser.add_argument("-p", "--pix_scale", type=float,
-                  action="store", dest="pix_scale", default=0.45,
-                  help="Pixel scale")
+                  action="store", dest="pix_scale", default=0.375,
+                  help="Pixel scale [default=%(default)s]")
     
     parser.add_argument("-d", "--draw_scale", type=float,
                   action="store", dest="draw_scale", default=1.0,
