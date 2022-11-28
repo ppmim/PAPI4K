@@ -156,10 +156,11 @@ def convertdata(pxi, pxj, focus):
                     Field coordinates and equivalent focus (mm) in the FPA and field stop
     '''
     # FPA xy in mmm
+    # Move origin to center of detector (2048,2048)
     FPAx = pxi.copy()
-    FPAx[pxi <= 2048.5] = (-2048.5 + pxi[pxi <= 2048.5]) * 0.015
+    FPAx = (-2048.5 + pxi) * 0.015
     FPAy = pxj.copy()
-    FPAy[pxj <= 2048.5] = (-2048.5 + pxj[pxj <= 2048.5]) * 0.015
+    FPAy = (-2048.5 + pxj) * 0.015
     FSx = FPAx / FPAscale
     FSy = FPAy / FPAscale
     FSz = focus * M2scale

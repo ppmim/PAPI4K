@@ -1,0 +1,14 @@
+# PANIC operation cycle log; see PANIC-SW-SP-01 for specification
+# Preferably use log_opcycle.py for adding new events
+# Warning: After change of the last entry, re-create the GEIRS FITS header file!
+# Number; Date; Time (UTC); Comment
+1; 2014-03-21; 15:00; First lab cold cycle: focal mask
+2; 2014-04-29; 15:00; Second lab cold cycle: focal mask
+3; 2014-05-22; 15:00; Third lab cold cycle: focal mask
+4; 2014-07-01; 15:00; Fourth lab cold cycle: focal mask
+5; 2014-07-17; 15:00; Fifth lab cold cycle: all optics, star simulator
+6; 2014-09-04; 17:00; Sixth lab cold cycle: tightened large tank screws, all filters, star simulator
+7; 2014-10-16; 11:00; Seventh cold cycle: Reassembly for operation at CAHA
+8; 2014-11-21; 15:00; Replaced defective Bias/Clock card with spare
+9; 2015-04-28; 15:16; Reasembly after repair of small vessel and Bias/Clock card
+10; 2016-02-18; 15:55; Instalation of new Filter. Irene, Armin, David G Jens 
