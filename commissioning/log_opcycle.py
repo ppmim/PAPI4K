@@ -23,7 +23,7 @@
 #   -c, --copyonly        Only copy log file to other panic computer
 #   --logpath LOGPATH     Logfile path, default: '/data1/PANIC/HWlogs'
 #   --logfile LOGFILE     Logfile filename, default: log_operation.txt
-#   --fitspath FITSPATH   FITS header input path, default: $CAMTMP or ~/tmp
+#   --fitspath FITSPATH   FITS header input path, default: $TMPDIR or ~/tmp
 #   --fitsfile FITSFILE   FITS header input filename, default:
 #                         geirsPhduAdd.panic_3
 #   --targetuser TARGETUSER
@@ -49,10 +49,12 @@
 #	1) Clarified manual date edit
 # 1.3 15/04/2015 BD Update
 #	1) Added copying logfile to other panic computer
-#
+# 1.4 28/11/2022 JMIM Update: for PANICv2
+# 
+
 # $Id:$
 _name = 'log_opcycle.py'
-_version = '1.3'
+_version = '1.4'
 #########################################################################
 import os
 import argparse
@@ -67,7 +69,7 @@ arggroup.add_argument('-f', '--fitsonly', help='Only write FITS header file data
 arggroup.add_argument('-c', '--copyonly', help='Only copy log file to other panic computer', action='store_true')
 parser.add_argument('--logpath', help="Logfile path, default: '/data1/PANIC/HWlogs'", type=str, default='/data1/PANIC/HWlogs')
 parser.add_argument('--logfile', help="Logfile filename, default: log_operation.txt", type=str, default='log_operation.txt')
-parser.add_argument('--fitspath', help="FITS header input path, default: $CAMTMP or ~/tmp", type=str)
+parser.add_argument('--fitspath', help="FITS header input path, default: $TMPDIR or ~/tmp", type=str)
 parser.add_argument('--fitsfile', help="FITS header input filename, default: geirsPhduAdd.panic_3", type=str, default='geirsPhduAdd.panic_3')
 parser.add_argument('--targetuser', help="User account on second panic computer to copy logfile, default: Determine from local host name", type=str)
 parser.add_argument('--targethost', help="Name of second panic computer to copy logfile, default: Determine from local host name", type=str)
@@ -87,8 +89,8 @@ else:
 
 logfilepath = os.path.join(logpath, logfilename)
 if not fitspath:
-	# FITS header file path: either $CAMTMP or ~/tmp
-	FITSpath = os.environ.get('CAMTMP', os.path.join(os.path.expanduser('~'), 'tmp'))
+	# FITS header file path: either $TMPDIR or ~/tmp
+	FITSpath = os.environ.get('TMPDIR', os.path.join(os.path.expanduser('~'), 'tmp'))
 else:
 	FITSpath = fitspath
 FITSfilepath = os.path.join(FITSpath, FITSfilename)
@@ -166,7 +168,7 @@ if not fitsonly and not copyonly:
 	print('(X) Exit')
 	while True:
 		# verify input
-		action = raw_input().upper()
+		action = input().upper()
 		if action not in ['A', 'F', 'X', 'C']:
 			print('Error: Wrong input, try again')
 		else:
@@ -188,7 +190,7 @@ if action == 'A':
 	print('Enter cycle starting point: (N) Now or (M) Manually:')
 	while True:
 		# verify input
-		ans = raw_input().upper()
+		ans = input().upper()
 		if ans not in ['N', 'M']:
 			print('Error: Wrong input, try again')
 		else:
@@ -201,7 +203,7 @@ if action == 'A':
 		# manual entry of date and time, check validity
 		print('Enter cycle start date in UT YYYY-mm-dd:')
 		while True:
-			ans = raw_input()
+			ans = input()
 			try:
 				datetime.datetime.strptime(ans, '%Y-%m-%d')
 			except ValueError:
@@ -211,7 +213,7 @@ if action == 'A':
 		date = ans
 		print('Enter cycle start time in UT HH:MM:')
 		while True:
-			ans = raw_input()
+			ans = input()
 			try:
 				datetime.datetime.strptime(ans, '%H:%M')
 			except ValueError:
@@ -222,7 +224,7 @@ if action == 'A':
 	# comment
 	print('Enter comment (no ";" allowed):')
 	while True:
-		ans = raw_input()
+		ans = input()
 		if ';' in ans:
 			print('Error: wrong input, no ";" allowed, try again')
 		else:
