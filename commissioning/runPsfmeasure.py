@@ -38,7 +38,8 @@ def getAverageFWHMfromPsfmeasure(images, coord_file, log_file):
         psfmeasure = iraf.obsutil.psfmeasure
         # setup all paramaters
         psfmeasure.coords = "mark1"
-        psfmeasure.wcs = "world"
+        # For x,y detector coordinates in ds9 .reg files, wcs **must** be physical 
+        psfmeasure.wcs = "physical"
         psfmeasure.display = "no"
         psfmeasure.size = "FWHM"
         psfmeasure.radius = 5
@@ -48,6 +49,7 @@ def getAverageFWHMfromPsfmeasure(images, coord_file, log_file):
         psfmeasure.saturation = "INDEF"
         psfmeasure.ignore_sat = "no"
         psfmeasure.imagecur = coord_file
+        # q.txt --> file with a 'q' character to avoid interactivity with IRAF plots
         #psfmeasure.graphcur = 'q.txt' #'myfile.mc' #'/dev/null' #file that is empty by definition
         psfmeasure.logfile = log_file
         res = psfmeasure(images, Stdout=1)[-1] # get last linet of output
