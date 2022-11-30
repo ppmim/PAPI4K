@@ -7,6 +7,10 @@ if (access("home$focus_seq.txt"))
              imagecur = "", display =yes, frame = 1, graphcur = "", 
              logfile = "starfocus.log")
              
+    # To show full pathname in xgterm windows after FWHM results
+    type("home$focus_seq.txt")
+    
+    # Delete the temporal file, anymore needed
     delete("home$focus_seq.txt", yes, verify=no)
 
     # Call next Python script to read the starfocus.log file and plot a more useful plot for the focus fitting.
