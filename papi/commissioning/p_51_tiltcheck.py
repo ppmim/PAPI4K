@@ -136,7 +136,8 @@ def loadfiledata(filter):
             focus[dataindex(r)] = float(tokens[5])
             # read table data (x,y,m)
             convfunc = lambda s: s.strip('(),:m=')
-            data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], converters={4: convfunc, 5: convfunc, 7: convfunc})
+            data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], encoding='UTF-8', converters={4: convfunc, 5: convfunc, 7: convfunc})
+            print(data) 
             # calculate relative flux and weighted pixel positions
             flux = 10**(data[:, 2] / -2.5)
             pxi[dataindex(r)] = (data[:, 0] * flux).sum() / flux.sum()
@@ -288,7 +289,7 @@ if ifilter in range(1, 7):
     ax.set_ylabel('FS y / mm')
     ax.set_zlabel('FS focus / mm')
     # colorbar for sizes
-    cbar = plt.colorbar(ct)
+    cbar = plt.colorbar(ct, ax = ax)
     cbar.set_label('z residuum / mm')
     plt.tight_layout()
     plt.figtext(0.02, 0.03, "Plane tilt angle: %5.2f'" %tilt, ha='left', style='italic', size=8)
