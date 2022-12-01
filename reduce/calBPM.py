@@ -719,6 +719,47 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
         else:
             return filename
 
+def swap_bpm(master_bpm, output_filename):
+    """
+    Swap values in BPM, 0s by 1s, and 1s by 0s.
+    """
+
+
+    ones = numpy.where(data == 1)
+    zeros = numpy.where(data == 0)
+
+    data[ones] = 0
+    data[zeros] = 1
+
+
+    # Check input filename is non-MEF
+    with fits.open(master_bpm) as myfits:
+        if len(myfits)>1:
+            raise Exception("MEF files are not supported yet.")
+    
+    try:
+        # Load Bad Pixels mask (BP=1's)
+        bpm_data, bh = fits.getdata(master_bpm, header=True)
+        badpix_ones = numpy.where(bpm_data==1)
+        badpix_zeros = numpy.where(bpm_data==0)
+        bpm_data[badpix_ones] = 0
+        bpm_data[badpix_zeros] = 1
+        
+
+        gh.set('HISTORY', 'BPM Swaped (0s by 1s and 1s by 0s)')
+
+        # Write masked data
+        if overwrite:
+            fits.writeto(master_bpm, bpm_data, header=gh, clobber=True)
+        else:
+            fits.writeto(output_filename, bpm_data, header=gh, clobber=True)
+    except Exception as e:
+        raise e
+    else:
+        if not overwrite:
+            return output_filename
+        else:
+            return filename
 
 ################################################################################
 # main
