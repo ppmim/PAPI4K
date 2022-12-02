@@ -258,7 +258,8 @@ class ApplyDarkFlat(object):
             out_suffix = out_suffix.replace(".fits","_BPM.fits") 
             if self.__mdark == None and self.__mflat == None:
                 with fits.open(self.__bpm) as bp:
-                    n_ext = len(bp) - 1
+                    if len(bp) == 1: n_ext = 1
+                    else: n_ext = len(bp) - 1
         elif self.__mdark == None and self.__mflat == None and self.__bpm != None and self.__bpm_action == 'none':
             log.error("Please, choose a BPM action (grab or fix)")
             raise Exception("No BPM action selected")
