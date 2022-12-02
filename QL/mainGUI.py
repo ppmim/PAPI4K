@@ -3404,7 +3404,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
 
     def applyDarkFlat(self):
         """
-        Apply to the selected files the master Dark and master Flat found in the
+        Apply to the selected files the master Dark, master Flat and BPM found in the
         database. The master Dark and FlatField are searched individualy for each
         selected file.
 
@@ -3589,7 +3589,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             
             msgBox = QMessageBox()
             msgBox.setText("Method selection:")
-            msgBox.setInformativeText("Do you want to <Grab (set to NaN)>  or <Fix> the Bad Pixels?")
+            master_bpm =  self.config_opts['bpm']['bpm_file']
+            msgBox.setInformativeText("Do you want to <Grab (set to NaN)>  or <Fix> the Bad Pixels ? \n(%s)" % master_bpm)
             button_grab = msgBox.addButton("Grab (set to NaN)", QMessageBox.ActionRole)
             button_fix = msgBox.addButton("Fix (bi-linear interpol)", QMessageBox.ActionRole)
             msgBox.setDefaultButton(button_grab)
