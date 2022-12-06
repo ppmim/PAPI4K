@@ -71,8 +71,10 @@ FPAgap = 0
 # Radial magnification FS-FPA
 FPAscale = 0.49647
 # Scale M2 to FS
-M2scale = 5.35
-M2scale_for_t35 = 8.13 # not used, but in future needs
+# @ T22   (value checked 03/12/2022)
+M2scale = 7.2 
+# @ T35  (value TO BE CONFIRMED before perform any adjustment at T35)
+M2scale_for_t35 = 8.13 
 
 filters = ['Ks', 'H', 'J', 'Y', 'Z', 'H2', 'All']
 filter = filters[ifilter - 1]
