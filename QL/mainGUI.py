@@ -3268,8 +3268,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         # #####################################
         if not last_files:
             # Compute search-radius of nearest frames
-            ra_dec_near_offset = self.lineEdit_ra_dec_near_offset.text().toInt()[0] / 3600.0
-            time_near_offset = self.lineEdit_time_near_offset.text().toInt()[0] / 86400.0
+            ra_dec_near_offset = int(self.lineEdit_ra_dec_near_offset.text()) / 3600.0
+            time_near_offset = int(self.lineEdit_time_near_offset.text()) / 86400.0
             #print "RA_DEC_OFFSET", ra_dec_near_offset
             #print "TIME_NEAR_OFFSET", time_near_offset
           
@@ -3951,8 +3951,8 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         file_n = 0 # really, not used for the moment
         file_list = []
         
-        ra_dec_near_offset = self.lineEdit_ra_dec_near_offset.text().toInt()[0]/3600.0
-        time_near_offset = self.lineEdit_time_near_offset.text().toInt()[0]/86400.0
+        ra_dec_near_offset = int(self.lineEdit_ra_dec_near_offset.text())/3600.0
+        time_near_offset = int(self.lineEdit_time_near_offset.text())/86400.0
         print("RA_DEC_OFFSET", ra_dec_near_offset)
         print("TIME_NEAR_OFFSET", time_near_offset)
         

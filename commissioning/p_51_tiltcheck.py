@@ -76,6 +76,14 @@ M2scale = 7.2
 # @ T35  (value TO BE CONFIRMED before perform any adjustment at T35)
 M2scale_for_t35 = 8.13 
 
+# Current shims values (mm)
+# for T22, set #3
+curr_shim_at_t22 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
+# for T35 (TBD)
+# curr_shim_at_t35 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
+# Thickness of new shims (mm)
+new_shim_thickness = 8
+
 filters = ['Ks', 'H', 'J', 'Y', 'Z', 'H2', 'All']
 filter = filters[ifilter - 1]
 logfilename = 'Log_tiltcheck_%s.txt' % filter
@@ -162,7 +170,7 @@ def convertdata(pxi, pxj, focus):
     # FPA xy in mmm
     # Move origin to center of detector (2048,2048)
     FPAx = pxi.copy()
-    FPAx = (-2048.5 + pxi) * 0.015
+    FPAx = (-2048.5 + pxi) * 0.015 # pixel size 0.015um for H4RG
     FPAy = pxj.copy()
     FPAy = (-2048.5 + pxj) * 0.015
     FSx = FPAx / FPAscale
@@ -234,7 +242,7 @@ if ifilter in range(1, 7):
     # calculate the change of the shim thicknesses
     pr('# Calculating shim changes')
     # screw positions in image / mm
-    TAdia = 680
+    TAdia = 680 # telescope adapter diameter (telescope interface)
     shims = np.arange(1, 13)
     shimsx = TAdia / 2 * np.sin(np.radians(15 + (shims - 1) * 30))
     shimsy = -TAdia / 2 * np.cos(np.radians(15 + (shims - 1) * 30))
@@ -244,6 +252,14 @@ if ifilter in range(1, 7):
     pr('# Shim nr, Thickness change/mm')
     for i in range(12):
         pr('%2i, %6.4f' %(i+1, dz[i]))
+
+    pr("\n\n")
+    pr("For NEW SHIMS set of %s mm of Thickness" %new_shim_thickness)
+    pr('**************************************')
+    pr('# Shim nr, Thickness change/mm to NEW shim')
+    new_dz = -(8 - (np.array(curr_shim_at_t22) + dz))
+    for i in range(12):
+        pr('%2i, %6.4f' %(i+1, new_dz[i]))
 
     # 3D plot
     pr('# Plotting points and plane fit')
@@ -296,6 +312,7 @@ if ifilter in range(1, 7):
     plt.tight_layout()
     plt.figtext(0.02, 0.03, "Plane tilt angle: %5.2f'" %tilt, ha='left', style='italic', size=8)
     plt.figtext(0.02, 0.01, "Plane position angle: %5.1f'" %angle, ha='left', style='italic', size=8)
+    obj = obj.replace("/", "_")
     filename = '%s_%s_tiltcheck' %(obj, filter)
     plt.savefig(os.path.join(outputpath, filename + '.png'))
     plt.close()
@@ -443,6 +460,7 @@ elif ifilter in [7]:
     plt.tight_layout()
     plt.figtext(0.02, 0.03, "Plane tilt angle: %5.2f'" %tilt, ha='left', style='italic', size=8)
     plt.figtext(0.02, 0.01, "Plane position angle: %5.1f'" %angle, ha='left', style='italic', size=8)
+    obj = obj.replace("/", "_")
     filename = '%s_%s_tiltcheck' %(obj, filter)
     plt.savefig(os.path.join(outputpath, filename + '.png'))
     plt.close()
@@ -457,6 +475,15 @@ elif ifilter in [7]:
     # plane positions and normalized to maximum (material to remove)
     shimsz = a * shimsx + b * shimsy
     dz = shimsz - shimsz.max()
-    pr('# Shim nr, Thickness change/mm')
+    pr('# Shim nr, Thickness change/mm to current shim')
     for i in range(12):
         pr('%2i, %6.4f' %(i+1, dz[i]))
+
+    pr("\n\n")
+    pr('For NEW SHIMS set of %s mm of Thickness' % new_shim_thickness)
+    pr('**************************************')
+    pr('# Shim nr, Thickness change/mm to NEW shim')
+    new_dz = -(8 - (np.array(curr_shim_at_t22) + dz))
+    for i in range(12):
+        pr('%2i, %6.4f' %(i+1, new_dz[i]))
+
