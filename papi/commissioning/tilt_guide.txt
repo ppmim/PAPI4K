@@ -1,0 +1,43 @@
+1) Connect to PANIC computer as obs22
+> ssh -X obs22@panic22
+
+2) Load PAPI environment
+
+> source ~/bin/start_papi_env.sh
+
+3) For each filter:
+
+3.0) Create Z_Fullframe.reg using ds9 over best focus image
+
+> cp Z_Fullframe.reg /data2/PANIC/demo_tilt/Z/
+
+3.1) Create data directory, and one subdirectory per filter
+
+> mkdir /data2/PANIC/demo_tilt/Z
+> cd /data2/PANIC/demo_tilt/Z
+
+3.2) Split fullframe region file into 16 regions
+python ~/bin/split_region.py /data2/PANIC/demo_tilt/Z/Z_Fullframe.reg
+
+3.3) Edit run_mult_startfocus.sh for: data_dir, filter_name and filter_id
+> kate ~/bin/run_mult_starfocus.sh
+
+3.4 ) Run starfocus for all regions (type 'q' on iraf plot and close plot window)
+> ~/bin/run_mult_starfocus.sh
+
+The results of each run of runStartfocus.py are saved into /data2/PANIC/demo_tilt/
+as Z_Region_i.txt
+
+And finally, p_51_tiltcheck.py (included into run_mult_startfocus.sh) will generate
+/data2/PANIC/demo_tilt/Log_tiltcheck_Z.txt and .png file with plot;
+Log_tiltcheck_Z.txt will contain all the data about tilt measurements;
+
+3.5) To inspect the plot of the tilt:
+
+> okular _data2_PANIC_demo_tilt_Z_tiltcheck.png
+
+3.6) finally, run p_51_tiltcheck.py for all the filters
+
+> cd /data2/PANIC/demo_tilt/
+> ~/bin/p_51_tiltcheck.py -i /data2/PANIC/demo_tilt/ 7
+
