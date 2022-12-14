@@ -91,6 +91,8 @@ def showFrame(frame, del_all=False):
     elif os.path.isfile(frame):
         delete_all = del_all
         fileList = [frame]
+    else:
+        return
 
     for file in fileList:
         f = ClFits(file)

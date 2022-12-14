@@ -1667,7 +1667,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 msg = "Error reading file %s : %s" % (filename, str(e))
                 log.error(msg)
                 self.logConsole.error(msg)
-                raise Exception(msg)
+                return
             
             # Print out the info
             self.logConsole.info("---------------")
@@ -1767,8 +1767,15 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     (date, ut_time, type, filter, texp, detector_id, run_id, 
                      ra, dec, object, mjd, nexp, ncoadds, itime) = self.inputsDB.GetFileInfo(file)
                     if file == seq[0]:
-                        nObject = fits.getval(file,"OBJECT", ext=0)
-                        header = fits.getheader(file)
+                        try:
+                            nObject = fits.getval(file,"OBJECT", ext=0)
+                            header = fits.getheader(file)
+                        except Exception as e:
+                            msg = "Error reading file %s : %s" % (file, str(e))
+                            log.error(msg)
+                            self.logConsole.error(msg)
+                            continue
+                        
                         #the first time, fill the "tittle" of the group 
                         elem.setText(0, "TYPE="+str(seq_types[k]) +
                                      "  ** FILTER=" + str(filter) + 
@@ -1782,7 +1789,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     e_child.setText(2, str(filter))
                     
                     # Check if the files belongs to a set of individuals not integrated
-                    header = fits.getheader(file)
+                    try:
+                        header = fits.getheader(file)
+                    except Exception as e:
+                        msg = "Error reading file %s : %s" % (file, str(e))
+                        log.error(msg)
+                        self.logConsole.error(msg)
+                        continue
+
                     try:
                         framenum_com = header.comments['FRAMENUM'].split()
                     except Exception as ex:
@@ -1866,7 +1880,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                 elem.setText(2, str(filter))
 
                 # Check if the files belongs to a set of individuals not integrated
-                header = fits.getheader(file)
+                try:
+                    header = fits.getheader(file)
+                except Exception as e:
+                    msg = "Error reading file %s : %s" % (file, str(e))
+                    log.error(msg)
+                    self.logConsole.error(msg)
+                    continue
+
                 try:
                     framenum_com = header.comments['FRAMENUM'].split()
                 except Exception as ex:
@@ -1915,7 +1936,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     elem.setText(2, str(filter.split()[0]))
 
                     # Check if the files belongs to a set of individuals not integrated
-                    header = fits.getheader(file)
+                    try:
+                        header = fits.getheader(file)
+                    except Exception as e:
+                        msg = "Error reading file %s : %s" % (file, str(e))
+                        log.error(msg)
+                        self.logConsole.error(msg)
+                        continue
+
                     try:
                         framenum_com = header.comments['FRAMENUM'].split()
                     except Exception as ex:
