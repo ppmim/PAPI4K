@@ -40,10 +40,12 @@
 # 1.1 26/01/2015 BD Update
 #	1) Added shim calculation for all filters
 # 1.2 16/11/2022 JM Update for PANICv2
-#   2) TBD modifications for commissioning of PANICv2
+#   1) TBD modifications for commissioning of PANICv2
+# 1.3 9/12/2022 JM adds new shims size improvemen
+#   1) To provide the new shim sizes 
 
 _name = 'p_51_tiltcheck.py'
-_version = '1.2'
+_version = '1.3'
 #########################################################################
 import numpy as np
 import os

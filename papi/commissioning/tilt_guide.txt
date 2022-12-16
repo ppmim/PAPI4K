@@ -1,6 +1,16 @@
 1) Connect to PANIC computer as obs22
 > ssh -X obs22@panic22
 
+1.1) Take [focus serie + DARKs + DOME_FLATS] images using OT
+1.2) Check field orientation using Quick-Look (Astrometric Calib.): check output in linux terminal for N-E angle
+1.3) Pre-Process focus serie using Quick-Look (Apply Dark & FlatField & BPM)
+1.4) Determine the telescope focus using Quick-Loook (Focus evaluation): IRAF + DS9 will be opened to run iraf.Starfocus
+1.5) Take the second focus serie to be used for instrument tilt check
+1.6) Pre-Process second focus serie using Quick-Look (Apply Dark & FlatField & BPM)
+
+
+Once the telescope is focused and second focus serie processed, procceed to step 2)  
+
 2) Load PAPI environment
 
 > source ~/bin/start_papi_env.sh
