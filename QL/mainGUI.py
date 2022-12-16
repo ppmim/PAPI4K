@@ -2063,7 +2063,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             statusTip="Apply Dark, Flat and BPM", 
             triggered=self.applyDarkFlat)
 
-        self.mFocusEval = QAction("&Focus evaluation", self,
+        self.mFocusEval = QAction("&Focus Evaluation", self,
             shortcut="Ctrl+F",
             statusTip="Run a telescope focus evaluation of a focus serie.", 
             triggered=self.focus_eval)
