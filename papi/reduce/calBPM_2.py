@@ -113,8 +113,8 @@ class BadPixelMask(object):
         self.verbose = False
     
     def create(self):
-        #return self.create_IRAF()
-        return self.create_simple()
+        return self.create_IRAF()
+        # return self.create_simple()
         
     def create_IRAF(self):
         
@@ -124,9 +124,9 @@ class BadPixelMask(object):
         intensity levels, and identifying those pixels where the ratio of the 
         normalised flux is more than 15%. In detail (using IRAF commands):
         
-            1 - Take: 5 dark images, 5 Domeflats with low counts (~5000 counts), 
+            (1) - Take: 5 dark images, 5 Domeflats with low counts (~5000 counts), 
                     5 Domeflats with high counts (~20,000 counts)
-            2 - Zerocombine the darks images
+            (2) - Zerocombine the darks images
             3 - Dark subtract the Domeflat images
             4 - Flatcombine the domeflats with high counts - FLATHIGH
             5 - Flatcombine the domeflats with low counts - FLATLOW
@@ -315,6 +315,8 @@ class BadPixelMask(object):
         # for bad (masked) pixels.
         list_outfitsnames = []
         if nExt == 1:
+            # import globally (can) cause problems
+            from pyraf.iraf import imred, ccdred
             iraf.imred.ccdred.ccdmask(image=flat_ratio.replace('//','/'),
                      mask=self.output_file.partition(".fits")[0] + ".pl",
                      ncmed = 7, # Column box size for median level calculation
@@ -331,6 +333,8 @@ class BadPixelMask(object):
             list_outfitsnames.append(self.output_file.partition(".fits")[0] + ".pl")
         else:
             i = 0
+            # import globally (can) cause problems
+            from pyraf.iraf import imred, ccdred
             for i_nExt in range(0, nExt):
                 mfnp = self.output_file.partition('.fits')
                 outfitsname = mfnp[0] + ".Q%02d" % (i + 1) + mfnp[1] + mfnp[2]
@@ -376,16 +380,18 @@ class BadPixelMask(object):
         
     def create_simple(self):
         """
+        NOTE 20-Dic-22: this procedure need to be completed.
+
         Build a BPM following the algorithm described bellow:
         
-            1 - Take: 5 dark images, 5 Domeflats with low counts (~5000 counts), 
+            (1) - Take: 5 dark images, 5 Domeflats with low counts (~5000 counts), 
                     5 Domeflats with high counts (~20,000 counts)
-            2 - Zerocombine the darks images
+            (2) - Zerocombine the darks images
             3 - Dark subtract the Domeflat images
             4 - Flatcombine the domeflats with high counts - FLATHIGH
             5 - Flatcombine the domeflats with low counts - FLATLOW
             6 - iraf.imarith/iraf.mscred.mscarith FLATLOW.fits / FLATHIGH.fits FLATLHRATIO.fits
-            7 - ccdmask FLATLHRATIO.fits BADPIX_MASK_FILE with the following parameters set:
+            7 - Select BPs below /above defined levels (TBD)
         
         It works with MEFs, and in principle with SEF.
         
@@ -538,14 +544,15 @@ class BadPixelMask(object):
         bpm = numpy.zeros([nExt, nx1, nx2], dtype=numpy.uint8)
         
         for i in range(0, nExt):
-            # TBC: Bad pixel selection criterion 
+            # TODO: the selection of BPs need to be well defined !!
+            # TBC: Bad pixel selection criterion --> +-10% has no sense !
             # Bad pixels = 1, good_pixels = 0
             if nExt == 1:
-                bpm[0] = numpy.where(fr[0].data < 0.9, 1, 
-                            numpy.where(fr[0].data > 1.1, 1, 0))
+                bpm[0] = numpy.where(fr[0].data < 0.1, 1, 
+                            numpy.where(fr[0].data > 10.0, 1, 0))
             else:
-                bpm[i] = numpy.where(fr[i + 1].data < 0.9, 1, 
-                            numpy.where(fr[i + 1].data > 1.1, 1, 0))
+                bpm[i] = numpy.where(fr[i + 1].data < 0.1, 1, 
+                            numpy.where(fr[i + 1].data > 10.0, 1, 0))
             
             # Show stats
             log.info("# Bad pixels (extension %s): %f"%(i + 1, (bpm[i] == 1).sum()))

@@ -75,7 +75,7 @@ from papi.reduce.calDark import MasterDark
 from papi.reduce.calTwFlat import MasterTwilightFlat
 from papi.reduce.calGainMap import DomeGainMap, TwlightGainMap, SkyGainMap
 from papi.reduce.calDomeFlat import MasterDomeFlat
-from papi.reduce.calBPM_2 import BadPixelMask
+from papi.reduce.calBPM import BadPixelMask
 from papi.reduce.applyDarkFlat import ApplyDarkFlat
 from papi.reduce.checkQuality import CheckQuality
 from papi.reduce.astrowarp import doAstrometry
@@ -2063,7 +2063,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             statusTip="Apply Dark, Flat and BPM", 
             triggered=self.applyDarkFlat)
 
-        self.mFocusEval = QAction("&Focus Evaluation", self,
+        self.mFocusEval = QAction("&Focus evaluation", self,
             shortcut="Ctrl+F",
             statusTip="Run a telescope focus evaluation of a focus serie.", 
             triggered=self.focus_eval)
@@ -3408,16 +3408,14 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             if outfileName:
                 try:
                     self.genFileList(self.m_popup_l_sel, self.m_tempdir + "/flat.list")
-                    expTime = ClFits(self.m_popup_l_sel[0]).expTime()
-                    dark = self.outputsDB.GetFilesT('MASTER_DARK', expTime)[-1]
-                    lsig = 10
-                    hsig = 10
+                    #expTime = ClFits(self.m_popup_l_sel[0]).expTime()
+                    #dark = self.outputsDB.GetFilesT('MASTER_DARK', expTime)[-1]
+                    
                     QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-                    self._task = BadPixelMask( self.m_tempdir + "/flat.list",
-                                                               dark, 
-                                                               str(outfileName), 
-                                                               lsig, hsig, 
-                                                               self.m_tempdir)
+
+                    self._task = BadPixelMask(self.m_tempdir + "/flat.list",
+                        outputfile=str(outfileName), lthr=4.0, hthr=4.0,
+                        temp_dir=self.m_tempdir)
                     
                     thread = ExecTaskThread(self._task.create,
                                                    self._task_info_list)
@@ -3428,7 +3426,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                     QMessageBox.critical(self, "Error", "Not suitable frames to compute BPM.\n You need flat_off and flat_on frames")
                     raise
         else:
-            QMessageBox.critical(self, "Error","Error, not suitable frames selected (flat fields)")
+            QMessageBox.critical(self, "Error","Error, not suitable number of frames (>3) selected (flat fields)")
 
     def applyDarkFlat(self):
         """

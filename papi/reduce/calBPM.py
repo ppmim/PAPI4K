@@ -91,9 +91,9 @@ class BadPixelMask(object):
         # If true, neither check image type or readout mode
         self.raw_flag = raw_flag
 
-        if outputfile==None:
+        if outputfile == None:
             dt = datetime.datetime.now()
-            self.output = self.temp_dir + 'BadPixMask'+dt.strftime("-%Y%m%d%H%M%S")
+            self.output = self.temp_dir + 'BadPixMask' + dt.strftime("-%Y%m%d%H%M%S")
         else:
             self.output = outputfile
         
@@ -128,23 +128,23 @@ class BadPixelMask(object):
         f_readmode = -1
         if not self.raw_flag:
             for iframe in filelist:
-                fits = ClFits(iframe)
-                log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, fits.exptime, fits.type)) 
+                cfits = ClFits(iframe)
+                log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, cfits.exptime, cfits.type)) 
                 # Check EXPTIME, TYPE (flat) and FILTER
-                if not fits.isDomeFlat():
+                if not cfits.isDomeFlat():
                     log.warning("Warning: Task 'create BPM' found a non-domeflat frame")
                 else:
                     # Check READMODE
-                    if f_readmode != -1 and (f_readmode != fits.getReadMode()):
+                    if f_readmode != -1 and (f_readmode != cfits.getReadMode()):
                         log.error("Error: Task 'calBPM' finished. Found a FLAT frame with different  READMODE")
                         raise Exception("Found a FLAT frame with different  READMODE") 
                     else: 
-                        f_readmode  =fits.getReadMode()
+                        f_readmode  = cfits.getReadMode()
                         good_flats.append(iframe)
         else: 
             good_flats = filelist                    
              
-        if len(good_flats)<2:
+        if len(good_flats) < 2:
             msg = "Not enough dome flats provided. At least 2 good flat frames"\
                   "are required"
             log.error(msg)
@@ -186,11 +186,11 @@ class BadPixelMask(object):
         flat_comb_hdu = fits.open(flat_comb)
         nExt = 1 if len(flat_comb_hdu)==1 else len(flat_comb_hdu)-1
         if nExt ==1:
-            median = numpy.median(flat_comb_hdu[0].data)
+            median = numpy.nanmedian(flat_comb_hdu[0].data)
             flat_comb_hdu[0].data = flat_comb_hdu[0].data / median
         else:
             for i_nExt in range(0, nExt):
-                median = numpy.median(flat_comb_hdu[i_nExt+1].data)
+                median = numpy.nanmedian(flat_comb_hdu[i_nExt+1].data)
                 flat_comb_hdu[i_nExt+1].data = flat_comb_hdu[i_nExt+1].data / median
 
                 
@@ -206,67 +206,53 @@ class BadPixelMask(object):
             f_i = fits.open(flat)
             for i_nExt in range(0, nExt):
                 log.info("*** Detector %d" % (i_nExt + 1))
-                if nExt==1:
+                if nExt == 1:
                     # to avoid zero division error
-                    mydata = numpy.where(flat_comb_hdu[0].data<__epsilon, 
+                    mydata = numpy.where(flat_comb_hdu[0].data < __epsilon, 
                                         numpy.NaN, 
                                         flat_comb_hdu[0].data) 
                     tmpf = f_i[0].data / mydata
                 else:
                     # to avoid zero division error
-                    mydata = numpy.where(flat_comb_hdu[i_nExt+1].data<__epsilon, 
+                    mydata = numpy.where(flat_comb_hdu[i_nExt+1].data < __epsilon, 
                                         numpy.NaN, 
                                         flat_comb_hdu[i_nExt+1].data) 
-                    tmpf = f_i[i_nExt+1].data / mydata
+                    tmpf = f_i[i_nExt + 1].data / mydata
 
                 #mdat = numpy.ma.masked_array(tmpf, numpy.isnan(tmpf))
                 mdat = tmpf
-                std = numpy.std(mdat)
+                std = numpy.nanstd(mdat)
                 r_std = robust.std(mdat)
-                median = numpy.median(mdat)
-                mad = numpy.median(numpy.abs(mdat - median))
-                # 1/0.6745 is the constant to convert from MAD to std
+                median = numpy.nanmedian(mdat)
+                mad = numpy.nanmedian(numpy.abs(mdat - median))
+                # 1 / 0.6745 is the constant to convert from MAD to std
                 mad*=1.4826
             
-                log.info("    Median: %s "%median)
-                log.info("    STD: %s"%std)
-                log.info("    STD(robust): %s"%r_std)
-                log.info("    MAD: %s"%mad)
+                log.info("    Median: %s " % median)
+                log.info("    STD: %s" % std)
+                log.info("    STD(robust): %s" % r_std)
+                log.info("    MAD: %s" % mad)
             
                 # Normalize the flattened image
                 tmpf = tmpf / median
                 r_std2 = robust.std(tmpf)
-                #print ">>R_STD2=",r_std2
-
-                # Debug - save the normalized flat
-                #misc.fileUtils.removefiles(flat.replace(".fits","_N.fits"))
-                #hdulist = fits.HDUList()
-                #hdr0 = fits.getheader(good_flats[0])
-                #prihdu = fits.PrimaryHDU (data = tmpf, header = hdr0)
-                #hdulist.append(prihdu)
-      
-                #hdulist.writeto(flat.replace(".fits","_N.fits"))
-                #hdulist.close(output_verify='ignore')
-                # End debug
 
                 # Define the H and L thresholds
-                low = 1.0 - self.lthr*mad/median
-                high = 1.0 + self.hthr*mad/median
+                low = 1.0 - self.lthr * mad / median
+                high = 1.0 + self.hthr * mad / median
                 
-                #low = 1.0 - self.lthr*r_std2
-                #high = 1.0 + self.hthr*r_std2
-                
-                log.info("    Low Threshold: %f"%low)
-                log.info("    High Threshold: %f"%high)
+                log.info("    Low Threshold: %f" % low)
+                log.info("    High Threshold: %f" % high)
             
                 # Count the number of NaN values (due to < __epsilon)
                 n_nan = numpy.count_nonzero(numpy.isnan(tmpf))
-                #print ">>#_NaN=",n_nan
+                log.debug("Number of NaNs :%s" % n_nan)
 
                 # STEP 4.3 Define the bad pixels
-                tmpf.shape = nx1,nx2
+                tmpf.shape = nx1, nx2
                 #bpm[ i_nExt, numpy.isnan(tmpf)]+=1
                 bpm[ i_nExt, (tmpf < low) | (tmpf > high) | numpy.isnan(tmpf)]+=1
+            
             log.debug("BPM updated with current flat %s", flat)
             f_i.close()
             
@@ -275,16 +261,16 @@ class BadPixelMask(object):
         # STEP 5: Go through the rejection mask and if a pixel has been marked bad 
         # more than a set number of times (a quarter of number of images), 
         # then it is defined as bad.
-        nbmax = numpy.maximum(2, len(good_flats)/4)
-        bpm = numpy.where(bpm>nbmax, 1, 0) # bad pixels set to 1
+        nbmax = numpy.maximum(2, len(good_flats) / 4)
+        bpm = numpy.where(bpm > nbmax, 1, 0) # bad pixels set to 1
 
         # Show stats
         nbad = numpy.zeros(nExt)
         for i_nExt in range(0, nExt):
             nbad[i_nExt] = (bpm[i_nExt]==1).sum()
-            badfrac = float(nbad[i_nExt])/float(nx1*nx2)
-            log.info("# Bad pixels (detector %s): %f"%(i_nExt+1, nbad[i_nExt]))
-            log.info("Fraction Bad pixel (detector %s): %f"%(i_nExt+1, badfrac))
+            badfrac = float(nbad[i_nExt]) / float(nx1*nx2)
+            log.info("# Bad pixels (detector %s): %f" % (i_nExt + 1, nbad[i_nExt]))
+            log.info("Fraction Bad pixel (detector %s): %f %%" % (i_nExt + 1, badfrac*100))
         
         # STEP 6: Save the BPM --- TODO MEF !!!!
         removefiles(self.output)
@@ -310,7 +296,7 @@ class BadPixelMask(object):
         prihdu.header.set('PAPIVERS', __version__, 'PANIC Pipeline version')
         prihdu.header.add_history('BPM created from %s' % good_flats)
 
-        if nExt>1:
+        if nExt > 1:
             prihdu.header.set('EXTEND', True, after = 'NAXIS')
             prihdu.header.set('NEXTEND', nExt)
             prihdu.header.set('FILENAME', self.output)
@@ -332,7 +318,7 @@ class BadPixelMask(object):
             hdulist.writeto(self.output)
             hdulist.close(output_verify='ignore')
         except Exception as e:
-            log.error("Error writing linearity model %s"%self.output)
+            log.error("Error writing BPM %s" % self.output)
             raise e
 
         # Remove temp files
@@ -340,6 +326,8 @@ class BadPixelMask(object):
         
         log.debug('Saved Bad Pixel Mask  to %s' , self.output)
         log.debug("createBPM' finished %s", t.tac() )
+
+        return self.output
         
     def create_JM(self):
             """ 
@@ -370,23 +358,23 @@ class BadPixelMask(object):
             f_readmode = -1
             if not self.raw_flag:
                 for iframe in filelist:
-                    fits = ClFits(iframe)
-                    log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, fits.exptime, fits.type)) 
+                    cfits = ClFits(iframe)
+                    log.debug("Frame %s EXPTIME= %f TYPE= %s " %(iframe, cfits.exptime, cfits.type)) 
                     # Check EXPTIME, TYPE (flat) and FILTER
-                    if not fits.isDomeFlat():
+                    if not cfits.isDomeFlat():
                         log.warning("Warning: Task 'create BPM' found a non-domeflat frame")
                     else:
                         # Check READMODE
-                        if f_readmode!=-1 and (f_readmode!= fits.getReadMode() ):
+                        if f_readmode!=-1 and (f_readmode!= cfits.getReadMode() ):
                             log.error("Error: Task 'calBPM' finished. Found a FLAT frame with different  READMODE")
                             raise Exception("Found a FLAT frame with different  READMODE") 
                         else: 
-                            f_readmode  =fits.getReadMode()
+                            f_readmode  = cfits.getReadMode()
                             good_flats.append(iframe)
             else: 
                 good_flats = filelist                    
                  
-            if len(good_flats)<2:
+            if len(good_flats) < 2:
                 log.error('Not enough dome flats provided. At least 2 good flat frames are required')
                 raise Exception("Not enough dome flats provided. At least 2 good flat frames are required")
             
@@ -395,7 +383,7 @@ class BadPixelMask(object):
             # we need to build again a text file with the good_files
             if len(good_flats)!=len(filelist):
                 flats = self.temp_dir + "/flats.txt"
-                ftemp = open(flats,"w")
+                ftemp = open(flats, "w")
                 for flat in good_flats:
                     ftemp.write(flat+"\n")
                 ftemp.close() 
@@ -556,6 +544,8 @@ class BadPixelMask(object):
             
             log.debug('Saved Bad Pixel Mask  to %s', self.output)
             log.debug("createBPM' finished %s", t.tac())
+
+            return self.output
 
 #-------------------------------------------------------------------------------
 # Some util routines
@@ -719,18 +709,10 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
         else:
             return filename
 
-def swap_bpm(master_bpm, output_filename):
+def swap_bpm(master_bpm, output_filename, overwrite=False):
     """
     Swap values in BPM, 0s by 1s, and 1s by 0s.
     """
-
-
-    ones = numpy.where(data == 1)
-    zeros = numpy.where(data == 0)
-
-    data[ones] = 0
-    data[zeros] = 1
-
 
     # Check input filename is non-MEF
     with fits.open(master_bpm) as myfits:
@@ -745,14 +727,16 @@ def swap_bpm(master_bpm, output_filename):
         bpm_data[badpix_ones] = 0
         bpm_data[badpix_zeros] = 1
         
-
-        gh.set('HISTORY', 'BPM Swaped (0s by 1s and 1s by 0s)')
+        bh.set('INSTRUME', 'PANIC')
+        bh.set('CAMERA', 'HgCdTe IR-Camera (1 H4RGs)')
+        bh.set('FILTER', 'NO      ')
+        bh.set('HISTORY', 'BPM Swaped (0s by 1s and 1s by 0s)')
 
         # Write masked data
         if overwrite:
-            fits.writeto(master_bpm, bpm_data, header=gh, clobber=True)
+            fits.writeto(master_bpm, bpm_data, header=bh, clobber=True)
         else:
-            fits.writeto(output_filename, bpm_data, header=gh, clobber=True)
+            fits.writeto(output_filename, bpm_data, header=bh, clobber=True)
     except Exception as e:
         raise e
     else:
