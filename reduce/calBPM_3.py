@@ -57,6 +57,8 @@ import papi.misc.robust as robust
 from papi.misc.version import __version__
 
 
+def reject_outliers(data, m=2):
+    return data[abs(data - numpy.mean(data)) < m * numpy.std(data)]
 
 class BadPixelMask(object):
     """
@@ -135,6 +137,7 @@ class BadPixelMask(object):
         
         dark = None
         if self.dark_list is not None:
+            # HOT pixels
             # STEP 1: Make the combine of DARK frames
             log.debug("Combining DARKS frames...")
             dark_comb = self.temp_dir + '/darkcomb.fits'
@@ -151,7 +154,7 @@ class BadPixelMask(object):
                             scale='exposure'
                             #scale='none'
                             )
-            log.debug("Created combined Dark %s"%dark_comb)
+            log.debug("Created combined Dark %s" % dark_comb)
 
             # STEP 1.1: Define the threshold as: 75% of (mean-3*sigma)
             dark = fits.open(dark_comb)
@@ -168,16 +171,19 @@ class BadPixelMask(object):
                     det_id = dark[ext].header['DET_ID']
                 else: 
                     det_id = i_nExt+1
-                log.info("*** Detector %s"%det_id)
-                median = numpy.mean(dark[ext].data)
+                log.info("*** Detector %s" % det_id)
+                median = numpy.median(dark[ext].data)
                 std = robust.std(dark[ext].data)
-                dark_threshold = (median + self.dthr*std)
+                ## dark_threshold = (median + self.dthr * std)
+                p75 = numpy.percentile(dark[ext].data + 3*std, 95)
+                dark_threshold = p75
                 #dark_threshold = self.dthr
                 #dark_threshold = (mean + 3*std)*(self.dthr/100.0)
-                log.debug("   Dark Median = %s"%median)
-                log.debug("   Dark STD = %s"%std)
-                log.debug("   Dark Threshold (median + D*sigma) = %s"%dark_threshold)
- 
+                log.debug("   Dark Median = %s" % median)
+                log.debug("   Dark STD = %s" % std)
+                ## log.debug("   Dark Threshold (median + D*sigma) = %s" % dark_threshold)
+                log.debug("   Dark Threshold (P75) = %s" % dark_threshold)
+                
                 # STEP 1.2: Mask (==1) pixels **above** the threshold.
                 bpm[i_nExt, (dark[ext].data > dark_threshold) | numpy.isnan(dark[ext].data)] = 1
                 nbad_hot[i_nExt] = (bpm[i_nExt]==1).sum()
@@ -191,6 +197,7 @@ class BadPixelMask(object):
         # STEP 2: Make the combine of dome FLAT frames
         # - Build the frame list for IRAF
         if self.flat_list != None:
+            # COLD pixels
             log.debug("Combining Flat frames...")
             flat_comb = self.temp_dir + '/flatcomb.fits'
             removefiles(flat_comb)
@@ -229,21 +236,24 @@ class BadPixelMask(object):
                 if 'DET_ID' in flat[ext].header: 
                     det_id = flat[ext].header['DET_ID']
                 else: 
-                    det_id = i_nExt+1
+                    det_id = i_nExt + 1
 
-                log.info("*** Detector %s"%det_id)
+                log.info("*** Detector %s" % det_id)
                 ## Note: robust mean is very similar to median
                 median = numpy.median(flat[ext].data)
                 std = robust.std(flat[ext].data)
                 # STEP 2.1: Define the thresholds as : +-%-ile of median, i.e., 
                 # (tails of the distribution).
-                low_flat_threshold = median*(self.fthr/100.0)  # COLD pixels
+                ## low_flat_threshold = median*(self.fthr/100.0)  # COLD pixels
+                low_flat_threshold = numpy.percentile(flat[ext].data - 3*std, 5)
                 # High_flat_threshold is not sure to have a good value...
-                high_flat_threshold = median*(1+(100-self.fthr)/100.0) # HOT_Sat pixels
-                log.info("    Flat Median = %s"%median)
-                log.info("    Flat STD = %s"%std)
-                log.info("    Flat Low  Threshold = %s"%low_flat_threshold)
-                log.info("    Flat High Threshold = %s"%high_flat_threshold)
+                ## high_flat_threshold = median*(1+(100-self.fthr)/100.0) # HOT_Sat pixels
+                high_flat_threshold = numpy.percentile(flat[ext].data + 3*std, 95)
+
+                log.info("    Flat Median = %s " % median)
+                log.info("    Flat STD = %s" % std)
+                log.info("    Flat Low  Threshold (cold level) = %s" % low_flat_threshold)
+                log.info("    Flat High Threshold (sat level) = %s" % high_flat_threshold)
 
 
                 # STEP 2.2: Mask (==1) pixels below (cold) and above (sat) the 
@@ -255,7 +265,7 @@ class BadPixelMask(object):
 
                 nbad_cold[i_nExt] = (bpm[i_nExt]==1).sum() - nbad_hot[i_nExt]
                 
-                log.info("    # Cold-Bad pixels from Flats of detector %d: %d"
+                log.info("    # Cold & saturated Bad pixels from Flats of detector %d: %d"
                         %(i_nExt+1, nbad_cold[i_nExt]))
         else:
             nbad_cold = 0
@@ -390,7 +400,7 @@ def main(arguments=None):
         arguments = sys.argv[1:] # argv[0] is the script name
     (options, args) = parser.parse_args(args = arguments)
 
-    if len(sys.argv[1:])<1:
+    if len(sys.argv[1:]) < 1:
        parser.print_help()
        return 2
 
