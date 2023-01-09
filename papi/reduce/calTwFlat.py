@@ -193,7 +193,7 @@ class MasterTwilightFlat(object):
         if self.__master_dark_model:
             if (isinstance(self.__master_dark_model, list) and
                     len(self.__master_dark_model) > 0):
-                self.__master_dark_model = self.__master_dark_mode[-1]
+                self.__master_dark_model = self.__master_dark_model[-1]
             if not os.path.exists(self.__master_dark_model):
                 log.error("Cannot find frame : %s"%self.__master_dark_model)
                 raise Exception("Master Dark Model not found")

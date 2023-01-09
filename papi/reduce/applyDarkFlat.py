@@ -196,7 +196,7 @@ class ApplyDarkFlat(object):
         # Master FLAT reading
         if self.__mflat != None:
             if not os.path.exists(self.__mflat): # check whether input file exists
-                msg = "Master Flat '%s' does not exist"%self.__mflat
+                msg = "Master Flat '%s' does not exist" % self.__mflat
                 log.error(msg)
                 raise Exception(msg)
             else:
@@ -434,8 +434,10 @@ class ApplyDarkFlat(object):
                     # Note: if sci_data is a cube (3D array), dark is subtracted
                     # to each layer, and flat is applied also to each layer. Thus,
                     # the calibrations works correctly for data cubes of data, 
-                    # no matter if they are MEF or single HDU fits.  
-                    sci_data = (sci_data - dark_data) / flat_data
+                    # no matter if they are MEF or single HDU fits.
+                    f_mean = robust.r_nanmean(flat_data)
+                    print("FFLAT_MEAN = ", f_mean)  
+                    sci_data = (sci_data - dark_data)  / (flat_data)
                     
                     # Now, apply BPM
                     if self.__bpm:
@@ -655,7 +657,7 @@ same image size.
                   help="Forces operations withouth checking FITS data type [default: %(default)s]")
    
     parser.add_argument("-N", "--normalize_FF",
-                  action="store_false", dest="normalize", default=False,
+                  action="store_true", dest="normalize", default=False,
                   help="Performs Flat-Filed normalization [default: %(default)s]")
 
     
