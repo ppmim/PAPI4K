@@ -28,3 +28,12 @@ python run_papi.py -c config_files/papi.cfg -s /data1/PANIC/SIMU_4k/sci_H/Q1/sca
 python reduce/montage.py -l /data1/PANIC/SIMU_4k/sci_H/Q1/scaled/simu_sci_H_4k.txt
 python run_papi.py -c config_files/papi.cfg -s /data1/PANIC/2015-06-24/ -S 67 67  -d /data2/out/ -t /data2/tmp/
 python run_papi.py -c config_files/papi.cfg -s /data1/PANIC/2015-06-24/ -S 36 36  -d /data2/out/ -t /data2/tmp
+
+
+# Processing in panic22:
+
+# To create master DarkModel
+python reduce/calDarkModel.py  -s /data2/tmp/dark_model_files_28dic.txt  -o /data2/tmp/DM2.fits
+
+# To create master TW flats
+python reduce/calTwFlat.py  -s /data2/tmp/tw_flats_H.txt  -D /data1/Calibs2/DarkModel_CNTSR.fits -o /data2/tmp/Master_TW_Flat_H.fits -N

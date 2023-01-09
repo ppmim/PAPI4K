@@ -63,7 +63,7 @@ class LogSheet (object):
         super (LogSheet, self).__init__ (*a,**k)
         
         self.__file_list=file_list
-        self.__output_filename=output_filename  # full filename (path+filename)
+        self.__output_filename = output_filename  # full filename (path+filename)
         self.rows = rows
         self.remove_head = remove_head
         
