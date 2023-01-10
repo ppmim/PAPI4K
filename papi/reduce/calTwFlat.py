@@ -572,6 +572,8 @@ class MasterTwilightFlat(object):
             
             # Cleanup: Remove temporary files
             removefiles(self.__output_filename)
+            print("OUTFILE=", self.__output_filename)
+            
             # Compute normalized flat
             iraf.mscred.mscarith(operand1=comb_flat_frame,
                     operand2=median,
