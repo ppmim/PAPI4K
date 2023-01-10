@@ -83,7 +83,7 @@ M2scale_for_t35 = 8.13
 curr_shim_at_t22 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
 # for T35 (TBD)
 # curr_shim_at_t35 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
-# Thickness of new shims (mm)
+# Thickness (mm) of new (raw) shims to be used to apply changes.
 new_shim_thickness = 8
 
 filters = ['Ks', 'H', 'J', 'Y', 'Z', 'H2', 'All']
@@ -138,7 +138,7 @@ def loadfiledata(filter):
         try:
             datafile = open(os.path.join(inputpath, datafilename), 'r')
         except IOError:
-            pr('WARNING: input file %s not found!' %datafilename)
+            pr('WARNING: input file %s not found!' %datafile)
         else:
             lines = datafile.readlines()
             # read header data: object, best focus

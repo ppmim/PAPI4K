@@ -3132,7 +3132,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         flat_files=self.m_popup_l_sel,
                         master_dark_model=dark_model,
                         master_dark_list=darks,
-                        output_filename=str(outfileName[0]))
+                        output_filename=str(outfileName))
                     
                     thread = ExecTaskThread(self._task.createMaster,
                                                  self._task_info_list)

@@ -75,7 +75,7 @@ class LogSheet (object):
         log.debug("Start createLogSheet")
         
         # STEP 0:Get the user-defined list of frames
-        if type(self.__file_list)==type([]):
+        if type(self.__file_list) == type([]):
             filelist = self.__file_list
         elif os.path.isdir(self.__file_list):
             # Input is a directory
@@ -93,7 +93,7 @@ class LogSheet (object):
             logsheet.write("#-------------------------------------------------------------------------\n")
             logsheet.write("#LOG SHEET created on %s (sorted by DATE_OBS)\n" %(datetime.now()))
             logsheet.write("#-------------------------------------------------------------------------\n") 
-            logsheet.write('#%4s  %-32s  %-12s    %-20s  %-12s  %-12s  %-10s  %-10s  %-10s  %-20s\n' % (" ID", "Filename", "Filter", "Type", "RA", "Dec", "TEXP", "NCOADDS","ITIME","DATE_OBS"))
+            logsheet.write('#%4s  %-32s  %-12s    %-20s  %-12s  %-12s  %-10s  %-10s  %-10s %-20s %-20s\n' % (" ID", "Filename", "Filter", "Type", "RA", "Dec", "TEXP", "NCOADDS","ITIME","READMODE", "DATE_OBS"))
             logsheet.write("#-------------------------------------------------------------------------------------------------------------------------------------------------------------------\n") 
         
         # STEP 2: Sort out the files
@@ -119,16 +119,16 @@ class LogSheet (object):
         for key in keys:
             if self.rows is None:  # show all the data
                 f = sorted_list[key]
-                logsheet.write('%4d  %-32s  %-12s  %-20s  %-12f  %-12f  %-10f  %-10d  %-10f  %-20s\n' % (id, f.pathname, f.getFilter(), f.getType(), f.ra, f.dec, f.expTime(), f.getNcoadds(), f.getItime(), f.getDateTimeObs()) )
+                logsheet.write('%4d  %-32s  %-12s  %-20s  %-12f  %-12f  %-10f  %-10d  %-10f  %-20s  %-20s\n' % 
+                    (id, f.pathname, f.getFilter(), f.getType(), f.ra, f.dec, f.expTime(), 
+                        f.getNcoadds(), f.getItime(), f.getReadMode(), f.getDateTimeObs()) )
             elif id >= min and id <= max:
                 f = sorted_list[key]
                 logsheet.write('%s\n' % (f.pathname))
-                print('%4d  %-32s  %-12s  %-20s  %-12f  %-12f  %-10f  %-10d  %-10f  %-20s'\
+                print('%4d  %-32s  %-12s  %-20s  %-12f  %-12f  %-10f  %-10d  %-10f  %-20s  %-20s'\
                     % (id, os.path.basename(f.filename), f.getFilter(), f.getType(), 
-                       f.ra, f.dec, f.expTime(), f.getNcoadds(), f.getItime(), \
+                       f.ra, f.dec, f.expTime(), f.getNcoadds(), f.getItime(),  f.getReadMode(),\
                        f.getDateTimeObs()))
-                #logsheet.write('%4d  %-32s  %-12s  %-20s  %-12f  %-12f  %-10f  %-10d  %-10f  %-20s\n' % (id, os.path.basename(f.filename), f.getFilter(), f.getType(), f.ra, f.dec, f.expTime(), f.getNcoadds(), f.getItime(), f.getDateTimeObs()) )
-
                 
             id +=1
                          
