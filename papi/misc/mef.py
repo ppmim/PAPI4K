@@ -217,13 +217,13 @@ class MEF (object):
         
         return n_ext, new_files
             
-    def doSplit( self , out_filename_suffix = ".Q%02d.fits", out_dir = None, 
+    def doSplit(self , out_filename_suffix = ".Q%02d.fits", out_dir = None, 
                  copy_keyword = None, instrument='panic'):
         """ 
         Method used to split a MEF into single FITS frames, 
         copying all the header information required.
            
-        **This is the mail method used by PAPI for the parallel reduction**
+        **This is the main method used by PAPI for the parallel reduction**
         
         Splitted images now are as follow: Q01=SG1, Q02=SG2, Q03=SG3, Q04=SG4.
         
@@ -363,26 +363,34 @@ class MEF (object):
                 n_planes = in_hdulist[1].data.shape[0]
                 log.debug("MEF file with %d extensions and %d planes." %(n_ext, n_planes))
             else:
-                n_ext = 1
-                log.error("Found a simple FITS file, not a MEF file")
-                raise MEF_Exception("File %s is not a MEF" % file)
+                n_ext = 0
+                n_planes = in_hdulist[0].data.shape[0]
+                log.debug("Found SEF file with %d planes." %(n_planes))
             
             primaryHeader = in_hdulist[0].header.copy()
             for i_plane in range(0, n_planes):
                 out_hdulist = fits.HDUList()
                 primaryHeader['FRAMENUM'] = i_plane + 1
-                primaryHeader.comments['FRAMENUM'] = 'of %d saved' %n_planes
+                primaryHeader.comments['FRAMENUM'] = 'of %d saved' % n_planes
                 # Create primary HDU (without data, only the common header)
                 prihdu = fits.PrimaryHDU(data=None, header = primaryHeader)
                 out_hdulist.append(prihdu)
-                # Add the other HDU with header+data
-                for i_ext in range(1, n_ext + 1):
-                    log.debug("i_ext=%d" % i_ext)
-                    hdu_i = fits.ImageHDU(header=in_hdulist[i_ext].header, 
-                                          data=in_hdulist[i_ext].data[i_plane,:,:])
+                # MEF
+                if n_ext > 0:
+                    # Add the other HDU with header+data
+                    for i_ext in range(1, n_ext + 1):
+                        log.debug("i_ext = %d" % i_ext)
+                        hdu_i = fits.ImageHDU(header=in_hdulist[i_ext].header, 
+                                              data=in_hdulist[i_ext].data[i_plane,:,:])
+                        out_hdulist.append(hdu_i)
+                else:
+                    # Add the other HDU with header+data
+                    log.debug("Non MEF file found")
+                    hdu_i = fits.ImageHDU(header=in_hdulist[0].header, 
+                                          data=in_hdulist[0].data[i_plane,:,:])
                     out_hdulist.append(hdu_i)
-                    
-                new_filename =  file.replace(".fits", out_filename_suffix % i_plane)
+
+                new_filename = file.replace(".fits", out_filename_suffix % i_plane)
                 if out_dir != None:
                     new_filename = new_filename.replace( 
                                     os.path.abspath(os.path.join(new_filename, os.pardir)), out_dir
@@ -391,7 +399,7 @@ class MEF (object):
                                     output_verify = 'ignore',
                                     overwrite=True)
                 del out_hdulist
-                log.info("MEF file created: %s" % new_filename) 
+                log.info("New file created: %s" % new_filename) 
         
         log.info("End of odSlice")
             

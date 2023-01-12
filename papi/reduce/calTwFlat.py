@@ -443,7 +443,7 @@ class MasterTwilightFlat(object):
                     mdark = fits.open(n_dark)
                     scaled_dark = mdark[0].data
                     
-                log.info("AVG(dark)=%s" % robust.r_nanmean(scaled_dark)) 
+                log.info("AVG(dark) = %s" % robust.r_nanmean(scaled_dark)) 
                 f[0].data = f[0].data - scaled_dark
                 log.info("Dark Subtraction done")
             
@@ -572,8 +572,7 @@ class MasterTwilightFlat(object):
             
             # Cleanup: Remove temporary files
             removefiles(self.__output_filename)
-            print("OUTFILE=", self.__output_filename)
-            
+
             # Compute normalized flat
             iraf.mscred.mscarith(operand1=comb_flat_frame,
                     operand2=median,
