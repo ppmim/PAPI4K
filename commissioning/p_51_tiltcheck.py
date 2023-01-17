@@ -40,12 +40,10 @@
 # 1.1 26/01/2015 BD Update
 #	1) Added shim calculation for all filters
 # 1.2 16/11/2022 JM Update for PANICv2
-#   1) TBD modifications for commissioning of PANICv2
-# 1.3 9/12/2022 JM adds new shims size improvemen
-#   1) To provide the new shim sizes 
+#   2) TBD modifications for commissioning of PANICv2
 
 _name = 'p_51_tiltcheck.py'
-_version = '1.3'
+_version = '1.2'
 #########################################################################
 import numpy as np
 import os
@@ -74,17 +72,19 @@ FPAgap = 0
 FPAscale = 0.49647
 # Scale M2 to FS
 # @ T22   (value checked 03/12/2022)
-M2scale = 7.2 
+M2scale = 7.2
 # @ T35  (value TO BE CONFIRMED before perform any adjustment at T35)
 M2scale_for_t35 = 8.13 
 
 # Current shims values (mm)
+# for T22, set #6
+curr_shim_at_t22 = [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0]
 # for T22, set #3
-curr_shim_at_t22 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
+#curr_shim_at_t22 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
 # for T35 (TBD)
 # curr_shim_at_t35 = [4.624, 5.298, 6.194, 7.072, 7.697, 7.900, 7.629, 6.954, 6.057, 5.180, 4.555, 4.352]
-# Thickness (mm) of new (raw) shims to be used to apply changes.
-new_shim_thickness = 8
+# Thickness of new shims (mm)
+new_shim_thickness = 20
 
 filters = ['Ks', 'H', 'J', 'Y', 'Z', 'H2', 'All']
 filter = filters[ifilter - 1]
@@ -138,7 +138,7 @@ def loadfiledata(filter):
         try:
             datafile = open(os.path.join(inputpath, datafilename), 'r')
         except IOError:
-            pr('WARNING: input file %s not found!' %datafilename)
+            pr('WARNING: input file %s not found!' %os.path.join(inputpath, datafilename))
         else:
             lines = datafile.readlines()
             # read header data: object, best focus
@@ -146,10 +146,11 @@ def loadfiledata(filter):
             obj = tokens[1][:-1]
             tokens = lines[1].split()
             focus[dataindex(r)] = float(tokens[5])
+            #print("read FOCUS=",focus)
             # read table data (x,y,m)
             convfunc = lambda s: s.strip('(),:m=')
             data = np.loadtxt(os.path.join(inputpath, datafilename), ndmin=2, usecols=[4, 5, 7], encoding='UTF-8', converters={4: convfunc, 5: convfunc, 7: convfunc})
-            print(data) 
+            #print(data) 
             # calculate relative flux and weighted pixel positions
             flux = 10**(data[:, 2] / -2.5)
             pxi[dataindex(r)] = (data[:, 0] * flux).sum() / flux.sum()
@@ -248,8 +249,12 @@ if ifilter in range(1, 7):
     shims = np.arange(1, 13)
     shimsx = TAdia / 2 * np.sin(np.radians(15 + (shims - 1) * 30))
     shimsy = -TAdia / 2 * np.cos(np.radians(15 + (shims - 1) * 30))
+    print("SHIMSX=", shimsx)
+    print("SHIMSY=", shimsy)
     # plane positions and normalized to maximum (material to remove)
-    shimsz = np.abs(a * shimsx + b * shimsy + d) / np.sqrt(a**2 + b**2 + c**2)
+    shimsz = a * shimsx + b * shimsy
+    # shimsz = np.abs(a * shimsx + b * shimsy + d) / np.sqrt(a**2 + b**2 + c**2)
+    # print(shimsz)
     dz = shimsz - shimsz.max()
     pr('# Shim nr, Thickness change/mm')
     for i in range(12):

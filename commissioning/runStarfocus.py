@@ -144,12 +144,12 @@ def getBestFocusfromStarfocus(images, coord_file, log_file):
         starfocus.fstep = "" 
         starfocus.nexposures = 1 
         starfocus.coords = "mark1"
-        starfocus.wcs = "world" 
+        starfocus.wcs = "physical" 
         starfocus.size = "MFWHM"
         # Usually the value starfocus.scale = 1 to measure sizes in pixels or if starfocus.scale = 'image pixel scale value' 
         # in arc seconds per pixel
         starfocus.scale = 1
-        starfocus.radius = 5
+        starfocus.radius = 10
         starfocus.sbuffer = 10 
         starfocus.swidth= 10
         starfocus.saturation = satur_level
