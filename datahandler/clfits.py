@@ -351,7 +351,7 @@ class ClFits (object):
                 log.error('Could not open frame - something wrong with input data')
                 raise
 
-    def recognize(self, retries=5):
+    def recognize(self, retries=10):
      
         # Check the file exists
         if not os.path.exists(self.pathname):
@@ -373,8 +373,9 @@ class ClFits (object):
             # Secondly, we check if file is still being saved, ie., still 
             # open by some GEIRS's process
             if check_open(self.pathname, "geirs_save"):
-                # File is still open by 'save' process of GEIRS 
-                raise IOError("Error, file %s still being saved"%self.pathname)
+                # File is still open by 'save' process of GEIRS
+                log.warning("Error reading file %s, still being saved by GEIRS"%self.pathname) 
+                raise IOError("Error, file %s still being saved " % self.pathname)
 
             # We change that behavior of fits warnings with a filter.
             # See http://bit.ly/1etvfJC
@@ -732,13 +733,16 @@ class ClFits (object):
         try:
             # WCS-coordinates are preferred than RA,DEC (both in degrees)
             if ('CTYPE1' in myfits[0].header and
-                     'TAN' in myfits[0].header['CTYPE1'] ): #'RA---TAN' or 'RA---TAN--SIP'
+                     'TAN' in myfits[0].header['CTYPE1']): #'RA---TAN' or 'RA---TAN--SIP'
                 m_wcs = wcs.WCS(myfits[0].header)
                 #self._ra, self._dec = wcs.image2sky( self.naxis1/2, self.naxis2/2, True)
                 # No SIP or Paper IV table lookup distortion correction is applied.
                 # Take as reference the coordinates of the center of the detector
-                self._ra = m_wcs.wcs_pix2world([[self.naxis1/2, self.naxis2/2]], 1)[0][0]
-                #log.debug("Read RA-WCS coordinate =%s", self._ra)
+                if myfits[0].header['NAXIS'] == 2:
+                    self._ra = m_wcs.wcs_pix2world([[self.naxis1 / 2, self.naxis2 / 2]], 1)[0][0]
+                else:
+                    self._ra = m_wcs.wcs_pix2world([[self.naxis1 / 2, self.naxis2 / 2, 1]], 1)[0][0]
+                log.debug("Read RA-WCS coordinate =%s", self._ra)
             elif 'RA' in myfits[0].header:
                 self._ra = myfits[0].header['RA'] # degrees supposed
             elif 'OBJCTRA' in myfits[0].header:
@@ -766,8 +770,11 @@ class ClFits (object):
                 m_wcs = wcs.WCS(myfits[0].header)
                 #self._ra, self._dec = wcs.image2sky( self.naxis1/2, self.naxis2/2, True)
                 # No SIP or Paper IV table lookup distortion correction is applied.
-                self._dec = m_wcs.wcs_pix2world([[self.naxis1/2, self.naxis2/2]], 1)[0][1]
-                # log.debug("Read Dec-WCS coordinate =%s", self._dec)
+                if myfits[0].header['NAXIS'] == 2:
+                    self._dec = m_wcs.wcs_pix2world([[self.naxis1 / 2, self.naxis2 / 2]], 1)[0][1]
+                else:
+                    self._dec = m_wcs.wcs_pix2world([[self.naxis1 / 2, self.naxis2 / 2, 1]], 1)[0][1]
+                log.debug("Read Dec-WCS coordinate =%s", self._dec)
             elif 'DEC' in myfits[0].header:
                 self._dec = myfits[0].header['DEC']
             elif 'OBJCTDEC' in myfits[0].header:

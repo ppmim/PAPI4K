@@ -138,7 +138,7 @@ def loadfiledata(filter):
         try:
             datafile = open(os.path.join(inputpath, datafilename), 'r')
         except IOError:
-            pr('WARNING: input file %s not found!' %datafile)
+            pr('WARNING: input file %s not found!' %datafilename)
         else:
             lines = datafile.readlines()
             # read header data: object, best focus
@@ -249,7 +249,7 @@ if ifilter in range(1, 7):
     shimsx = TAdia / 2 * np.sin(np.radians(15 + (shims - 1) * 30))
     shimsy = -TAdia / 2 * np.cos(np.radians(15 + (shims - 1) * 30))
     # plane positions and normalized to maximum (material to remove)
-    shimsz = a * shimsx + b * shimsy
+    shimsz = np.abs(a * shimsx + b * shimsy + d) / np.sqrt(a**2 + b**2 + c**2)
     dz = shimsz - shimsz.max()
     pr('# Shim nr, Thickness change/mm')
     for i in range(12):
