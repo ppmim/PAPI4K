@@ -37,6 +37,7 @@ import copy
 import fileinput
 import glob
 import datetime as dt
+import time
 
 # PAPI modules
 from papi.datahandler.clfits import ClFits
@@ -93,7 +94,7 @@ class DataCollector (object):
         # Files that gave and error and need to be re-read next time, upto 
         # '_n_retries_' times
         self.pend_to_read = {}
-        self._n_retries_ = 20
+        self._n_retries_ = 50
 
         # Some flags
         self.stop = False
@@ -165,9 +166,11 @@ class DataCollector (object):
                 try:
                     fits = ClFits(file, check_integrity=True)
                 except IOError as e:
+                    # ClFits can raise and IOError exception if geirs_save is still running
                     if file in self.pend_to_read:
                         if self.pend_to_read[file] < self._n_retries_:
                             self.pend_to_read[file] = self.pend_to_read[file] + 1
+                            time.sleep(1)
                         else:
                             # definitely, file is discarted
                             self.bad_files_found.append(file)
@@ -175,6 +178,7 @@ class DataCollector (object):
                             print("[__sortFilesMJD] Definitely file %s , is discarted"%(file))
                     else:
                         self.pend_to_read[file] = 1
+                        time.sleep(0.5)
                 except Exception as e:
                     print("[__sortFilesMJD] Error reading file %s , skipped..." %(file))
                     print(str(e))
