@@ -51,22 +51,28 @@ def startDisplay():
     started
     """
 
-    # First all, check if already is running
-    # stdout_handle = os.popen("/sbin/pidofproc ds9","r")
-    stdout_handle = os.popen("%s/xpaaccess ds9"%xpa_path, "r")
-    if stdout_handle.read() == 'no\n':
-        # print "DS9 not running "
-        # DS9 is not running, so we start it  
-        os.system(("%s/ds9 &" % ds9_path))
-        time.sleep(4)
-        stdout_handle = os.popen("%s/xpaaccess ds9"%xpa_path, "r")
-        if stdout_handle.read() == 'no\n':
-            time.sleep(3)
-        time.sleep(1)
-
-    else:
-        # DS9 is already running...
-        pass
+    try:
+        # First all, check if already is running
+        # stdout_handle = os.popen("/sbin/pidofproc ds9","r")
+        with os.popen("%s/xpaaccess ds9"%xpa_path, "r") as stdout_handle:
+            if stdout_handle.read() == 'no\n':
+                log.debug("DS9 not running, lauching it ...")
+                os.system(("%s/ds9 &" % ds9_path))
+                time.sleep(4)
+                with os.popen("%s/xpaaccess ds9"%xpa_path, "r") as stdout_handle2:
+                    if stdout_handle2.read() == 'no\n':
+                        log.debug("DS9 not running yet, waitting for it ...")
+                        time.sleep(4)
+                    else:
+                        # DS9 is already running...
+                        log.debug("DS9 is already launched !")
+            else:
+                # DS9 is already running...
+                log.debug("DS9 is already running !")
+                pass
+    except Exception as ex:
+        log.error("Cannot start DS9: %s" %str(ex))
+        raise ex
 
 
 ################################################################################
@@ -77,9 +83,13 @@ def showFrame(frame, del_all=False):
     Show in DS9 display the file/s given in the input
     """
   
-    # Check display
-    startDisplay()
-  
+    try:
+        # Check display
+        startDisplay()
+    except Exception as ex:
+        log.error("Cannot start display: %s" %str(ex))
+        raise ex
+            
     global frame_no
     global created_frames
   
@@ -95,7 +105,12 @@ def showFrame(frame, del_all=False):
         return
 
     for file in fileList:
-        f = ClFits(file)
+        try:
+            f = ClFits(file)
+        except Exception as ex:
+            log.error("Cannot open file %s : %s" %(file, str(ex)))
+            continue
+
         if f.mef and f.getNExt() > 1:
                 # Multi-Extension FITS files
                 if f.getInstrument() == 'hawki':
