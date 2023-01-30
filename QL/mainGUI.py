@@ -1724,6 +1724,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
     def slot_classFilter(self):
         """ Filter files on main ListView"""
         
+        log.debug("slot_classFilter: start")
         if self.comboBox_classFilter.currentText() == "GROUP":
             self.listView_dataS.clear()
             sequences = []
