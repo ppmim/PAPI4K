@@ -176,6 +176,73 @@ def cleanBadPixels( input_image, bpm, output_file=None, is_gainmap=False):
     
     return output_file
 
+
+
+def bad_pixel_fix(image,hdr,sizex,sizey,newfilename,s=3):
+    ''' Fixes bad pixels by interpolating from surrounding pixels.
+        Copied from:
+        http://mtham.ucolick.org/egates/2016GradWorkshop/PDFs/DataReduction/DataReductionProcedures-Python-2016.pdf
+        Inputs:
+            image (2d array): image to be fixed
+            hdr (fits header): header of image for getting
+            sizex, sizey (float): dimensions of image to be fixed
+            newfilename (str): new file name
+            s (int): radius of pixels to use in interpolation (default = 3)
+        Returns:
+            flat_div (2d array): pixel corrected image
+    '''
+
+    # Depending on the size of the image, load the correct bad pixel list:
+    #     (Python indicies are (row,column) so the image indicies are (y,x) in python; additionally python begins with
+    #      initial index of 0, while image data begins at 1)
+    if sizex == 1024 and sizey == 1024:
+        badpix = np.loadtxt(open("nirc2.1024.1024.badpix","rb"))
+        badpix = badpix.astype(int)
+    elif sizex == 512 and sizey == 512:
+        badpix = np.loadtxt(open("nirc2.512.512.badpix","rb"))
+        badpix = badpix.astype(int)
+    else:
+        print "I don't have a bad pixel list to match this image size.  I only have 1024x1024 or 512x512.  \
+        Check your image sizes please."
+        quit()
+
+    # Make a boolean mask the same size as the image and set all initial values to False:
+    mask = np.ma.make_mask(image,copy=True,shrink=True, dtype=np.bool)
+    mask[:,:] = False
+    # For each bad pixel in the list, set the value of the mask to true:
+    for i in badpix:
+        mask[i[1]-1][i[0]-1] = True
+    # Set the value of all bad pixels in the image to nan:
+    mdata = np.ma.masked_array(image,mask=mask,fill_value=np.nan)
+    # Make a new array as a copy of original image:
+    badpixelfixed = image.copy()
+    # For each x and y value, loop through image and replace the value of all "nan"
+    # pixels with the mean of the four pixels on either side of the bad one:
+    for i in range(0,mdata.shape[0]):
+        for j in range(0,mdata.shape[1]):
+            if np.math.isnan(mdata[i,j]):
+                x1 = i-s
+                x2 = i+s+1
+                y1 = j-s
+                y2 = j+s+1
+                if x1<0:
+                    x1 = 0
+                if x2>mdata.shape[0]:
+                    x2=mdata.shape[0]
+                if y1<0:
+                    y1 = 0
+                if y2>mdata.shape[1]:
+                    y2 = mdata.shape[1]
+                badpixelfixed[i,j] = np.mean(mdata[x1:x2,y1:y2])
+    # Add a comment to the header:
+    hdr['COMMENT'] = '         Bad pixels fixed on '+time.strftime("%m/%d/%Y")+ ' By Logan A. Pearce'
+    # Write out the bad pixel corrected image to a new fits file:
+    fits.writeto(newfilename,badpixelfixed,hdr,overwrite=True)
+    return badpixelfixed
+    
+    
+
+
 if __name__ == "__main__":
 
     usage = "usage: %prog [options]"
@@ -226,7 +293,7 @@ increased in size until unmasked pixels are found."""
         cleanBadPixels(options.source_filename, 
                        mask, 
                        options.output_filename,
-                       is_gainmap = (options.gainmap > 0))
+                       is_gainmap = False)
     except Exception as e:
         log.error("Error cleaning image. %s " % str(e))
         
