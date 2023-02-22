@@ -37,3 +37,7 @@ python reduce/calDarkModel.py  -s /data2/tmp/dark_model_files_28dic.txt  -o /dat
 
 # To create master TW flats
 python reduce/calTwFlat.py  -s /data2/tmp/tw_flats_H.txt  -D /data1/Calibs2/DarkModel_CNTSR.fits -o /data2/tmp/Master_TW_Flat_H.fits -N
+
+# Apply Dark Flats to Focus series
+
+python reduce/applyDarkFlat.py -s /data2/PANIC/2023-01-31-tilt/Test3/J/files_raw_J.txt -d /data1/Calibs2/DarkModel_CNTSR.fits -f /data1/Calibs2/Master_TW_Flat_J.fits -b /data1/Calibs2/BPM-MPIA/bpm_comp_swap_uint8.fits -a grab -o /data2/PANIC/2023-01-31-tilt/Test3/J
