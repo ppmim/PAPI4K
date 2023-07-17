@@ -510,6 +510,10 @@ def main(arguments=None):
         # Write values into data file for the Tilt analysis.
         writeDataFile(my_best_focus, min_fwhm, avg_x, avg_y, 
                       options.data_file, options.target)
+
+        iraf_data_file = options.data_file.replace(".txt", "_iraf.txt")
+        writeDataFile(best_focus, min_fwhm, avg_x, avg_y, 
+                      iraf_data_file, options.target)
         
     sys.exit(0)
 

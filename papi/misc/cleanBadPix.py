@@ -202,9 +202,9 @@ def bad_pixel_fix(image,hdr,sizex,sizey,newfilename,s=3):
         badpix = np.loadtxt(open("nirc2.512.512.badpix","rb"))
         badpix = badpix.astype(int)
     else:
-        print "I don't have a bad pixel list to match this image size.  I only have 1024x1024 or 512x512.  \
-        Check your image sizes please."
-        quit()
+        print("I don't have a bad pixel list to match this image size.  I only have 1024x1024 or 512x512.  \
+        Check your image sizes please.")
+        return None
 
     # Make a boolean mask the same size as the image and set all initial values to False:
     mask = np.ma.make_mask(image,copy=True,shrink=True, dtype=np.bool)

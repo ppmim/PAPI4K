@@ -277,7 +277,8 @@ class MEF (object):
                         extname = 'SG%i_1' %iSG
                 else:
                     # We suppose a HAWKI MEF file
-                    extname = 'CHIP%i.INT1' %iSG 
+                    extname = 'CHIP%i.INT1' %iSG
+
                 suffix = out_filename_suffix % iSG # number from 1 to 4
                 new_filename = file.replace(".fits", suffix)
                 if out_dir is not None:
@@ -337,7 +338,7 @@ class MEF (object):
                     
     def doSlice(self, out_filename_suffix = ".P%03d.fits", out_dir = None,):
         """
-        Method used to slice a MEF cube into individual MEFs, i.e., a 
+        Method used to slice a MEF or SEF cube into individual MEFs, i.e., a 
         a MEF with only one 2 dimensions.
         """
         
@@ -372,11 +373,12 @@ class MEF (object):
                 out_hdulist = fits.HDUList()
                 primaryHeader['FRAMENUM'] = i_plane + 1
                 primaryHeader.comments['FRAMENUM'] = 'of %d saved' % n_planes
-                # Create primary HDU (without data, only the common header)
-                prihdu = fits.PrimaryHDU(data=None, header = primaryHeader)
-                out_hdulist.append(prihdu)
+                
                 # MEF
                 if n_ext > 0:
+                    # Create primary HDU (without data, only the common header)
+                    prihdu = fits.PrimaryHDU(data=None, header = primaryHeader)
+                    out_hdulist.append(prihdu)
                     # Add the other HDU with header+data
                     for i_ext in range(1, n_ext + 1):
                         log.debug("i_ext = %d" % i_ext)
@@ -384,9 +386,9 @@ class MEF (object):
                                               data=in_hdulist[i_ext].data[i_plane,:,:])
                         out_hdulist.append(hdu_i)
                 else:
-                    # Add the other HDU with header+data
                     log.debug("Non MEF file found")
-                    hdu_i = fits.ImageHDU(header=in_hdulist[0].header, 
+                    # Create primary HDU (with data and the common header)    
+                    hdu_i = fits.PrimaryHDU(header=primaryHeader, 
                                           data=in_hdulist[0].data[i_plane,:,:])
                     out_hdulist.append(hdu_i)
 
