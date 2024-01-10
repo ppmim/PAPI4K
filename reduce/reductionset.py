@@ -1148,7 +1148,8 @@ class ReductionSet(object):
             if stype != 'all':
                 seqs, seq_types = self.getOTSequences(show, stype)
             else:
-                if self.db is None: print("PASOOOO-001")
+                if self.db is None: 
+                    print("PASOOOO-001")
                 seqs, seq_types = self.getOTSequences(show)
         elif self.group_by == 'filter':
             if self.db is None:
@@ -2673,6 +2674,14 @@ class ReductionSet(object):
                 # Look for the required MasterDark (any ExpTime);first in the 
                 # local DB (current RS), and if anyone found, then in the 
                 # external DB. 
+                # First, we neeed to Init the DB (ext_db is always initialited whether db!=None)
+                try:  
+                    if self.db is None:
+                        self.__initDB()
+                except Exception as e:
+                    print(str(e))
+                    raise e
+
                 # Local (Initially, EXPTIME is not a constraint for MASTER_DARK_MODEL);
                 master_dark_model = self.db.GetFilesT('MASTER_DARK_MODEL') 
                 
@@ -2689,7 +2698,8 @@ class ReductionSet(object):
                     # Look for historic/old created MASTER_DARKs (set in config file) 
                     if self.ext_db != None:
                         master_darks += self.ext_db.GetFilesT('MASTER_DARK', -1)
-                    if self.master_dark !=None: master_darks += [self.master_dark]
+                    if self.master_dark !=None and self.master_dark!="None": 
+                        master_darks += [self.master_dark]
                 else:
                     # could there be > 1 master darks, then use the last (mjd sorted)
                     master_dark_model = master_dark_model[-1]

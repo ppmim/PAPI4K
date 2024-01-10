@@ -220,16 +220,18 @@ class MasterTwilightFlat(object):
     
         # STEP 0: Convert (if required) all files to MEF
         # Darks
-        try:
-            mef = MEF(self.__master_dark_list)
-            self.__master_dark_list = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
-        except Exception as e:
-            log.error("Error converting Darks to MEF file: %s", str(e))
-            raise e
+        i_file = ClFits(self.__master_dark_list[0])
+        if not i_file._is_panic_h4rg:
+            try:
+                mef = MEF(self.__master_dark_list)
+                self.__master_dark_list = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
+            except Exception as e:
+                log.error("Error converting Darks to MEF file: %s", str(e))
+                raise e
         
         # Flats
         i_file = ClFits(framelist[0])
-        if i_file.mef:
+        if not i_file._is_panic_h4rg:
             try:
                 mef = MEF(framelist)
                 framelist = mef.convertGEIRSToMEF(out_dir=self.__temp_dir)[1]
