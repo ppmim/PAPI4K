@@ -370,12 +370,12 @@ class MEF (object):
             
             primaryHeader = in_hdulist[0].header.copy()
             for i_plane in range(0, n_planes):
-                out_hdulist = fits.HDUList()
                 primaryHeader['FRAMENUM'] = i_plane + 1
-                primaryHeader.comments['FRAMENUM'] = 'of %d saved' % n_planes
+                primaryHeader.comments['FRAMENUM'] = 'of %d saved' % n_planes        
                 
                 # MEF
                 if n_ext > 0:
+                    out_hdulist = fits.HDUList()
                     # Create primary HDU (without data, only the common header)
                     prihdu = fits.PrimaryHDU(data=None, header = primaryHeader)
                     out_hdulist.append(prihdu)
@@ -385,22 +385,27 @@ class MEF (object):
                         hdu_i = fits.ImageHDU(header=in_hdulist[i_ext].header, 
                                               data=in_hdulist[i_ext].data[i_plane,:,:])
                         out_hdulist.append(hdu_i)
+
                 else:
                     log.debug("Non MEF file found")
                     # Create primary HDU (with data and the common header)    
-                    hdu_i = fits.PrimaryHDU(header=primaryHeader, 
-                                          data=in_hdulist[0].data[i_plane,:,:])
-                    out_hdulist.append(hdu_i)
+                    out_hdulist = fits.PrimaryHDU(header=primaryHeader, 
+                                          data=in_hdulist[0].data[i_plane,:,:], 
+                                          scale_back=False)
+                    # out_hdulist.scale(type='int32', bzero=0, bscale=1.0)
+                    # out_hdulist.append(hdu_i)
 
                 new_filename = file.replace(".fits", out_filename_suffix % i_plane)
+                
                 if out_dir != None:
                     new_filename = new_filename.replace( 
                                     os.path.abspath(os.path.join(new_filename, os.pardir)), out_dir
                                     )
+                
                 out_hdulist.writeto(new_filename, 
                                     output_verify = 'ignore',
                                     overwrite=True)
-                del out_hdulist
+                del out_hdulist                
                 log.info("New file created: %s" % new_filename) 
         
         log.info("End of odSlice")

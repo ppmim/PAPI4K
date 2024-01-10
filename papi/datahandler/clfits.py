@@ -563,9 +563,9 @@ class ClFits (object):
                 if ('CAMERA' in myfits[0].header and
                     'H4RG' in myfits[0].header['CAMERA']):
                     self._is_panic_h4rg = True
-                    log.info("Found H4RG detector")
                 else:
-                    log.info("NOT a H4RG !!!! ")
+                    # log.debug("NOT a H4RG !!!! ")
+                    self._is_panic_h4rg = False
             except KeyError:
                 log.warning("CAMERA keyword not found")
 
