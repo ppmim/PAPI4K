@@ -198,6 +198,22 @@ def writeDataFile(best_focus, min_fwhm, avg_x, avg_y,
         print('Error, no data file given')
 
 
+def find_last_occurrence_and_get_lines(file_path, search_string):
+    last_occurrence_line = None
+    lines_below_occurrence = []
+
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    for line_num, line in enumerate(reversed(lines), start=1):
+        if search_string in line:
+            last_occurrence_line = len(lines) - line_num + 1
+            lines_below_occurrence = lines[last_occurrence_line:]
+            break
+
+    return last_occurrence_line, lines_below_occurrence
+
+
 def readStarfocusLog(log_file):
     """
     Read the results from the iraf.starfocus log file and compute
@@ -206,22 +222,25 @@ def readStarfocusLog(log_file):
     """
     
     # Read the last lines 
-    with open(log_file, "r") as f:
-        f.seek(0, 2)                    # Seek @ EOF
-        fsize = f.tell()                # Get Size
-        f.seek(max(fsize-2**15, 0), 0)  # Set pos @ last chars
-        lines = f.readlines()           # Read to end
+    # with open(log_file, "r") as f:
+    #     f.seek(0, 2)                    # Seek @ EOF
+    #     fsize = f.tell()                # Get Size
+    #     f.seek(max(fsize-2**15, 0), 0)  # Set pos @ last chars
+    #     lines = f.readlines()           # Read to end
     
-    lines.reverse()
-    my_lines = []
+    # lines.reverse()
+    # my_lines = []
     
-    # Look for the last execution (It must start with
-    # 'NOAO/IRAF') 
-    while not lines[0].strip().startswith('NOAO/IRAF'):
-        my_lines.append(lines[0])
-        lines.pop(0)
+    # # Look for the last execution (It must start with
+    # # 'NOAO/IRAF') 
+    # while not lines[0].strip().startswith('NOAO/IRAF'):
+    #     my_lines.append(lines[0])
+    #     lines.pop(0)
 
-    my_lines.reverse()
+    # my_lines.reverse()
+
+    last_occ, my_lines = find_last_occurrence_and_get_lines(log_file, 'NOAO/IRAF')
+
     data = []
     # start to read the right columns
     for line in my_lines:
