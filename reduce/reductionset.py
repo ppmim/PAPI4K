@@ -478,6 +478,9 @@ class ReductionSet(object):
         
         # self.db.ListDataSet()
         
+        # OUTPUT products also added to local DB
+        # TODO
+        
         # External DataBase (in memory)
         if len(self.ext_db_files) > 0:
             log.info("Initializing External DataBase")
@@ -2391,8 +2394,15 @@ class ReductionSet(object):
             if k in seqs_to_reduce and ('all' in types_to_reduce or type in types_to_reduce):
                 log.debug("A Sequence is going to be reduced ... ")
                 try:
-                    files_created += self.reduceSeq(seq, type)
-                    reduced_sequences+=1
+                    new_files_created = self.reduceSeq(seq, type)
+                    files_created += new_files_created
+                    reduced_sequences += 1
+                    # insert products (calibrations mainly) into DB
+                    #for f in new_files_created:
+                    #    #if not f.isScience():
+                    #    log.debug("Inserting NEW created file %s into DB" % str(f))
+                    #    self.db.insert(f)
+
                 except Exception as e:
                     # If an error happen while proecessing a sequence, we 
                     # do NOT STOP, but continue with the next ones. 

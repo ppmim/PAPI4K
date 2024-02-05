@@ -31,10 +31,13 @@ import argparse
 import numpy
 import astropy.io.fits as fits
 
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 from papi.datahandler.clfits import ClFits
+# To be able to run in any common python environment without Qt
+matplotlib.use('TkAgg')
 
 
 def draw_offsets_H2RG(offsets, pix_scale = 0.45, scale_factor=1.0):
@@ -127,7 +130,7 @@ def draw_offsets_H4RG(offsets, pix_scale = 0.375, scale_factor=1.0):
         ax2.annotate('%s'%step, xy=(x,y), xytext=(x,y), size=8)
         step +=1
         
-    plt.show(block=True)
+    #plt.show(block=True)
     fig2.savefig('offsets.png', dpi=360, bbox_inches='tight')
 
 def getWCSPointingOffsets(images_in,
@@ -222,7 +225,13 @@ def getWCSPointingOffsets(images_in,
                 # Assummed that North is up and East is left
                 # To give the results in arcsec, set pix_scale=1.0
                 pix_scale = 1
-                #offsets[i][0] = ((ra - ra0)*3600) / float(pix_scale)
+                # In order to recover the original offsets given into the Observing Tool (OT),
+                # refered as offset at DEC=0 (equator), we need to take into account the cos(DEC)
+                # and undo the DEC correction.
+                diff_ra =  ra - ra0
+                if diff_ra < 0: diff_ra = diff_ra + 360
+                elif diff_ra > 360: diff_ra = diff_ra - 36  
+
                 offsets[i][0] = ((ra - ra0)*3600 * math.cos(dec/57.29578)) / float(pix_scale)
                 offsets[i][1] = ((dec0 - dec)*3600) / float(pix_scale)
                 
@@ -302,7 +311,7 @@ if __name__ == "__main__":
         sys.exit(0)
     
     # Try to get PIX_SCALE
-    with fits.open(files[0]) as hdu:
+    with fits.open(files[0], mode="readonly") as hdu:
         if 'PIXSCALE' in hdu[0].header:
             pix_scale = hdu[0].header['PIXSCALE']
         else:

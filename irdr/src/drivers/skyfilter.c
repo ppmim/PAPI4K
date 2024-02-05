@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     /* Read the initial sliding window */
     for (i = 0; i < (2 * hwid + 1); i++)  {
 	    printf("Nplanes: %d  i: %d \n", nplanes, i);
-	    if (i<nplanes) readdata(i, usemask);
+	    if (i < nplanes) readdata(i, usemask);
 	}
 
 
@@ -112,12 +112,12 @@ int main(int argc, char *argv[])
         int j, nsky = 0, skyend = skybeg + 2 * hwid;
         float avgscale = 0.0;
 
-	    if (skyend>=nplanes) skyend=nplanes-1;
+	    if (skyend >= nplanes) skyend=nplanes-1;
 	    printf("Image: %d   Sky: ", i);
 
         for (j = skybeg; j <= skyend; j++) {  /* collect adjacent frame ptrs */
             if (j != i) {                             /* skip current frame */
-		printf (" %d", j);
+		        printf (" %d", j);
                 dbuf[nsky] = data[j];
 
                 if (usemask)
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
                 nsky++;
             }
         }
-	printf (" \n");
+	    printf (" \n");
 
         if (nsky==0) {
             eprintf("[skyfilter] Error: not enought number of sky frames");
