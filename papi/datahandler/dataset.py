@@ -119,7 +119,7 @@ class DataSet(object):
         #    -Load and check the FITS file
         #    -Insert into 'dataset' table a new row with data from FITS file
         for file in contents:
-            log.debug("Reading file: %s" % file)
+            # log.debug("Reading file: %s" % file)
             try:
                 self.insert(file)
             except Exception as e:
@@ -185,7 +185,7 @@ class DataSet(object):
     
             self.id += 1
 
-            log.debug("File %s inserted correctly in DB:" % filename)
+            # log.debug("File %s inserted correctly in DB:" % filename)
             return True
             
         else:
