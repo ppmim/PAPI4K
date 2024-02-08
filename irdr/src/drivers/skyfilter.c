@@ -200,9 +200,12 @@ int main(int argc, char *argv[])
             skybeg++;
         }
     }
+
     /* finally, free memory of the last sliding window */
     for(i=0; i < hwid*2+1; i++)
         freedata(nplanes-i-1, usemask);
+
+    free(gainmap);
 
     return 0;
 }
@@ -241,6 +244,7 @@ static void readdata(int i, int usemask)
 /* freedata: free data for image plane i */
 static void freedata(int i, int usemask)
 {
+    if (i<0) return;
     printf("\n[FREEDATA----] Freeing file ---> %d <--- \n", i);
 
     free(data[i]);  data[i] = NULL;
