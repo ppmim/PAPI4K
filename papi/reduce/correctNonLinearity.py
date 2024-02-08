@@ -32,7 +32,7 @@
 #
 
 _name = 'correctNonLinearity.py'
-_version = '1.1'
+_version = '1.2'
 ################################################################################
 # Import necessary modules
 import numpy as np
