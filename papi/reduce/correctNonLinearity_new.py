@@ -183,9 +183,8 @@ class NonLinearityCorrection(object):
                 raise ValueError('Mismatch in header data for keyword \'%s\'' %key)
         keys = ['B_EXT', 'B_DSUB', 'B_VREST', 'B_VBIAG']
         for key in keys:
-            for i in range(1, 5):
-                if dataHeader[key + '%i' % i] != modelHeader[key + '%i' % i]:
-                    raise ValueError('Mismatch in header data for keyword \'%s%i\'' %(key, i))
+            if dataHeader[key + '1'] != modelHeader[key + '1']:
+                    raise ValueError('Mismatch in header data for keyword \'%s1\'' %(key))
 
     def applyModel(self, data_file):
         """
@@ -235,14 +234,18 @@ class NonLinearityCorrection(object):
 
         # ---
         # another way would be to loop until the correct one is found
-        datadetsec = hdulist[0].header['DETSEC']
-        nldetsec = nlhdulist['LINMAX'].header['DETSEC']
+        datadetsec = hdulist[0].header['DETSEC'].replace(" ", "")
+        # nldetsec = nlhdulist['LINMAX'].header['DETSEC']
+        nldetsec = nlhdulist[0].header['DETSEC'].replace(" ", "")
         if datadetsec != nldetsec:
+            log.warning("Mismatch of detector sections")
             raise ValueError('Mismatch of detector sections')
-        datadetid = hdulist[0].header['DET_ID']
-        nldetid = nlhdulist['LINMAX'].header['DET_ID']
+
+        datadetid = hdulist[0].header['CHIPID'].replace(" ", "")
+        # nldetid = nlhdulist['LINMAX'].header['CHIPID']
+        nldetid = nlhdulist[0].header['CHIPID'].replace(" ", "")
         if datadetid != nldetid:
-            raise ValueError('Mismatch of detector IDs')
+             raise ValueError('Mismatch of detector IDs')
 
         # Work around to correct data when NCOADDS > 1
         if hdulist[0].header['NCOADDS'] > 1:
