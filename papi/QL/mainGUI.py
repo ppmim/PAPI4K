@@ -1229,7 +1229,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         # NLC                
         # master_nlc = self.outputsDB.GetFilesT('MASTER_NLC')
         #if self.config_opts['nonlinearity']['apply']!=False:
-        master_nlc  = self.config_opts['nonlinearity']['model_lir']
+        master_nlc  = self.config_opts['nonlinearity']['model_cntsr']
             
         """
         log.debug("Master Darks found %s", master_dark)
@@ -3672,11 +3672,31 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
 
         if len(self.m_popup_l_sel) > 0:
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+
             try:
                 if self.m_masterNLC:
                     master_nlc =  self.m_masterNLC
                 else:
-                    master_nlc =  self.config_opts['nonlinearity']['model_lir']
+                    # master_nlc =  self.config_opts['nonlinearity']['model_cntsr']
+                    # Find out the readmode
+                    try:
+                        myhdulist = fits.open(self.m_popup_l_sel[-1])
+                        if myhdulist[0].header['READMODE'] == 'continuous.sampling.read':
+                            master_nlc = self.config_opts['nonlinearity']['model_cntsr']
+                        elif myhdulist[0].header['READMODE'] == 'line.interlaced.read':
+                            master_nlc = self.config_opts['nonlinearity']['model_lir']
+                        elif myhdulist[0].header['READMODE'] == 'fast-reset-read.read':
+                            master_nlc = self.config_opts['nonlinearity']['model_rrrmpia']
+                        else:
+                            log.warning("Non-Linearity model does not match. Correction de-activated.")
+                            master_nlc = None
+                    except Exception:
+                        msg = "Error while reading READMODE keyword on file %s" % self.m_popup_l_sel[-1]
+                        log.error(msg)
+                        raise Exception(msg)
+                    finally:
+                        myhdulist.close()
+
                 if os.path.isfile(master_nlc):
                     try:
                         log.info("**** Applying Non-Linearity correction ****")

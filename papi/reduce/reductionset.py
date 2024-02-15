@@ -317,7 +317,9 @@ class ReductionSet(object):
         if self.non_linearity_apply:
             try:
                 myhdulist = fits.open(rs_filelist[-1])
-                if myhdulist[0].header['READMODE'] == 'line.interlaced.read':
+                if myhdulist[0].header['READMODE'] == 'continuous.sampling.read':
+                    self.non_linearity_model = self.config_dict['nonlinearity']['model_cntsr']
+                elif myhdulist[0].header['READMODE'] == 'line.interlaced.read':
                     self.non_linearity_model = self.config_dict['nonlinearity']['model_lir']
                 elif myhdulist[0].header['READMODE'] == 'fast-reset-read.read':
                     self.non_linearity_model = self.config_dict['nonlinearity']['model_rrrmpia']
@@ -329,6 +331,8 @@ class ReductionSet(object):
                 msg = "Error while reading READMODE keyword on file %s" % rs_filelist[-1]
                 log.error(msg)
                 raise Exception(msg)
+            finally:
+                myhdulist.close()
             
         #
         # Reduction mode (lemon=for LEMON pipeline, quick=for QL, science=for 
@@ -480,7 +484,7 @@ class ReductionSet(object):
         
         # OUTPUT products also added to local DB
         # TODO
-        
+
         # External DataBase (in memory)
         if len(self.ext_db_files) > 0:
             log.info("Initializing External DataBase")
