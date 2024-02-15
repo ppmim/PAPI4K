@@ -281,17 +281,17 @@ class NonLinearityCorrection(object):
         # Undo the coadd_correction
         lindata = lindata * n_coadd
         
-        new_hdu = fits.ImageHDU(lindata.astype('float32'), header=hdulist[0].header.copy())
+        ## new_hdu = fits.ImageHDU(lindata.astype('float32'), header=hdulist[0].header.copy())
         # this may rearrange the MEF extensions, otherwise loop over extensions
-        hdus.append(new_hdu)
-
+        ## hdus.append(new_hdu)
+        linhdu.data = lindata.astype('float32')
         # --
         # add some info in the header
         linhdu.header['HISTORY'] = 'Nonlinearity correction applied'
         linhdu.header['HISTORY'] = 'Nonlinearity data: %s' %nlheader['ID']
         linhdu.header['HISTORY'] = '<-- The PANIC team made this on 2024/02/29'
         linhdu.header.set('PAPIVERS', __version__,'PANIC Pipeline version')
-        linhdulist = fits.HDUList([linhdu] + hdus)
+        linhdulist = fits.HDUList([linhdu])
         
         # Compose output filename
         mfnp = os.path.basename(data_file).partition('.fits')
@@ -300,7 +300,7 @@ class NonLinearityCorrection(object):
         outfitsname = os.path.normpath(outfitsname)
 
         # overwrite the output file if exists
-        linhdulist.writeto(outfitsname, clobber=True)
+        linhdulist.writeto(outfitsname, overwrite=True)
         
         if to_delete:
             os.unlink(to_delete)
