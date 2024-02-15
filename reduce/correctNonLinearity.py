@@ -29,7 +29,7 @@
 #
 # 1.1 18/07/2014 JMIM Adaption to PAPI (correctNonLinearity.py)
 # 
-#
+# 1.2 08/02/2024 JMIM Update to new PANIC detector H4RG
 
 _name = 'correctNonLinearity.py'
 _version = '1.2'
@@ -74,8 +74,8 @@ class NonLinearityCorrection(object):
             FITS filename of the Non-Linearity model, ie., containing polynomial 
             coeffs (4th order) for correction that must has been previously 
             computed. It must be a cube with 4 planes (a plane for each coeff c4
-            to c1, c0 is not used in the correction and not stored in the cube), 
-            and N extensions (one per detector). Planes definitions:
+            to c1; c0 (intercept) is not used in the correction and not stored in the cube), 
+            and one single extension for the full detector. Planes definitions:
 
                 plane_0 = coeff_4 
                 plane_1 = coeff_3 
@@ -83,7 +83,7 @@ class NonLinearityCorrection(object):
                 plane_3 = coeff_1 
         
         input_files: list 
-            A list of FITS files to be corrected (MEF or single FITS).
+            A list of FITS files to be corrected (non MEF FITS).
 
         out_dir: str
             Directory where new corredted files will be saved
@@ -147,8 +147,12 @@ class NonLinearityCorrection(object):
         """
 
         # First, checks model is a MASTER_LINEARITY
-        if modelHeader['PAPITYPE'] != 'MASTER_LINEARITY':
-            raise ValueError('Wrong type of nonlinearity correction file')
+        try:
+            if modelHeader['PAPITYPE'] != 'MASTER_LINEARITY':
+                log.warning('PAPITYPE not found in header')
+                # raise ValueError('Wrong type of nonlinearity correction file')
+        except Exception as ex:
+            log.warning('Cannot read PAPITYPE in header')
 
         # Check input files are non-integrated files (NCOADDS)
         # It is done on applyModel, where can be skipped.
@@ -160,13 +164,15 @@ class NonLinearityCorrection(object):
         datadate = dateutil.parser.parse(dataHeader['DATE-OBS'])
         nldate = dateutil.parser.parse(modelHeader['USE_AFT'])
         if datadate < nldate:
-            raise ValueError('Nonlinearity calibration too new for input data')           
+            log.warning('Nonlinearity calibration too new for input data')
+            # raise ValueError('Nonlinearity calibration too new for input data')           
         
         # Check some other keys related with READOUT configuration 
         keys = ['INSTRUME', 'PREAD', 'PSKIP', 'LSKIP', 'READMODE', 'IDLEMODE', 'IDLETYPE']
         for key in keys:
             if str(dataHeader[key]).lower() != str(modelHeader[key]).lower():
-                raise ValueError('Mismatch in header data for keyword \'%s\'' %key)            
+                log.warning('Mismatch in header data for keyword \'%s\'' %key)
+                #raise ValueError('Mismatch in header data for keyword \'%s\'' %key)            
         
         # some may not be present in old data
         keys = ['DETROT90', 'DETXYFLI']
@@ -177,9 +183,8 @@ class NonLinearityCorrection(object):
                 raise ValueError('Mismatch in header data for keyword \'%s\'' %key)
         keys = ['B_EXT', 'B_DSUB', 'B_VREST', 'B_VBIAG']
         for key in keys:
-            for i in range(1, 5):
-                if dataHeader[key + '%i' % i] != modelHeader[key + '%i' % i]:
-                    raise ValueError('Mismatch in header data for keyword \'%s%i\'' %(key, i))
+            if dataHeader[key + '1'] != modelHeader[key + '1']:
+                    raise ValueError('Mismatch in header data for keyword \'%s1\'' %(key))
 
     def applyModel(self, data_file):
         """
@@ -202,26 +207,13 @@ class NonLinearityCorrection(object):
         hdulist = fits.open(data_file)
         dataheader = hdulist[0].header
         
-        # Check if input files are in MEF format or saved as a full-frame with 
-        # the 4 detectors 'stitched'.
+        # Check if input files are in SEF format
         to_delete = None
-        if len(hdulist) == 1:
-            # we need to convert to MEF
-            log.warning("Mismatch in header data format. Converting to MEF file.")
+        if len(hdulist) > 1:
+            # we do not allow MEF
+            log.warning("Mismatch in header data format. MEF file not supported")
             hdulist.close()
-            
-            # Convert single-FITS to MEF
-            mef = MEF([data_file])
-            mef_suffix = ".mef.fits"
-            n_ext, new_mef_files = mef.convertGEIRSToMEF(mef_suffix, self.out_dir)
-            if n_ext !=4:
-                raise ValueError('Mismatch in header data format. Only MEF files allowed.')
-            
-            # load new MEF raw data file
-            hdulist = fits.open(new_mef_files[0])
-            dataheader = hdulist[0].header
-            # copy the filename to be deleted after processing (?)
-            to_delete = new_mef_files[0]
+            raise ValueError('Mismatch in header data format. Only MEF files allowed.')
 
         # load model
         nlhdulist = fits.open(self.model)
@@ -240,77 +232,64 @@ class NonLinearityCorrection(object):
         linhdu.header = dataheader.copy()
         hdus = []
 
-        # Check which version of MEF we have.
-        # Since GEIRS-r731M-18 version, new MEF extension naming:
-        #    EXTNAME = 'Qi'
-        #    DET_ID =  'SGi'
-        # and the order in the MEF file shall be Q1, Q2, Q3, Q4
-        try:
-            hdulist['Q1'].header
-            ext_name = 'Q%i'
-            ext_order = (1, 2, 3, 4)
-        except KeyError:
-            ext_name = 'SG%i_1'
-            ext_order = (4, 1, 3, 2)
-            
-        # loop over detectors
-        # To avoid the re-arrange of the MEF extensions
-        for iSG in ext_order:
-            extname = ext_name % iSG
-            # check detector sections
-            # another way would be to loop until the correct one is found
-            datadetsec = hdulist[extname].header['DETSEC']
-            nldetsec = nlhdulist['LINMAX%i' %iSG].header['DETSEC']
-            if datadetsec != nldetsec:
-                raise ValueError('Mismatch of detector sections for SG%i' %iSG)
-            # or check SG IDs (as long as they are reliable)
-            datadetid = hdulist[extname].header['DET_ID']
-            nldetid = nlhdulist['LINMAX%i' %iSG].header['DET_ID']
-            if datadetid != nldetid:
-                raise ValueError('Mismatch of detector IDs for extension' % extname)
+        # ---
+        # another way would be to loop until the correct one is found
+        datadetsec = hdulist[0].header['DETSEC'].replace(" ", "")
+        # nldetsec = nlhdulist['LINMAX'].header['DETSEC']
+        nldetsec = nlhdulist[0].header['DETSEC'].replace(" ", "")
+        if datadetsec != nldetsec:
+            log.warning("Mismatch of detector sections")
+            raise ValueError('Mismatch of detector sections')
 
-            # Work around to correct data when NCOADDS>1
-            if hdulist[0].header['NCOADDS'] > 1:
-                if self.coadd_correction:
-                    log.info("NCOADDS>1; Doing ncoadd correction...")
-                    n_coadd = hdulist[0].header['NCOADDS']
-                else:
-                    log.info("Found a wrong type of source file. Use -c to user ncoadd correction")
-                    raise ValueError('Cannot apply model, found NCOADDS > 1.')
+        datadetid = hdulist[0].header['CHIPID'].replace(" ", "")
+        # nldetid = nlhdulist['LINMAX'].header['CHIPID']
+        nldetid = nlhdulist[0].header['CHIPID'].replace(" ", "")
+        if datadetid != nldetid:
+             raise ValueError('Mismatch of detector IDs')
+
+        # Work around to correct data when NCOADDS > 1
+        if hdulist[0].header['NCOADDS'] > 1:
+            if self.coadd_correction:
+                log.info("NCOADDS > 1; Doing ncoadd correction...")
+                n_coadd = hdulist[0].header['NCOADDS']
             else:
-                n_coadd = 1
-                
-            # load file data (and fix coadded images => coadd_correction)
-            data = hdulist[extname].data / n_coadd
-            nlmaxs = nlhdulist['LINMAX%i' %iSG].data
-            nlpolys = np.rollaxis(nlhdulist['LINPOLY%i' %iSG].data, 0, 3)
-
-            # calculate linear corrected data
-            lindata = self.polyval_map(nlpolys, data)
+                log.info("Found a wrong type of source file. Use -c to user ncoadd correction")
+                raise ValueError('Cannot apply model, found NCOADDS > 1.')
+        else:
+            n_coadd = 1
             
-            # mask saturated inputs - to use nan it has to be a float array
-            lindata[data > nlmaxs] = np.nan
-            # mask where max range is nan
-            # (first, take into account the option of cubes as input images) 
-            if len(lindata.shape) == 3 : 
-                # we have a 3D image (cube)
-                for i in range(lindata.shape[0]):
-                    lindata[i, np.isnan(nlmaxs)] = np.nan
-            else:
-                # we have a single 2D image
-                lindata[np.isnan(nlmaxs)] = np.nan
+        # load file data (and fix coadded images => coadd_correction)
+        data = hdulist[0].data / n_coadd
+        nlmaxs = nlhdulist['LINMAX'].data
+        nlpolys = np.rollaxis(nlhdulist['LINPOLY'].data, 0, 3)
 
-            # Undo the coadd_correction
-            lindata = lindata * n_coadd
-            
-            exthdu = fits.ImageHDU(lindata.astype('float32'), header=hdulist[extname].header.copy())
-            # this may rearrange the MEF extensions, otherwise loop over extensions
-            hdus.append(exthdu)
+        # calculate linear corrected data
+        lindata = self.polyval_map(nlpolys, data)
+        
+        # mask saturated inputs - to use nan it has to be a float array
+        lindata[data > nlmaxs] = np.nan
+        # mask where max range is nan
+        # (first, take into account the option of cubes as input images) 
+        if len(lindata.shape) == 3: 
+            # we have a 3D image (cube)
+            for i in range(lindata.shape[0]):
+                lindata[i, np.isnan(nlmaxs)] = np.nan
+        else:
+            # we have a single 2D image
+            lindata[np.isnan(nlmaxs)] = np.nan
 
+        # Undo the coadd_correction
+        lindata = lindata * n_coadd
+        
+        new_hdu = fits.ImageHDU(lindata.astype('float32'), header=hdulist[0].header.copy())
+        # this may rearrange the MEF extensions, otherwise loop over extensions
+        hdus.append(new_hdu)
+
+        # --
         # add some info in the header
         linhdu.header['HISTORY'] = 'Nonlinearity correction applied'
         linhdu.header['HISTORY'] = 'Nonlinearity data: %s' %nlheader['ID']
-        linhdu.header['HISTORY'] = '<-- The German team made this on 2014/07/13'
+        linhdu.header['HISTORY'] = '<-- The PANIC team made this on 2024/02/29'
         linhdu.header.set('PAPIVERS', __version__,'PANIC Pipeline version')
         linhdulist = fits.HDUList([linhdu] + hdus)
         
@@ -413,14 +392,14 @@ class NonLinearityCorrection(object):
 def main(arguments=None):
 
     desc = """Performs the non-linearity correction of the PANIC raw data files
-using the proper NL-Model (FITS file). Raw data files must be MEF files; if 
-MEF-cubes, each plane is corrected individually.
+using the proper NL-Model (FITS file). Raw data files must be SEF files; if 
+SEF-cubes, each plane is corrected individually.
 """
     parser = argparse.ArgumentParser(description=desc)
     # Basic inputs
     parser.add_argument("-m", "--model",
                   action="store", dest="model",
-                  help="FITS MEF-cube file of polinomial coeffs (c4, c3, c2, c1) of the NL model.")
+                  help="FITS SEF (can be a cube) file of polinomial coeffs (c4, c3, c2, c1) of the NL model.")
 
     parser.add_argument("-i", "--input_file",
                   action="store", dest="input_file",
