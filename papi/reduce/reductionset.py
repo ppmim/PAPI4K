@@ -457,7 +457,7 @@ class ReductionSet(object):
         """
         
         # Local DataBase (in memory)
-        log.info("Initializing Local DataBase: %s " % self.rs_filelist)
+        log.info("Initializing Local DataBase") # %s " % self.rs_filelist)
         instrument = self.config_dict['general']['instrument'].lower()
         try:
             self.db = DataSet(self.rs_filelist, instrument)
@@ -1155,8 +1155,8 @@ class ReductionSet(object):
             if stype != 'all':
                 seqs, seq_types = self.getOTSequences(show, stype)
             else:
-                if self.db is None: 
-                    print("PASOOOO-001")
+                # if self.db is None: 
+                #    pass
                 seqs, seq_types = self.getOTSequences(show)
         elif self.group_by == 'filter':
             if self.db is None:
@@ -1196,20 +1196,21 @@ class ReductionSet(object):
         debug = 1
         if debug:    
             k = 0
-            log.debug("=========================================================")
-            log.debug("=========== GROUPED SEQUENCES (by %s) =============="%self.group_by)
-            log.debug("=========================================================")
+            log.info("=========================================================")
+            log.info("=========== GROUPED SEQUENCES (by %s) =============="%self.group_by)
+            log.info("=========================================================")
             for type in seq_types:
                 if stype != 'all' and type == 'UNKNOWN':
                     continue
                 else:
-                    log.debug("SEQUENCE #[%d]  - TYPE= %s   FILTER= %s  TEXP= %f  #files = %d " \
+                    log.info("SEQUENCE #[%d]  - TYPE= %s   FILTER= %s  TEXP= %f  #files = %d " \
                             %(k, type, self.db.GetFileInfo(seqs[k][0])[3], 
                             self.db.GetFileInfo(seqs[k][0])[4], 
                             len(seqs[k])))
-                    log.debug("-------------------------------------------------------------------")
+                    log.info("-------------------------------------------------------------------")
                     for file in seqs[k]:
-                        log.debug("%s type = %s" %(file, self.db.GetFileInfo(file)[2]))
+                        log.info("%s type = %s" %(file, self.db.GetFileInfo(file)[2]))
+                    log.info("\n\n")
                 k += 1
 
         # very important to del the sqlite object, because
@@ -3437,7 +3438,7 @@ class ReductionSet(object):
                 gain_data[badpix_p] = 0
                 log.debug("Final number of Bad Pixels in GainMap: %d", (gain_data==0).sum())
                 gh.set('HISTORY','Combined (to 0) with BPM:%s' % master_bpm)
-                fits.writeto(gainmap, gain_data, header=gh, clobber=True)
+                fits.writeto(gainmap, gain_data, header=gh, overwrite=True)
                     
         
         ########################################################################

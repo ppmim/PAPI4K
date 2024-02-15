@@ -7,5 +7,6 @@ git archive --format zip --output $DEST/papi_$now.zip master papi
 echo $DEST/papi_$now.zip 
 
 echo "Copying to panic22 and panic35...."
+rsync -av $DEST/papi_$now.zip panic@panic1.iaa.es:/home/panic/SOFTWARE/QL_INSTALL/PAPI22
 rsync -av $DEST/papi_$now.zip panic@panic22.caha.es:/data1/ICS/QL_INSTALL/PAPI22
 rsync -av $DEST/papi_$now.zip panic@panic35.caha.es:/data1/ICS/QL_INSTALL/PAPI22
