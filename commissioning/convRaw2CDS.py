@@ -144,6 +144,7 @@ def convRaw2CDS(files, out_dir, suffix):
 					new_fits.data = median_image.astype('float32')
 					new_fits.header['BZERO'] = 0
 					new_fits.header['BSCALE'] = 1
+					new_fits.header['NCOADDS'] = nexps
 					new_hdulist = fits.HDUList([new_fits])
 					if combine_median:
 						outfitsname = out_dir + '/' + mfnp[0] + suffix + "_median" + mfnp[1] + mfnp[2]

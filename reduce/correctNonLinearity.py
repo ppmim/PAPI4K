@@ -257,7 +257,22 @@ class NonLinearityCorrection(object):
                 raise ValueError('Cannot apply model, found NCOADDS > 1.')
         else:
             n_coadd = 1
-            
+        
+        # 2024-02-23: JMIM
+        # Parche provisional para poder procesar imagenes con NEXP != NCOADD que se crearon "mal"
+        # en convRaw2CDS.py (ya parcheado tambien)
+        nexp = hdulist[0].header['NEXP']
+        if len(hdulist[0].data.shape) > 2:
+            cube_layers = hdulist[0].data.shape[-1]
+        else:
+            cube_layers = 1
+
+        if nexp > 1 and n_coadd==1 and cube_layers==1:
+            n_coadd = nexp
+        else:
+            n_coadd = 1
+        # Fin-del-parche 
+
         # load file data (and fix coadded images => coadd_correction)
         data = hdulist[0].data / n_coadd
         nlmaxs = nlhdulist['LINMAX'].data
