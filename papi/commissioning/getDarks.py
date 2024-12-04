@@ -17,6 +17,25 @@ import glob
 import fileinput
 import astropy.io.fits as fits
 
+def parse_ranges(input_string):
+    """
+    # Example usage
+    input_string = '[1024:3071,1024:3071]'
+    result = parse_ranges(input_string)
+    """
+    
+    # Remove the square brackets and split by the comma
+    cleaned_string = input_string.strip('[]')
+    ranges = cleaned_string.split(',')
+
+    # Parse each range into start and end values
+    parsed_ranges = []
+    for r in ranges:
+        start, end = map(int, r.split(':'))
+        parsed_ranges.append((start, end))
+    
+    return parsed_ranges
+
 
 def getItimesNcoadds(path, output_file, recursive=False):
     """
@@ -30,10 +49,10 @@ def getItimesNcoadds(path, output_file, recursive=False):
     
     Example of output file:
     
-    lir       2.7   2  mef
-    lir       5.0  10  mef
-    rrr-mpia  1.3   5  mef
-    rrr-mpia  1.3   5  sef
+    lir       2.7   2  mef   1  4096  1 4096
+    lir       5.0  10  mef   1  4096  1 4096
+    rrr-mpia  1.3   5  mef   1024   2048  1024  2048
+    rrr-mpia  1.3   5  sef   1024   2048  1024  2048
     
     
     """
@@ -72,11 +91,12 @@ def getItimesNcoadds(path, output_file, recursive=False):
         full_output_file = tmp_dir + "/" + output_file
 
     fd = open(full_output_file + "_tmp_", "w+")
-    fd.write("# READMODE\tITIME\tNCOADDS\tSAVEMODE\n")
+    fd.write("# READMODE\tITIME\tNCOADDS\tSAVEMODE\tX\tXRANGE\tY\tYRANGE\n")
      
     for my_file in filelist:
         try:
-            my_fits = fits.open(my_file)
+            my_fits = fits.open(my_file, mode='readonly', memmap=True, do_not_scale_image_data=True, ignore_blank=True,
+                                       ignore_missing_end=False, lazy_load_hdus=True)
             # Image type
             if 'IMAGETYP' in  my_fits[0].header:
                 papitype = my_fits[0].header['IMAGETYP']
@@ -126,15 +146,26 @@ def getItimesNcoadds(path, output_file, recursive=False):
             if save_mode == 'mef' and len(my_fits[1].data.shape) > 2:
                 ncoadds = my_fits[1].data.shape[0]
             elif save_mode == 'sef' and len(my_fits[0].data.shape) > 2:
-                ncoadds = my_fits[0].data.shape[0]
+                #ncoadds = my_fits[0].data.shape[0]
+                ncoadds = my_fits[0].header['NEXP']
             else:
-                ncoadds = my_fits[0].header['NCOADDS']
-                
+                #ncoadds = my_fits[0].header['NCOADDS']
+                ncoadds = my_fits[0].header['NEXP']
+            
+            # Subwin
+            # DETSEC  = '[1024:3071,1024:3071]' / [pix] xrange and yrange of window
+            # DETSIZE = '[1:4096,1:4096]'    / [px] full size of the detector
+            detsec =  my_fits[0].header['DETSEC']
+            p =  parse_ranges(detsec)
+            x, xrange = (p[0][0]), (p[0][1]-p[0][0] + 1)
+            y, yrange = (p[1][0]), (p[1][1]-p[1][0] + 1)
+
+
             # Finaly, write out the parameters to text file
-            if [read_mode, itime, ncoadds, save_mode] not in file_types:
-                file_types.append([read_mode, itime, ncoadds, save_mode])
+            if [read_mode, itime, ncoadds, save_mode, x, xrange, y, yrange] not in file_types:
+                file_types.append([read_mode, itime, ncoadds, save_mode, x, xrange, y, yrange])
                 # Insert into output file
-                fd.write("%s\t%3.03f\t%d\t%s\n"%(read_mode, float(itime), int(ncoadds), save_mode))
+                fd.write("%s\t\t%3.03f\t%d\t%s\t\t%d\t%d\t%d\t%d\n"%(read_mode, float(itime), int(ncoadds), save_mode, x, xrange, y, yrange))
         except Exception as e:
             print("Error while reading file: %s\n %s"%(my_file,str(e)))
 

@@ -45,137 +45,143 @@ import astropy.io.fits as fits
 import numpy as np
 
 
-def convRaw2CDS(files, out_dir, suffix):
-	"""
-	Method used convert Single frame cubes (raw data) to
-	CDS data and compute stats of a list of FITS files.
-	
-	Parameters
-	----------
-	files: sequence 
-		A list FITS files
-	out_dir: string
-		Output directory for created CDS files
-	suffix: string
-		suffix to add to the new created FITS files
-
-	Returns
-	-------
-	Number of files read    
-	"""
-
-	print("Starting imstatFITS...")
-
-	for file in files:      
-		try:
-			# To preserve image scale (BITPIX)--> do_not_scale_image_data 
-			# (http://goo.gl/zYkc6)
-			# Other option, is use fits.ImageHDU.scale_back
-			hdulist = fits.open(file, mode="readonly", do_not_scale_image_data=False)
-		except IOError:
-			print('Error, can not open file %s' % (file))
-			continue
-
-		# Check if it is a MEF file
-		if len(hdulist) > 1:
-			print("[Error] Wrong Extension number for file: %s" % file)
-			continue
-
-		try:
-			new_fits = fits.PrimaryHDU()
-			new_fits.header = hdulist[0].header.copy()
-			data = np.rollaxis(hdulist[0].data.astype('int32'), 0, 3)
-			header = hdulist[0].header
-			cpar1 = header['CPAR1'] # cycle type parameter (number of frames per exp)
-			nexps = header['NEXP'] # crep (number of repetitions)
-			cdscube = np.zeros((4096, 4096, nexps)).astype('int32')
-			print("NEXP = %02i" %nexps)
-			rmode = 'cntsr'
-			if rmode == 'cntsr':
-				for iexp in range(nexps):
-					print("IEXP=%02i"%iexp)
-					# CDS from multiple frame cubes
-					# cdsdata = data[:, :, 1] - data[:, :, 0]
-					cdscube[:, :, iexp] = (data[:, :, cpar1*iexp + cpar1 -1] - data[:,:, cpar1*iexp])
-					cds_median = np.median(cdscube[:, :, iexp])
-					median_last_frame = np.median(data[:, :, cpar1*iexp + cpar1 -1])
-					median_reset_frame = np.median(data[:,:, cpar1*iexp])
-					std_reset_frame = np.std(data[:,:, cpar1*iexp])
-					new_fits.data = cdscube[:, :, iexp].astype('float32')
-					new_fits.header['BZERO'] = 0
-					new_fits.header['BSCALE'] = 1
-					new_fits.header['HISTORY'] = 'CNTSR: raw single cube CONVERTED to CDS'
-					new_hdulist = fits.HDUList([new_fits])
-					# Compose output filename
-					mfnp = os.path.basename(file).partition('.fits')
-					# add suffix before .fits extension, or at the end if no such extension present
-					outfitsname = out_dir + '/' + mfnp[0] + suffix + "_%04i"%(iexp+1) + mfnp[1] + mfnp[2]
-					outfitsname = os.path.normpath(outfitsname)
-					# outfitsname = file.replace(".fits", "_%s.fits"%suffix)
-					new_hdulist.writeto(outfitsname, overwrite=True)
-					print('FITS file created: %s' % outfitsname)
-					print('Median last frame = %f' %median_last_frame)
-					print('Median reset frame = %f' %median_reset_frame)
-					print('STD reset frame = %f' %std_reset_frame)
-					print('Frame diff  = %f' %(median_last_frame - median_reset_frame))
-					print('CDS Median = %f' %cds_median)
-
-				combine = True
-				combine_sum = True
-				combine_median = False
-				if combine_median or combine_sum:
-					if combine_median:
-						# Apply sigma clipping to the cube
-						sigma = 3.0
-						print('Sigma clipping...')
-						clipped_cube = sigma_clip(cdscube, sigma=sigma, maxiters=2, axis=2)
-						# Calculate the median along the axis (axis=2)
-						# shortcut if nothing is clipped
-						if clipped_cube.count() == clipped_cube.size:
-							pr('No data clipped')
-							median_image = np.median(cdscube, axis=2)
-						else:
-							median_image = np.ma.median(cdscube, axis=2).filled(np.nan)
-
-					elif combine_sum:
-						median_image = cdscube.sum(2)
-
-					# create and save fits file
-					new_fits.data = median_image.astype('float32')
-					new_fits.header['BZERO'] = 0
-					new_fits.header['BSCALE'] = 1
-					new_fits.header['NCOADDS'] = nexps
-					new_hdulist = fits.HDUList([new_fits])
-					if combine_median:
-						outfitsname = out_dir + '/' + mfnp[0] + suffix + "_median" + mfnp[1] + mfnp[2]
-						new_fits.header['HISTORY'] = 'CDS and median average sigclip'
-					else:
-						outfitsname = out_dir + '/' + mfnp[0] + suffix + "_coadd" + mfnp[1] + mfnp[2]
-						new_fits.header['HISTORY'] = 'CDS and coadd of NEXPs'
-
-					outfitsname = os.path.normpath(outfitsname)
-					print('    - Saving output file %s' %outfitsname)
-					new_hdulist.writeto(outfitsname, overwrite=True)
-
-				del cdscube
-
-		except Exception as e:
-			print("[Error] Cannot run stats of file %s: \n %s"%(file, str(e)))
-			hdulist.close()
+def convRaw2CDS(files, out_dir, suffix, quick=False):
+    """
+    Method used convert Single frame cubes (raw data) to
+    CDS data and compute stats of a list of FITS files.
     
-	print("End of imstatFITS")
-	return
+    Parameters
+    ----------
+    files: sequence 
+        A list FITS files
+    out_dir: string
+        Output directory for created CDS files
+    suffix: string
+        suffix to add to the new created FITS files
+
+    Returns
+    -------
+    Number of files read    
+    """
+
+    print("Starting convRaw2CDS...")
+
+    for file in files:      
+        try:
+            # To preserve image scale (BITPIX)--> do_not_scale_image_data 
+            # (http://goo.gl/zYkc6)
+            # Other option, is use fits.ImageHDU.scale_back
+            hdulist = fits.open(file, mode="readonly", do_not_scale_image_data=False,  ignore_blank=True)
+        except IOError:
+            print('Error, can not open file %s' % (file))
+            continue
+
+        # Check if it is a MEF file
+        if len(hdulist) > 1:
+            print("[Error] Wrong Extension number for file: %s" % file)
+            continue
+
+        try:
+            new_fits = fits.PrimaryHDU()
+            new_fits.header = hdulist[0].header.copy()
+            header = hdulist[0].header
+            cpar1 = header['CPAR1'] # cycle type parameter (number of frames per exp)
+            nexps = header['NEXP'] # crep (number of repetitions)
+            save_mode = header['SAVEMODE'] # 'single.frame.read'
+            print(save_mode)
+            if save_mode != 'single.frame.read':
+                print("No conversion needed. Image is not saved as raw image")
+                return file
+            cdscube = np.zeros((4096, 4096, nexps)).astype('int32')
+            print("NEXP = %02i" %nexps)
+            rmode = header['READMODE'] 
+            mfnp = os.path.basename(file).partition('.fits')
+            if rmode == 'continuous.sampling.read':
+                data = np.rollaxis(hdulist[0].data.astype('int32'), 0, 3)
+                for iexp in range(nexps):
+                    # print("IEXP=%02i"%iexp)
+                    # CDS from multiple frame cubes
+                    # cdsdata = data[:, :, 1] - data[:, :, 0]
+                    cdscube[:, :, iexp] = (data[:, :, cpar1*iexp + cpar1 -1] - data[:,:, cpar1*iexp])
+                    if not quick:
+                        cds_median = np.median(cdscube[:, :, iexp])
+                        median_last_frame = np.median(data[:, :, cpar1*iexp + cpar1 -1])
+                        median_reset_frame = np.median(data[:,:, cpar1*iexp])
+                        std_reset_frame = np.std(data[:,:, cpar1*iexp])
+                        new_fits.data = cdscube[:, :, iexp].astype('float32')
+                        new_fits.header['BZERO'] = 0
+                        new_fits.header['BSCALE'] = 1
+                        new_fits.header['HISTORY'] = 'CNTSR: raw single cube CONVERTED to CDS'
+                        new_hdulist = fits.HDUList([new_fits])
+                        # Compose output filename
+                        # add suffix before .fits extension, or at the end if no such extension present
+                        outfitsname = out_dir + '/' + mfnp[0] + suffix + "_%04i"%(iexp+1) + mfnp[1] + mfnp[2]
+                        outfitsname = os.path.normpath(outfitsname)
+                        # outfitsname = file.replace(".fits", "_%s.fits"%suffix)
+                        new_hdulist.writeto(outfitsname, overwrite=True)
+                        print('FITS file created: %s' % outfitsname)
+                        print('Median last frame = %f' %median_last_frame)
+                        print('Median reset frame = %f' %median_reset_frame)
+                        print('STD reset frame = %f' %std_reset_frame)
+                        print('Frame diff  = %f' %(median_last_frame - median_reset_frame))
+                        print('CDS Median = %f' %cds_median)
+
+                combine = True
+                combine_sum = True
+                combine_median = False
+                if combine_median or combine_sum:
+                    if combine_median:
+                        # Apply sigma clipping to the cube
+                        sigma = 3.0
+                        print('Sigma clipping...')
+                        clipped_cube = sigma_clip(cdscube, sigma=sigma, maxiters=2, axis=2)
+                        # Calculate the median along the axis (axis=2)
+                        # shortcut if nothing is clipped
+                        if clipped_cube.count() == clipped_cube.size:
+                            pr('No data clipped')
+                            median_image = np.median(cdscube, axis=2)
+                        else:
+                            median_image = np.ma.median(cdscube, axis=2).filled(np.nan)
+
+                    elif combine_sum:
+                        median_image = cdscube.sum(2)
+
+                    # create and save fits file
+                    new_fits.data = median_image.astype('float32')
+                    new_fits.header['BZERO'] = 0
+                    new_fits.header['BSCALE'] = 1
+                    new_fits.header['NCOADDS'] = nexps
+                    new_hdulist = fits.HDUList([new_fits])
+                    if combine_median:
+                        outfitsname = out_dir + '/' + mfnp[0] + suffix + "_median" + mfnp[1] + mfnp[2]
+                        new_fits.header['HISTORY'] = 'CDS and median average sigclip'
+                    else:
+                        outfitsname = out_dir + '/' + mfnp[0] + suffix + "_coadd" + mfnp[1] + mfnp[2]
+                        new_fits.header['HISTORY'] = 'CDS and coadd of NEXPs'
+
+                    outfitsname = os.path.normpath(outfitsname)
+                    print('    - Saving output file %s' %outfitsname)
+                    new_hdulist.writeto(outfitsname, overwrite=True)
+
+                del cdscube
+
+        except Exception as e:
+            print("[Error] Cannot do conversion of file %s: \n %s"%(file, str(e)))
+            hdulist.close()
+    
+    print("End of convRaw2CDS")
+    return outfitsname
     
 def nowtime():
-	return datetime.datetime.now().isoformat()
+    return datetime.datetime.now().isoformat()
 
 def pr(msg):
-	'''Print messages and write to log file'''
-	print(msg)
-	if writelog:
-		logfile = open(os.path.join(outputpath, 'Logfile.txt'), 'a')
-		logfile.write(msg + '\n')
-		logfile.close()
+    '''Print messages and write to log file'''
+    print(msg)
+    if writelog:
+        logfile = open(os.path.join(outputpath, 'Logfile.txt'), 'a')
+        logfile.write(msg + '\n')
+        logfile.close()
 
 ################################################################################
 # main
@@ -200,6 +206,10 @@ def main(arguments=None):
     parser.add_argument("-S", "--suffix", type=str,
                   action="store", dest="suffix", default="_CDS",
                   help="Suffix to use for new corrected files (default: %(default)s)")
+    
+    parser.add_argument("-Q", "--quick",
+                  action="store_true", dest="quick", default=True,
+                  help="Use quick mode, with no stats (default: %(default)s)")
 
     options = parser.parse_args()
     
@@ -212,7 +222,7 @@ def main(arguments=None):
         parser.error("incorrect number of arguments ")
             
     try:
-        convRaw2CDS(filelist, options.out_dir, options.suffix)
+        convRaw2CDS(filelist, options.out_dir, options.suffix, options.quick)
     except Exception as e:
         raise e
 

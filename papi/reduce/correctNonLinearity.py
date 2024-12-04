@@ -245,7 +245,8 @@ class NonLinearityCorrection(object):
         # nldetid = nlhdulist['LINMAX'].header['CHIPID']
         nldetid = nlhdulist[0].header['CHIPID'].replace(" ", "")
         if datadetid != nldetid:
-             raise ValueError('Mismatch of detector IDs')
+            log.warning("Mismatch of detector IDs")
+            # raise ValueError('Mismatch of detector IDs')
 
         # Work around to correct data when NCOADDS > 1
         if hdulist[0].header['NCOADDS'] > 1:

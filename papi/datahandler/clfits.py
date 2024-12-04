@@ -390,6 +390,7 @@ class ClFits (object):
             # Turn matching warnings into exceptions
 
             warnings.simplefilter('error', UserWarning)
+            warnings.simplefilter('ignore', fits.verify.VerifyWarning)
             while True:
                 #log.debug("FITS integrity check. FILE=%s ITER=%d"%(self.pathname,nTry))
                 try:
@@ -402,8 +403,8 @@ class ClFits (object):
                     # at once. This is particularly useful for working with very 
                     # large arrays that cannot fit entirely into physical memory. 
                     # memmap=True is the default value as of PyFITS v3.1.0.
-                    myfits = fits.open(self.pathname, mode='readonly', memmap=True,
-                                       ignore_missing_end=False) # since some problems with O2k files
+                    myfits = fits.open(self.pathname, mode='readonly', memmap=True, do_not_scale_image_data=True, ignore_blank=True,
+                                       ignore_missing_end=False, lazy_load_hdus=True) # since some problems with O2k files
                 except Exception as e:
                     log.warning("Error reading FITS : %s" % self.pathname)
                     if nTry < retries:
@@ -423,7 +424,6 @@ class ClFits (object):
         else:
             myfits = fits.open(self.pathname, 
                                      ignore_missing_end=False)     
-
         # Check if is a MEF file 
         if len(myfits) > 1:
             self.mef = True
