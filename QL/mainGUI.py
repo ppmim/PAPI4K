@@ -96,7 +96,7 @@ from papi.misc.createDataSeq import createDataSeq
 from papi.commissioning.getImageOffsets import getWCSPointingOffsets, draw_offsets_H2RG, draw_offsets_H4RG
 from papi.misc.version import __version__
 import papi.misc.display as display
-
+from papi.commissioning.convRaw2CDS import convRaw2CDS
 # Log
 from papi.misc.paLog import log
 
@@ -2130,7 +2130,12 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             statusTip="Divide selected files", 
             triggered=self.divideFrames_slot)
 
-        # Sub-menu FITS actions       
+        # Sub-menu FITS actions
+        self.convRawAct = QAction("&Convert_Raw2CDS", self,
+            shortcut="Ctrl+C",
+            statusTip="Convert selected files from RAW 2 CDS (as integrated save mode)", 
+            triggered=self.convRaw2CDSFrames_slot)
+               
         self.mef2singleAct = QAction("MEF2Single", self,
             #shortcut="Ctrl+M",
             statusTip="Convert a MEF to a single file", 
@@ -2260,6 +2265,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             
             newAction = popUpMenu.addAction("FITS")
             subMenu_fits = QMenu("Popup Submenu", self)
+            subMenu_fits.addAction(self.convRawAct)
             subMenu_fits.addAction(self.mef2singleAct)
             subMenu_fits.addAction(self.single2mefAct)
             subMenu_fits.addAction(self.splitMEFAct)
@@ -2894,6 +2900,32 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
     ############################################################################
     ############# PROCESSING STAFF #############################################
     ############################################################################
+       
+    def convRaw2CDSFrames_slot(self):
+        """
+        This method is called to subtract two images selected from the File 
+        List View.
+        """
+
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        
+        for file in self.m_popup_l_sel:
+            try:
+                self.m_processing = False    
+                thread = ExecTaskThread(convRaw2CDS,
+                                            self._task_info_list,
+                                            [file],
+                                            self.m_outputdir,
+                                            "CDS",
+                                            True)
+                thread.start()
+            except Exception as e:
+                log.debug("Cannot convert Single-Fits-Cube to CDS file %s. Maybe it's "
+                          "not a Single-Fits-Cube", str(e))
+                QMessageBox.critical(self, "Error", "Cannot convert Single-FITS-Cube to "
+                    "CDS file : %s \n Maybe it's not a Cube file" % (file))
+            
+        QApplication.restoreOverrideCursor()
         
     def subtractFrames_slot(self):
         """
