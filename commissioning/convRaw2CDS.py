@@ -92,12 +92,13 @@ def convRaw2CDS(files, out_dir, suffix, quick=False):
             if save_mode != 'single.frame.read':
                 print("No conversion needed. Image is not saved as raw image")
                 return file
-            cdscube = np.zeros((4096, 4096, nexps)).astype('int32')
             print("NEXP = %02i" %nexps)
             rmode = header['READMODE'] 
             mfnp = os.path.basename(file).partition('.fits')
             if rmode == 'continuous.sampling.read':
                 data = np.rollaxis(hdulist[0].data.astype('int32'), 0, 3)
+                nx, ny, nz = data.shape
+                cdscube = np.zeros((nx, ny, nexps)).astype('int32')
                 for iexp in range(nexps):
                     # print("IEXP=%02i"%iexp)
                     # CDS from multiple frame cubes
