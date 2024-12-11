@@ -303,7 +303,7 @@ if action in ['A', 'C']:
 			raise ValueError('Unknow local host name (not "panic22" or "panic35"), cannot determine target host name, please specify in input')
 	if not targetuser:
 		if hostname == 'panic22':
-			targetuser = 'obs35'
+			targetuser = 'obs22'
 		elif hostname == 'panic35':
 			targetuser = 'obs22'
 		else:
@@ -311,7 +311,7 @@ if action in ['A', 'C']:
 	# copy file, check for errors
 	targetpath = '{}@{}:/data1/PANIC/HWlogs'.format(targetuser, targethost)
 	print('# Copying {} to {}'.format(logfilepath, targetpath))
-	error = subprocess.call(['rcp', '-p', '{}'.format(logfilepath), targetpath])
+	error = subprocess.call(['rsync', '-p', '{}'.format(logfilepath), targetpath])
 	if error != 0:
 		raise IOError('Copying log file to {} failed!'.format(targethost))
 	else:
