@@ -327,7 +327,7 @@ if action in ['A', 'C']:
 				break
 		if not targetuser:
 			if hostname == 'panic22':
-				targetuser = 'obs35'
+				targetuser = 'obs22'
 			elif hostname == 'panic35':
 				targetuser = 'obs22'
 			else:
@@ -337,7 +337,7 @@ if action in ['A', 'C']:
 		# copy file, check for errors
 		targetpath = '{}@{}:/data1/PANIC/HWlogs'.format(targetuser, targethost)
 		print('# Copying {} to {}'.format(logfilepath, targetpath))
-		error = subprocess.call(['rcp', '-p', '{}'.format(logfilepath), targetpath])
+		error = subprocess.call(['rsync', '-p', '{}'.format(logfilepath), targetpath])
 		if error != 0:
 			print('Error: Copying log file to {} failed!'.format(targethost))
 			print('WARNING: Log file could not be backed up on onther panic computer!')
