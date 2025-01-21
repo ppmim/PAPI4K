@@ -85,13 +85,33 @@ def convRaw2CDS(files, out_dir, suffix, quick=False):
             new_fits = fits.PrimaryHDU()
             new_fits.header = hdulist[0].header.copy()
             header = hdulist[0].header
+
+            # List of WCS keywords to remove (those ending with 'A')
+            wcs_keywords = [
+            'CUNIT1A', 'CUNIT2A', 
+            'CRVAL1A', 'CRVAL2A',
+            'CD1_1A', 'CD2_2A',
+            'CD1_2A', 'CD2_1A',
+            'CRPIX1A', 'CRPIX2A',
+            'WCSNAMEA',
+            'CTYPE1A', 'CTYPE2A'
+            ]
+        
+            # Remove each keyword if it exists
+            for keyword in wcs_keywords:
+                if keyword in new_fits.header:
+                    del new_fits.header[keyword]
+            
+            # -- End of deleting
+
             cpar1 = header['CPAR1'] # cycle type parameter (number of frames per exp)
             nexps = header['NEXP'] # crep (number of repetitions)
             save_mode = header['SAVEMODE'] # 'single.frame.read'
             print(save_mode)
             if save_mode != 'single.frame.read':
                 print("No conversion needed. Image is not saved as raw image")
-                return file
+                outfitsname = file
+                continue 
             print("NEXP = %02i" %nexps)
             rmode = header['READMODE'] 
             mfnp = os.path.basename(file).partition('.fits')
