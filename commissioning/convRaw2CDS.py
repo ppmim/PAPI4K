@@ -91,7 +91,8 @@ def convRaw2CDS(files, out_dir, suffix, quick=False):
             print(save_mode)
             if save_mode != 'single.frame.read':
                 print("No conversion needed. Image is not saved as raw image")
-                return file
+                outfitsname = file
+                continue 
             print("NEXP = %02i" %nexps)
             rmode = header['READMODE'] 
             mfnp = os.path.basename(file).partition('.fits')
