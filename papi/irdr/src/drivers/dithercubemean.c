@@ -122,10 +122,14 @@ int main(int argc, char *argv[])
     if (sum_flag)
     {
         float i_time = 1.0;
+        int nexp = 1;
         if (get_key_float(fn[0], "ITIME", &i_time) < 0) {
             fprintf(stderr, "get_wcs: unable to read ITIME in: %s\n", fn);
         }
-        put_key_float(argv[3], "EXPTIME", nplanes*i_time);
+        if (get_key_float(fn[0], "NEXP", &nexp) < 0) {
+            fprintf(stderr, "get_wcs: unable to read NEXP in: %s\n", fn);
+        }
+        put_key_float(argv[3], "EXPTIME", nplanes * i_time * nexp);
     }
     put_key_int(argv[3], "NCOMBINE", nplanes);          /* update FITS hdr */
     put_key_float(argv[3], "DATAMODE", avgscale);

@@ -171,12 +171,20 @@ def convRaw2CDS(files, out_dir, suffix, quick=False):
                     new_fits.data = median_image.astype('float32')
                     new_fits.header['BZERO'] = 0
                     new_fits.header['BSCALE'] = 1
-                    new_fits.header['NCOADDS'] = nexps
                     new_hdulist = fits.HDUList([new_fits])
                     if combine_median:
                         outfitsname = out_dir + '/' + mfnp[0] + suffix + "_median" + mfnp[1] + mfnp[2]
                         new_fits.header['HISTORY'] = 'CDS and median average sigclip'
                     else:
+                        # NCOADDS indicates how many frames have been added to generate one image
+                        # EXPTIME is the product of NEXP and ITIME, because each pixel in the image represents 
+                        # the arithmetic sum of the ixels in the individual exposures. 
+                        # Usually this equals the integration time.
+                        # If the data have been created using a repetition factor larger than one
+                        # (command crep and keyword NEXP), EXPTIME still is the time for the single image, in case of
+                        # saving the images in a FITS cube the time for each individual slice in the cube.
+                        new_fits.header['NCOADDS'] = nexps
+                        new_fits.header['EXPTIME'] = float(ew_fits.header['ITIME'] * nexps
                         outfitsname = out_dir + '/' + mfnp[0] + suffix + "_coadd" + mfnp[1] + mfnp[2]
                         new_fits.header['HISTORY'] = 'CDS and coadd of NEXPs'
 
