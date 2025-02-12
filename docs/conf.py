@@ -50,14 +50,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PAPI'
-copyright = u'2008-2022, J.M.Ibáñez-Mengual (IAA-CSIC)'
+copyright = u'2008-2025, J.M.Ibáñez-Mengual (IAA-CSIC)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '3.0'
+version = '3.1'
 from misc.version import __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__

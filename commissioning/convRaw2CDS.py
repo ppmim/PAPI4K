@@ -184,7 +184,7 @@ def convRaw2CDS(files, out_dir, suffix, quick=False):
                         # (command crep and keyword NEXP), EXPTIME still is the time for the single image, in case of
                         # saving the images in a FITS cube the time for each individual slice in the cube.
                         new_fits.header['NCOADDS'] = nexps
-                        new_fits.header['EXPTIME'] = float(ew_fits.header['ITIME']) * nexps
+                        new_fits.header['EXPTIME'] = float(new_fits.header['ITIME']) * nexps
                         outfitsname = out_dir + '/' + mfnp[0] + suffix + "_coadd" + mfnp[1] + mfnp[2]
                         new_fits.header['HISTORY'] = 'CDS and coadd of NEXPs'
 
