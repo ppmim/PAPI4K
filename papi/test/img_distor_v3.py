@@ -58,7 +58,7 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     # Query Gaia DR2 catalog
     center_coord = wcs.pixel_to_world(nx/2, ny/2)
     radius = np.sqrt((nx/2)**2 + (ny/2)**2) * wcs.pixel_scale_matrix[0,0] * u.deg
-    radius = np.abs(radius)*2.5
+    radius = np.abs(radius)*1.5
 
     # Construct Gaia query
     #query = f"""
@@ -83,7 +83,6 @@ def analyze_image_distortion(fits_file, mag_limit=20):
         Gaia.ROW_LIMIT = -1
         # Launch Gaia query
         job = Gaia.launch_job_async(query)
-        print("Query = \n", query)
         catalog = job.get_results()
         
         if len(catalog) == 0:
@@ -113,39 +112,45 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     # Convert to pixels
     mass_pixels = wcs.world_to_pixel(matched_mass)
     detected_pixels = wcs.world_to_pixel(matched_detected)
+
+
+    # Tranlate the matched sources to the pixel coordinates with the origin in the center of the image
+    detected_pixels = (detected_pixels[0] - nx/2, detected_pixels[1] - ny/2)
+    mass_pixels = (mass_pixels[0] - nx/2, mass_pixels[1] - ny/2)
+    
     
     # Calculate positional differences
     dx = detected_pixels[0] - mass_pixels[0]
     dy = detected_pixels[1] - mass_pixels[1]
 
-    filter_outliers = False
-    if (filter_outliers):
-        #### Filter out outliers using PCA
-        from sklearn.decomposition import PCA
+    # filter_outliers = False
+    # if (filter_outliers):
+    #     #### Filter out outliers using PCA
+    #     from sklearn.decomposition import PCA
 
-        # Stack dx, dy as (N, 2) matrix for PCA
-        displacements = np.vstack((dx, dy)).T
+    #     # Stack dx, dy as (N, 2) matrix for PCA
+    #     displacements = np.vstack((dx, dy)).T
 
-        # Apply PCA to find the main direction of displacement
-        pca = PCA(n_components=1)
-        pca.fit(displacements)
-        principal_direction = pca.components_[0]  # Principal axis
+    #     # Apply PCA to find the main direction of displacement
+    #     pca = PCA(n_components=1)
+    #     pca.fit(displacements)
+    #     principal_direction = pca.components_[0]  # Principal axis
 
-        # Project each displacement onto the principal axis
-        projections = displacements @ principal_direction
+    #     # Project each displacement onto the principal axis
+    #     projections = displacements @ principal_direction
 
-        # Compute standard deviation to filter outliers
-        std_threshold = 3  # Adjust as needed
-        mean_proj = np.mean(projections)
-        std_proj = np.std(projections)
+    #     # Compute standard deviation to filter outliers
+    #     std_threshold = 3  # Adjust as needed
+    #     mean_proj = np.mean(projections)
+    #     std_proj = np.std(projections)
 
-        # Keep only vectors close to the main direction
-        good_indices = np.abs(projections - mean_proj) < std_threshold * std_proj
+    #     # Keep only vectors close to the main direction
+    #     good_indices = np.abs(projections - mean_proj) < std_threshold * std_proj
 
-        # Filter dx, dy based on good indices
-        dx = dx[good_indices]
-        dy = dy[good_indices]
-        mass_pixels = (mass_pixels[0][good_indices], mass_pixels[1][good_indices])
+    #     # Filter dx, dy based on good indices
+    #     dx = dx[good_indices]
+    #     dy = dy[good_indices]
+    #     mass_pixels = (mass_pixels[0][good_indices], mass_pixels[1][good_indices])
 
 
     
@@ -157,14 +162,51 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     median_error = np.median(positional_error)
     std_error = np.std(positional_error)
     percentile_95 = np.percentile(positional_error, 95)
+    percentile_98 = np.percentile(positional_error, 98) 
     max_shift = np.max(positional_error)
     
-    #### Filter out dx, dy values that are above percentile_95, only for plotting purposes
-    good_indices = positional_error < percentile_95
+    # Computer the imageh distortion in %
+    field_size = max(nx, ny) * 0.3758
+    distortion_percentage = (max_shift / field_size) * 100
+    distortion_percentage_rms = (rms_error / field_size) * 100
+    distortion_percentage_95 = (percentile_95 / field_size) * 100
+    # Compute distortion percentage of the maximiun shift in pixels, as a fraction of the matching mass_pixels
+    # Find index  the maximum shift in pixels in dx, dy
+    max_shift_index = np.argmax(positional_error)   
+    max_shift = positional_error[max_shift_index]
+    predicted_max_shift = np.sqrt(mass_pixels[0][max_shift_index]**2 + mass_pixels[1][max_shift_index]**2)
+    new_distortion_percentage = (max_shift / predicted_max_shift) * 100 
+    
+
+    print("\n--- Astrometric Calibration Performance ---\n")
+    print("***Values BEFORE filtering:")
+    print(f"RMS Positional Error:     {rms_error:.3f} pixels")
+    print(f"Mean Positional Error:    {mean_error:.3f} pixels")
+    print(f"Standard Deviation (σ):   {std_error:.3f} pixels")
+    print(f"Median Positional Error:  {median_error:.3f} pixels")
+    print(f"95th Percentile Error:    {percentile_95:.3f} pixels")
+    print(f"Maximal Positional Shift: {max_shift:.3f} pixels")
+    print(f"Number of sources BEFORE filtering: {len(positional_error)}") 
+    # print distortion percentage
+    print(f"Distortion Percentage (max):    {distortion_percentage:.2f}%")
+    print(f"Distortion Percentage (rms_error):    {distortion_percentage_rms:.2f}%")
+    print(f"Distortion Percentage (95th percentile):    {distortion_percentage_95:.2f}%")
+    print(f"New Distortion Percentage (Zemax style):    {new_distortion_percentage:.2f}%")
+    # print detected pixel coordinates of the maximum shift
+    print(f"Detected pixel coordinates of the maximum shift: {detected_pixels[0][max_shift_index]}, {detected_pixels[1][max_shift_index]}")
+    print(f"Predicted pixel coordinates of the maximum shift: {mass_pixels[0][max_shift_index]}, {mass_pixels[1][max_shift_index]}")
+    print("-------------------------------------------") 
+
+    ####---------------------------------------------------
+    #### --- Filter out dx, dy values that are above percentile_98, only for plotting purposes
+    good_indices = positional_error < percentile_98
     dx = dx[good_indices]   
     dy = dy[good_indices]
     detected_pixels = (detected_pixels[0][good_indices], detected_pixels[1][good_indices])
-    positional_error = positional_error[good_indices]   
+    mass_pixels = (mass_pixels[0][good_indices], mass_pixels[1][good_indices])
+    positional_error = positional_error[good_indices]
+    ####---------------------------------------------------
+
     
     # Compute distortion percentage of the maximiun shift in pixels, as a fraction of the matching mass_pixels
     # Find index  the maximum shift in pixels in dx, dy
@@ -175,6 +217,15 @@ def analyze_image_distortion(fits_file, mag_limit=20):
 
 
 
+    # Calculate and display statistics
+    rms_error = np.sqrt(np.mean(positional_error**2))  # RMS error
+    mean_error = np.mean(positional_error)
+    median_error = np.median(positional_error)
+    std_error = np.std(positional_error)
+    percentile_95 = np.percentile(positional_error, 95)
+    percentile_98 = np.percentile(positional_error, 98) 
+    max_shift = np.max(positional_error)
+    
 
     # Computer the imageh distortion in %
     field_size = max(nx, ny) * 0.3758
@@ -184,7 +235,8 @@ def analyze_image_distortion(fits_file, mag_limit=20):
 
 
     # printout values in console, both in pixels and arcseconds
-    print("\n--- Astrometric Calibration Performance ---")
+    print("\n--- Values AFTER filtering:")
+    print(f"Number of sources after filtering: {len(positional_error)}")
     print(f"RMS Positional Error:     {rms_error:.3f} pixels")
     print(f"Mean Positional Error:    {mean_error:.3f} pixels")
     print(f"Standard Deviation (σ):   {std_error:.3f} pixels")
@@ -192,10 +244,13 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     print(f"95th Percentile Error:    {percentile_95:.3f} pixels")
     print(f"Maximal Positional Shift: {max_shift:.3f} pixels")
     # print distortion percentage
-    print(f"Distortion Percentage:    {distortion_percentage:.2f}%")
+    print(f"Distortion Percentage (max):    {distortion_percentage:.2f}%")
     print(f"Distortion Percentage (rms_error):    {distortion_percentage_rms:.2f}%")
     print(f"Distortion Percentage (95th percentile):    {distortion_percentage_95:.2f}%")
-    print(f"New Distortion Percentage:    {new_distortion_percentage:.2f}%")
+    print(f"New Distortion Percentage (Zemax style):    {new_distortion_percentage:.2f}%")
+    # print detected pixel coordinates of the maximum shift
+    print(f"Detected pixel coordinates of the maximum shift: {detected_pixels[0][max_shift_index]}, {detected_pixels[1][max_shift_index]}")
+    print(f"Predicted pixel coordinates of the maximum shift: {mass_pixels[0][max_shift_index]}, {mass_pixels[1][max_shift_index]}")
     print("-------------------------------------------")        
 
     # Plot image with distortion vectors
@@ -217,6 +272,11 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     im = ax.imshow(data, cmap='gray', vmin=z1, vmax=z2)#, interpolation='nearest')
     plt.colorbar(im, label='Counts')
     
+    # Revert coordinates transformation to plot sources
+    # Tranlate the matched sources to the pixel coordinates with the origin in the center of the image
+    detected_pixels = (detected_pixels[0] + nx/2, detected_pixels[1] + ny/2)
+    #mass_pixels = (mass_pixels[0] + nx/2, mass_pixels[1] + ny/2)
+
     # 2. Plot distortion vectors
     scale_factor = 20  # Adjust this to make vectors more visible
     for i in range(len(dx)):
