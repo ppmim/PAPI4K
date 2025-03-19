@@ -66,7 +66,7 @@ def get_reference_stars(image_header, radius=10*u.arcmin, catalog='II/246'):
     except Exception as e:
         raise ValueError(f"Error querying VizieR catalog: {e}")
 
-def detect_sources(image, fwhm=3.0, threshold=5.0):
+def detect_sources(image, fwhm=4.0, threshold=5.0):
     """
     Detect sources using DAOStarFinder
     
@@ -132,7 +132,6 @@ def perform_aperture_photometry(image, sources, aperture_radius=5.0, annulus_rad
         annulus_data = mask.multiply(image)
         if annulus_data is not None:
             annulus_data_1d = annulus_data[mask.data > 0]
-            # print("ANNULUS_DATA_1D = \n", annulus_data_1d)
             bkg_median.append(np.nanmedian(annulus_data_1d))
         else:
             bkg_median.append(0)
@@ -287,10 +286,12 @@ def calculate_zeropoint(phot_table, matched_refs, matched_sources, filter_name='
         print("INST_MAG\n", inst_mag)
 
         # Get reference magnitudes based on filter
+        print("FILTER ---> ", filter_name)
         ref_mag_column = {
             'J': 'Jmag',
             'H': 'Hmag',
-            'K': 'Kmag'
+            'K': 'Kmag',
+            'KS': 'Kmag'
         }.get(filter_name.upper(), 'Jmag')
         
         if ref_mag_column not in matched_refs.colnames:
@@ -345,10 +346,18 @@ def main(args):
         with fits.open(args.image) as hdul:
             image = hdul[0].data
             header = hdul[0].header
-            h_exptime = header['EXPTIME']
-            h_filter = header['FILTER']
-            h_airmass = header['AIRMASS']
-        
+            try:
+                h_exptime = header['EXPTIME']
+                h_filter = header['FILTER'].strip()
+                h_airmass = header['AIRMASS']
+            except Exception as e:
+                print("Some keyword (EXPTIME, FILTER, AIRMASS) is missing, user input value used")
+                h_exptime = args.exptime
+                h_filter = args.filter
+                h_airmass = args.airmass
+            else:
+                print("** FILTER=%s--   EXPTIME=%s   AIRMASS=%s"%(h_filter, h_exptime, h_airmass))
+
         # Get WCS
         try:
             wcs = WCS(header)
@@ -356,7 +365,8 @@ def main(args):
             print(f"Error reading/creating WCS: {e}")
             return None, None
         
-        # Detect sources
+        ######### Detect sources ##############################################
+        
         sources = detect_sources(image, fwhm=args.fwhm, threshold=args.threshold)
         print("==== DETECTED SOURCES = \n ", sources)
         
@@ -364,32 +374,23 @@ def main(args):
             print("No sources detected in the image!")
             return None, None
         
-        # print("---------> Starting photometry")
-
-        # Perform photometry
-        # phot_table = perform_aperture_photometry(
-        #    image, 
-        #    sources, 
-        #    aperture_radius=args.aperture,
-        #    annulus_radii=(args.annulus_inner, args.annulus_outer)
-        #)
+                
         
+        ######## Zeropoint calculation  #######################################
         print("---------> Starting ZP calculation")
-
-        # Zeropoint calculation
         zeropoint = args.zeropoint
         if args.calculate_zp:
             try:
-                # Get reference stars
+                ######## Get reference stars
                 reference_stars = get_reference_stars(
                     header, 
                     radius=args.search_radius*u.arcmin,
                     catalog=args.catalog
                 )
                 
-                print("Catalog results ---> ", reference_stars)
+                print("Catalog results ---> \n", reference_stars)
 
-                # Match sources
+                ####### Match sources
                 matched_sources, matched_refs = match_sources(
                     sources, 
                     reference_stars, 
@@ -401,7 +402,7 @@ def main(args):
                 print("\n====> Matched references = \n", matched_refs)
 
  
-                # Perform photometry of matched sources
+                ########## Perform photometry of matched sources
                 phot_table = perform_aperture_photometry(
                     image, 
                     matched_sources, 
@@ -411,12 +412,12 @@ def main(args):
                 print("\n====> PHOTO_TABLE_OF_MATCHED= \n",phot_table)
 
         
-                # Calculate zeropoint
+                ######## Calculate zeropoint
                 zp, zp_std = calculate_zeropoint(
                     phot_table, 
                     matched_refs, 
                     matched_sources, 
-                    filter_name=args.filter
+                    filter_name=h_filter
                 )
                 
                 # Use calculated zeropoint if no manual zeropoint provided
@@ -437,9 +438,9 @@ def main(args):
         # Absolute magnitude calculation
         absolute_mags = calculate_absolute_photometry(
             phot_table, 
-            args.exptime, 
+            h_exptime, 
             zeropoint, 
-            args.airmass, 
+            h_airmass, 
             args.extinction
         )
         # print("\n====> ABS_PHOTOMETRY= \n", absolute_mags)    
@@ -455,7 +456,8 @@ def main(args):
             phot_table.write(f"{args.output}_photometry.txt", format='ascii', overwrite=True)
             with open(f"{args.output}_statistics.txt", 'w') as f:
                 f.write("=== Photometry Statistics ===\n\n")
-                f.write(f"Zeropoint: {zeropoint:.3f} mag\n\n")
+                f.write(f"Zeropoint_{h_filter}: {zeropoint:.3f} mag\n")
+                f.write(f"Airmass: {h_airmass: .3f}\n\n")
                 for category, values in stats.items():
                     f.write(f"{category}:\n\n\n")
                     for key, value in values.items():
@@ -484,9 +486,9 @@ def cli():
     
     # Required arguments
     parser.add_argument('image', help='Path to the processed FITS image file')
-    parser.add_argument('--exptime', type=float, required=True,
+    parser.add_argument('--exptime', type=float, required=False,
                         help='Exposure time in seconds')
-    parser.add_argument('--airmass', type=float, required=True,
+    parser.add_argument('--airmass', type=float, required=False,
                         help='Airmass of the observation')
     
     # Zeropoint related arguments
@@ -504,11 +506,11 @@ def cli():
                        help='Calculate zero point using reference catalog')
 
     # Other optional arguments
-    parser.add_argument('--extinction', type=float, default=0.08,
-                       help='Atmospheric extinction coefficient (default: 0.08)')
+    parser.add_argument('--extinction', type=float, default=0.1,
+                       help='Atmospheric extinction coefficient (default: 0.10)')
     parser.add_argument('--fwhm', type=float, default=3.0,
-                       help='FWHM for source detection in pixels (default: 3.0)')
-    parser.add_argument('--threshold', type=float, default=5.0,
+                       help='FWHM for source detection in pixels (default: 4.0)')
+    parser.add_argument('--threshold', type=float, default=4.0,
                        help='Detection threshold in sigma (default: 5.0)')
     parser.add_argument('--aperture', type=float, default=5.0,
                        help='Aperture radius in pixels (default: 5.0)')

@@ -220,7 +220,7 @@ def solveField(filename, out_dir, tmp_dir="/tmp", pix_scale=None, extension=0, d
         # To avoid problems with wrong RA,Dec coordinates guessed, a wide 
         # radius is used (0.5 degrees)
         # Although --downsample is used, scale does not need to be modified
-        str_cmd = "%s/solve-field -O -p --scale-units arcsecperpix --scale-low %s \
+        str_cmd = "%s/solve-field -O -p --tweak-order 1 --scale-units arcsecperpix --scale-low %s \
         --scale-high %s --ra %s --dec %s --radius 0.5 -D %s --temp-dir %s %s %s --downsample %s\
         "%(path_astrometry, scale-0.05, scale+0.05, ra, dec, out_dir, tmp_dir, filename, ext_str, downsample)
     # 2) RA, Dec are unknown but scale is

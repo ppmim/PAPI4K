@@ -292,7 +292,7 @@ def analyze_image_distortion(fits_file, mag_limit=20):
     ax.set_xlabel('Right Ascension (J2000)')
     ax.set_ylabel('Declination (J2000)')
 
-    ax.set_title(f'Image Distortion Map (RMS: {rms_error:.2f} pixels)\n'
+    ax.set_title(f'Image Distortion Map (Max.Shift: {max_shift:.2f} pixels {new_distortion_percentage: .2f} %)\n'
                  f'Matched sources: {len(dx)}')
     
     # --- 2nd Distortion Vector Field ---
@@ -301,10 +301,27 @@ def analyze_image_distortion(fits_file, mag_limit=20):
             angles="xy", scale_units="xy", scale=1, color="r", alpha=0.6)
     plt.xlabel("X (pixels)")
     plt.ylabel("Y (pixels)")
-    plt.title("Image Distortion Vector Field (Scaled by %d)" % scale_factor)
+    plt.title(f'Image Distortion Vector Field (Scaled by: {scale_factor: 2d})"\n'
+                f"RMS Positional Error: {rms_error:.3f} pixels") 
+    plt.title(f'Image Distortion Vector Field scaled by {scale_factor: 2d} (Max.Shift: {max_shift:.2f} pixels {new_distortion_percentage: .2f} %)\n'
+                 f'Matched sources: {len(dx)}')
     #plt.gca().invert_yaxis()
     plt.show()
 
+
+
+    # --- 4. 1D Histogram of Positional Errors ---
+    plt.figure(figsize=(8, 6))
+    plt.hist(positional_error, bins=50, color="royalblue", edgecolor="black", alpha=0.7)
+    plt.axvline(rms_error, color="red", linestyle="dashed", linewidth=2, label=f"RMS Error = {rms_error:.3f} pixels")
+    plt.axvline(median_error, color="green", linestyle="dashed", linewidth=2, label=f"Median Error = {median_error:.3f} pixels")
+    plt.axvline(percentile_95, color="purple", linestyle="dashed", linewidth=2, label=f"95% Error = {percentile_95:.3f} pixels")
+    plt.xlabel("Positional Error (pixels)")
+    plt.ylabel("Number of Stars")
+    plt.title("Histogram of Astrometric Errors")
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.show()
 
     # Print additional statistics
     print(f"Total detected sources: {len(sources)}")

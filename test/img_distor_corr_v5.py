@@ -1,37 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import astropy.io.fits as fits
+from scipy.optimize import curve_fit
+from scipy.interpolate import UnivariateSpline
 import sys
 from matplotlib.colors import LogNorm  # Import LogNorm here
-from scipy.interpolate import UnivariateSpline
-
 
 # Load the corr.fits file
 filename = sys.argv[1]
 with fits.open(filename) as hdul:
     data = hdul[1].data  # Extract the binary table
-    
-    
+
 # Extract relevant columns
 field_x, field_y = data['field_x'], data['field_y']  # Measured x, y positions
 index_x, index_y = data['index_x'], data['index_y']  # Catalog-projected x, y positions
 
 field_ra, field_dec = data['field_ra'], data['field_dec']  # Measured RA, Dec
 index_ra, index_dec = data['index_ra'], data['index_dec']  # Reference RA, Dec
-
-# Compute the total image size in arcseconds (approximate field size)
-# Assuming image size is `width x height` in pixels, and plate scale is `scale_arcsec_per_pixel`
-image_width_pixels = max(field_x) - min(field_x)
-image_height_pixels = max(field_y) - min(field_y)
-
-# Translate the field_x and field_y to the center of the image as the origin
-field_x = field_x - image_width_pixels / 2
-field_y = field_y - image_height_pixels / 2
-
-# Translate the index_x and index_y to the center of the image as the origin
-index_x = index_x - image_width_pixels / 2
-index_y = index_y - image_height_pixels / 2
-
 
 # Compute positional residuals in pixels
 delta_x = field_x - index_x
@@ -49,24 +34,9 @@ mean_error = np.mean(positional_error)  # Mean absolute error (MAE)
 std_error = np.std(positional_error)  # Standard deviation
 median_error = np.median(positional_error)  # Median error
 percentile_95 = np.percentile(positional_error, 95)  # 95th percentile
-percentile_98 = np.percentile(positional_error, 99)  # 98th percentile
-
 
 # Maximal shift (maximum positional residual)
 max_shift = np.max(positional_error)
-
-# Filter out outliers (optional)
-filter_outliers = True
-if filter_outliers:
-    ####---------------------------------------------------
-    #### --- Filter out dx, dy values that are above percentile_98, only for plotting purposes
-    good_indices = positional_error < percentile_98
-    delta_x = delta_x[good_indices]   
-    delta_y = delta_y[good_indices]
-    field_x, field_y = (field_x[good_indices], field_y[good_indices])
-    index_x, index_y = (index_x[good_indices], index_y[good_indices])
-    positional_error = positional_error[good_indices]
-    ####---------------------------------------------------
 
 # --- Calculate Distortion Percentage ---
 # Total squared residuals in pixel space (x and y)
@@ -76,11 +46,11 @@ total_squared_residuals = np.sum(delta_x**2 + delta_y**2)
 num_stars = len(delta_x)
 
 # Calculate distortion percentage as the total squared residuals over the total number of stars
-#distortion_percentage = (total_squared_residuals / num_stars) * 100
+distortion_percentage = (total_squared_residuals / num_stars) * 100
 
 
 # Optionally normalize by the number of stars (average distortion per star)
-# average_distortion = total_squared_residuals / num_stars
+average_distortion = total_squared_residuals / num_stars
 
 # Define the total area of the image (in pixels). For example, let's assume the image is of size 1000x1000 pixels.
 image_area = 4096 * 4096  # Adjust to your actual image size
@@ -88,42 +58,28 @@ image_area = 4096 * 4096  # Adjust to your actual image size
 # Calculate distortion percentage: (total squared residuals / image area) * 100
 distortion_percentage = (total_squared_residuals / image_area) * 100
 
-# Compute distortion percentage of the maximiun shift in pixels, as a fraction of the matching mass_pixels
-# Find index  the maximum shift in pixels in dx, dy
-panic_scale = 0.3758
-max_shift_index = np.argmax(positional_error)   
-max_shift = positional_error[max_shift_index] 
-predicted_max_shift = (np.sqrt(index_x[max_shift_index]**2 + index_y[max_shift_index]**2))*panic_scale
-new_distortion_percentage = (max_shift / predicted_max_shift) * 100 
-print("Predicted maximum shift (arcsecs): ", predicted_max_shift)
-print(f"Detected pixel coordinates of the maximum shift: {field_x[max_shift_index]}, {field_y[max_shift_index]}")
-print(f"Predicted pixel coordinates of the maximum shift: {index_x[max_shift_index]}, {index_y[max_shift_index]}")
-   
+# Compute the total image size in arcseconds (approximate field size)
+# Assuming image size is `width x height` in pixels, and plate scale is `scale_arcsec_per_pixel`
+image_width_pixels = max(field_x) - min(field_x)
+image_height_pixels = max(field_y) - min(field_y)
 
 # Use an approximate plate scale (arcsec per pixel)
 plate_scale = np.mean(positional_error) / np.mean(np.sqrt(delta_x**2 + delta_y**2))
-print("Aproximate plate scale: ", plate_scale)
-
 # Compute the field size in arcseconds
 field_size = max(image_width_pixels, image_height_pixels) * plate_scale
-nx = ny = 4096    
-field_size = max(nx, ny) * 0.3758
 
 # Compute SCAMP-like distortion percentage
 distortion_percentage = (max_shift / field_size) * 100
-distortion_percentage_rms = (rms_error / field_size) * 100
 
 # Print Astrometric Performance Metrics
 print("\n--- Astrometric Calibration Performance ---")
-print(f"RMS Positional Error:     {rms_error:.3f} arcsec ({rms_error / plate_scale:.3f} pixels)")
-print(f"Mean Positional Error:    {mean_error:.3f} arcsec ({mean_error / plate_scale:.3f} pixels)")
-print(f"Standard Deviation (σ):   {std_error:.3f} arcsec ({std_error / plate_scale:.3f} pixels)")
-print(f"Median Positional Error:  {median_error:.3f} arcsec ({median_error / plate_scale:.3f} pixels)")
-print(f"95th Percentile Error:    {percentile_95:.3f} arcsec ({percentile_95 / plate_scale:.3f} pixels)")
-print(f"Maximal Positional Shift: {max_shift:.3f} arcsec ({max_shift / plate_scale:.3f} pixels)")
-print(f"Distortion Percentage (max_shift):    {distortion_percentage:.2f}%")
-print(f"Distortion Percentage (rms_error):    {distortion_percentage_rms:.2f}%")
-print(f"New Distortion Percentage (Zemax style):    {new_distortion_percentage:.2f}%")
+print(f"RMS Positional Error:     {rms_error:.3f} arcsec , {rms_error/plate_scale:.3f} pixels")
+print(f"Mean Positional Error:    {mean_error:.3f} arcsec, {mean_error/plate_scale:.3f} pixels")
+print(f"Standard Deviation (σ):   {std_error:.3f} arcsec, {std_error/plate_scale:.3f} pixels")
+print(f"Median Positional Error:  {median_error:.3f} arcsec, {median_error/plate_scale:.3f} pixels")
+print(f"95th Percentile Error:    {percentile_95:.3f} arcsec, {percentile_95/plate_scale:.3f} pixels")
+print(f"Maximal Positional Shift: {max_shift:.3f} arcsec, {max_shift/plate_scale:.3f} pixels")
+print(f"Distortion Percentage:    {distortion_percentage:.2f}%")
 print("-------------------------------------------")
 
 # Scale factor for vector length
@@ -135,7 +91,7 @@ plt.quiver(index_x, index_y, delta_x * scale_factor, delta_y * scale_factor,
            angles="xy", scale_units="xy", scale=1, color="r", alpha=0.6)
 plt.xlabel("X (pixels)")
 plt.ylabel("Y (pixels)")
-plt.title("Image Distortion Vector Field (Scaled)")
+plt.title("Image Distortion Vector Field (Scaled) - RMS= %.3f (px)"%(rms_error/plate_scale))
 plt.gca().invert_yaxis()
 plt.show()
 
@@ -200,6 +156,7 @@ plt.title("Histogram of Astrometric Errors")
 plt.legend()
 plt.grid(True, linestyle="--", alpha=0.6)
 plt.show()
+
 
 # --- 2. Heatmap of Positional Errors ---
 error_magnitude = np.sqrt(delta_x**2 + delta_y**2)

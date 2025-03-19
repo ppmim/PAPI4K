@@ -401,7 +401,7 @@ def doAstrometry(input_image, output_image=None, catalog='2MASS',
     swarp = SWARP()
     swarp.config['CONFIG_FILE'] = papi_home + config_dict['config_files']['swarp_conf']
     swarp.ext_config['IMAGEOUT_NAME'] = output_image
-    swarp.ext_config['COPY_KEYWORDS'] = 'OBJECT,INSTRUME,TELESCOPE,IMAGETYP,FILTER,FILTER1,FILTER2,SCALE,MJD-OBS,RA,DEC,HISTORY,NCOADDS,NDIT'
+    swarp.ext_config['COPY_KEYWORDS'] = 'OBJECT,INSTRUME,TELESCOPE,IMAGETYP,FILTER,FILTER1,FILTER2,SCALE,MJD-OBS,RA,DEC,HISTORY,NCOADDS,NDIT,AIRMASS,DETSEC'
     basename_o, extension_o = os.path.splitext(output_image)
     #"Projected" weight-maps are created too, even if no weight-maps were given in input (SWarp manual).
     swarp.ext_config['WEIGHTOUT_NAME'] = basename_o + ".weight" + extension_o
