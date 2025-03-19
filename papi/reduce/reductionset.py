@@ -3142,9 +3142,11 @@ class ReductionSet(object):
             
             # Add the list of original raw-files to the result image header
             if len(out_ext) > 0:
+                log.debug("Updating header of the final reduced sequence file")
                 new_frame = fits.open(seq_result_outfile, 'update')
                 raw_frames = [os.path.basename(f) for f in sequence]
                 new_frame[0].header.add_history("RAW_FRAMES= %s" % str(raw_frames))
+                new_frame.flush()
                 new_frame.close()
                 
             # Insert INSTRUMET/FILTER/TELESCOPE (montage does not include them)
