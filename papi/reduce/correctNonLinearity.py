@@ -53,7 +53,6 @@ from papi.misc.version import __version__
 # If you want to use the new multiprocessing module in Python 2.6 within a class, 
 # you might run into some problems. Here's a trick how to do a work-around. 
 def unwrap_self_applyModel(arg, **kwarg):
-    #print "ARG=",arg
     return NonLinearityCorrection.applyModel(*arg, **kwarg)
 
 
@@ -186,6 +185,31 @@ class NonLinearityCorrection(object):
             if dataHeader[key + '1'] != modelHeader[key + '1']:
                     raise ValueError('Mismatch in header data for keyword \'%s1\'' %(key))
 
+
+    def parse_detsec(self, detsec_str):
+        """Parses DETSEC string in the format '[x1:x2,y1:y2]' into integer indices."""
+        try:
+            detsec_str = detsec_str.strip().replace(" ", "").replace("[", "").replace("]", "")
+            x_range, y_range = detsec_str.split(",")
+            x1, x2 = map(int, x_range.split(":"))
+            y1, y2 = map(int, y_range.split(":"))
+
+            # **Convert 1-based indices to 0-based**
+            x1 -= 1
+            x2 -= 1
+            y1 -= 1
+            y2 -= 1
+
+            # Fix for inclusive slicing
+            x2 += 1  # Include last column
+            y2 += 1  # Include last row
+            print (f"Parsed DETSEC: x1={x1}, x2={x2}, y1={y1}, y2={y2}")
+            return x1, x2, y1, y2
+        except Exception as e:
+            log.error(f"Failed to parse DETSEC: {detsec_str}. Error: {e}")
+            raise ValueError(f"Invalid DETSEC format: {detsec_str}")
+
+
     def applyModel(self, data_file):
         """
         Do the Non-linearity correction using the supplied model. In principle,
@@ -234,16 +258,15 @@ class NonLinearityCorrection(object):
 
         # ---
         # another way would be to loop until the correct one is found
-        datadetsec = hdulist[0].header['DETSEC'].replace(" ", "")
-        # nldetsec = nlhdulist['LINMAX'].header['DETSEC']
-        nldetsec = nlhdulist[0].header['DETSEC'].replace(" ", "")
+        datadetsec = str(hdulist[0].header['DETSEC']).replace(" ", "") if isinstance(hdulist[0].header['DETSEC'], str) else str(hdulist[0].header['DETSEC'])
+        nldetsec = str(nlhdulist[0].header['DETSEC']).replace(" ", "") if isinstance(nlhdulist[0].header['DETSEC'], str) else str(nlhdulist[0].header['DETSEC'])
         if datadetsec != nldetsec:
             log.warning("Mismatch of detector sections")
-            raise ValueError('Mismatch of detector sections')
-
-        datadetid = hdulist[0].header['CHIPID'].replace(" ", "")
+            #raise ValueError('Mismatch of detector sections')
+        
+        datadetid = str(hdulist[0].header['CHIPID']).strip() if isinstance(hdulist[0].header['CHIPID'], str) else str(hdulist[0].header['CHIPID'])
         # nldetid = nlhdulist['LINMAX'].header['CHIPID']
-        nldetid = nlhdulist[0].header['CHIPID'].replace(" ", "")
+        nldetid = str(nlhdulist[0].header['CHIPID']).strip() if isinstance(nlhdulist[0].header['CHIPID'], str) else str(nlhdulist[0].header['CHIPID'])
         if datadetid != nldetid:
             log.warning("Mismatch of detector IDs")
             # raise ValueError('Mismatch of detector IDs')
@@ -262,16 +285,20 @@ class NonLinearityCorrection(object):
         # 2024-02-23: JMIM
         # Parche provisional para poder procesar imagenes con NEXP != NCOADD que se crearon "mal"
         # en convRaw2CDS.py (ya parcheado tambien)
+        # 2025-02-23: JMIM: Although this convRaw2CDS is already fixed, it is a good idea to keep it
         nexp = hdulist[0].header['NEXP']
         if len(hdulist[0].data.shape) > 2:
             cube_layers = hdulist[0].data.shape[-1]
         else:
             cube_layers = 1
 
-        if nexp > 1 and n_coadd==1 and cube_layers==1:
+        if nexp > 1 and n_coadd == 1 and cube_layers == 1:
+            log.warning("Overwriting n_coadd with nexp. Ensure this is the intended behavior.")
             n_coadd = nexp
-        else:
+        elif n_coadd == 1:
             n_coadd = 1
+        else:
+            log.info("Using provided n_coadd value.")
         # Fin-del-parche 
 
         # load file data (and fix coadded images => coadd_correction)
@@ -279,29 +306,38 @@ class NonLinearityCorrection(object):
         nlmaxs = nlhdulist['LINMAX'].data
         nlpolys = np.rollaxis(nlhdulist['LINPOLY'].data, 0, 3)
 
+
+        # Check if data is a subset of the full detector
+        # (if so, we need to crop the data)
+        # Extract subsection using DETSEC
+        try:
+            x1, x2, y1, y2 = self.parse_detsec(datadetsec)
+            nlmaxs_subsection = nlmaxs[y1:y2, x1:x2]
+            nlpolys_subsection = nlpolys[y1:y2, x1:x2, :]  # Assuming last dimension is polynomial coefficients
+        except ValueError:
+            log.warning("Using full data since DETSEC parsing failed")
+            nlmaxs_subsection = nlmaxs
+            nlpolys_subsection = nlpolys
+
         # calculate linear corrected data
-        lindata = self.polyval_map(nlpolys, data)
+        lindata = self.polyval_map(nlpolys_subsection, data)
         
         # mask saturated inputs - to use nan it has to be a float array
-        lindata[data > nlmaxs] = np.nan
+        lindata[data > nlmaxs_subsection] = np.nan
         # mask where max range is nan
         # (first, take into account the option of cubes as input images) 
         if len(lindata.shape) == 3: 
             # we have a 3D image (cube)
             for i in range(lindata.shape[0]):
-                lindata[i, np.isnan(nlmaxs)] = np.nan
+                lindata[i, np.isnan(nlmaxs_subsection)] = np.nan
         else:
             # we have a single 2D image
-            lindata[np.isnan(nlmaxs)] = np.nan
+            lindata[np.isnan(nlmaxs_subsection)] = np.nan
 
         # Undo the coadd_correction
-        lindata = lindata * n_coadd
-        
-        ## new_hdu = fits.ImageHDU(lindata.astype('float32'), header=hdulist[0].header.copy())
-        # this may rearrange the MEF extensions, otherwise loop over extensions
-        ## hdus.append(new_hdu)
+        lindata = lindata * n_coadd       
         linhdu.data = lindata.astype('float32')
-        # --
+        
         # add some info in the header
         linhdu.header['HISTORY'] = 'Nonlinearity correction applied'
         linhdu.header['HISTORY'] = 'Nonlinearity data: %s' %nlheader['ID']

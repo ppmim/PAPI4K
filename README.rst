@@ -10,6 +10,8 @@ signature), cosmic-ray removal, treatment for electronic ghosts (cross-talk),
 sky subtraction, non-linear count-rate correction, robust alignment and 
 registration.
 
+Although PAPI was developed for the PANIC camera with H2RG detector, it was updated 
+in 2022 to support the new H4RG detector integrated into PANIC. 
 
 PANIC_ is a general purpose Panoramic Near Infrared camera for Calar Alto. 
 It is optimized for use at the 2.2m telescope, but can also be installed 
@@ -24,14 +26,14 @@ PAPI has the following strict requirements:
  
  - `Python`_ 3.7
  - Numpy 1.18.x or later
- - `Anaconda`_ 3.18.9 o later
- - `IRAF`_
+ - `Anaconda`_ 2022.05-2024.10
+ - `IRAF`_ 2.16
 
 and also depends on next packages:
 
  * `NumPy <http://numpy.scipy.org/>`_ (> v1.18.x)
     * `SciPy <http://www.scipy.org>`_ (> v1.4.x)
-    * `Astropy <http://www.astropy.org/>`_ (4.x)
+    * `Astropy <http://www.astropy.org/>`_ (4.3.1)
     * `Matplotlib <http://matplotlib.org/>`_ (> v3.1.1)
     * `PyQt5 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_
     * `IRAF <http://iraf.noao.edu/>`_ with STSDAS and MSCRED (v2.16)
@@ -42,11 +44,11 @@ The above packages are automatically included in the `Anaconda` package, and the
 However, next tools need to be installed by the user following the instructions included in each package:
 
     * `CDSClient <http://cdsarc.u-strasbg.fr/doc/cdsclient.html>`_
-    * `SExtractor <http://astromatic.iap.fr/software/sextractor/>`_ (> v2.8.6)
-    * `SCAMP <http://www.astromatic.net/software/scamp>`_ (> v1.7.0)
-    * `SWarp <http://www.astromatic.net/software/swarp>`_ (> v2.19.1)
+    * `SExtractor <http://astromatic.iap.fr/software/sextractor/>`_ (> v2.25)
+    * `SCAMP <http://www.astromatic.net/software/scamp>`_ (> v2.10)
+    * `SWarp <http://www.astromatic.net/software/swarp>`_ (> v2.41.5)
     * `Astrometry.net <http://astrometry.net/>`_ with `42xx index files <http://broiler.astrometry.net/~dstn/4200/>`_
-    * `SAO DS9 and XPA <http://hea-www.harvard.edu/RD/ds9>`_ (> v7.3b5)
+    * `SAO DS9 and XPA <http://hea-www.harvard.edu/RD/ds9>`_ (v8.5)
     * `Montage <http://montage.ipac.caltech.edu/download/Montage_v3.3.tar.gz>`_ (v3.3)
     * `montage_wrapper <https://pypi.python.org/pypi/montage-wrapper>`_ (0.9.8)
 
@@ -114,7 +116,7 @@ As can a particular commit hash::
 
 Supported Platforms
 ===================
-Currently PAPI has only be tested under openSuSE15.1 and Ubuntu 19.10, but it
+Currently PAPI has only be tested under openSuSE15.5 and Ubuntu 24.04, but it
 should work on any 64-bit Linux box with the software packages required above.
 
 
@@ -129,7 +131,7 @@ Maintainer: jmiguel@iaa.es
 
 
 .. links:
-.. |logo| image:: ./papi/QL/resources/logo_PANIC_100.jpg
+.. |logo| image:: ./QL/resources/logo_PANIC_100.jpg
           :width: 127 px
           :alt: PANIC icon
 
