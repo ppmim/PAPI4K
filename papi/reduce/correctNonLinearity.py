@@ -109,6 +109,7 @@ class NonLinearityCorrection(object):
         """
         self.input_files = input_files
         self.model = model
+        self.r_offset = r_offset
         self.suffix = suffix
         self.out_dir = out_dir
         self.force = force
@@ -206,7 +207,7 @@ class NonLinearityCorrection(object):
             # Fix for inclusive slicing
             x2 += 1  # Include last column
             y2 += 1  # Include last row
-            print (f"Parsed DETSEC: x1={x1}, x2={x2}, y1={y1}, y2={y2}")
+            # print (f"Parsed DETSEC: x1={x1}, x2={x2}, y1={y1}, y2={y2}")
             return x1, x2, y1, y2
         except Exception as e:
             log.error(f"Failed to parse DETSEC: {detsec_str}. Error: {e}")
@@ -339,7 +340,11 @@ class NonLinearityCorrection(object):
             nlpolys_subsection = nlpolys
 
         # subtract reference offset taking into account the coadd_correction (repetitions integrated)
+        log.info("Subtracting reference offset")
+        log.debug("Mean value of reference offset: %s" % str(np.mean(ref_offset)))
+        log.debug("Mean value of data: %s" % str(np.mean(data)))
         data = data - sub_r_offset*n_coadd
+        log.debug("Mean value of data after offset: %s" % str(np.mean(data)))
         
         # calculate linear corrected data
         lindata = self.polyval_map(nlpolys_subsection, data)

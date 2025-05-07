@@ -735,7 +735,7 @@ class AstroWarp(object):
             raise Exception ("Cannot find required .head file")
         
         
-        swarp.ext_config['COPY_KEYWORDS'] = 'OBJECT,INSTRUME,TELESCOPE,IMAGETYP,FILTER,FILTER1,FILTER2,SCALE,MJD-OBS,RA,DEC,HISTORY,NCOADDS,NDIT'
+        swarp.ext_config['COPY_KEYWORDS'] = 'OBJECT,INSTRUME,TELESCOPE,IMAGETYP,FILTER,FILTER1,FILTER2,SCALE,MJD-OBS,RA,DEC,HISTORY,NCOADDS,NDIT,AIRMASS,DETSEC'
         swarp.ext_config['IMAGEOUT_NAME'] = output_path
         swarp.ext_config['WEIGHTOUT_NAME'] = output_path.replace(".fits", ".weight.fits")
                                                                  

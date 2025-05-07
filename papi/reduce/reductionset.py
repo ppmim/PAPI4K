@@ -319,6 +319,7 @@ class ReductionSet(object):
                 myhdulist = fits.open(rs_filelist[-1])
                 if myhdulist[0].header['READMODE'] == 'continuous.sampling.read':
                     self.non_linearity_model = self.config_dict['nonlinearity']['model_cntsr']
+                    self.non_linearity_cds_offset_cntsr = self.config_dict['nonlinearity']['cds_offset_cntsr']
                 elif myhdulist[0].header['READMODE'] == 'line.interlaced.read':
                     self.non_linearity_model = self.config_dict['nonlinearity']['model_lir']
                 elif myhdulist[0].header['READMODE'] == 'fast-reset-read.read':
@@ -2542,7 +2543,8 @@ class ReductionSet(object):
             try:
                 log.info("**** Applying Non-Linearity correction ****")
                 log.info("NLC Model: %s"%master_nl)
-                nl_task = correctNonLinearity.NonLinearityCorrection(master_nl, 
+                log.info("NLC offset: %s"%self.non_linearity_cds_offset_cntsr)
+                nl_task = correctNonLinearity.NonLinearityCorrection(self.non_linearity_cds_offset_cntsr, master_nl, 
                             sequence, out_dir=self.temp_dir, suffix='_LC')
                 corr_sequence = nl_task.runMultiNLC()
 

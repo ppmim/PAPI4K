@@ -143,6 +143,12 @@ def main(arguments=None):
                       "Q1(SG1), Q2(SG2), Q3(SG3), Q4(SG4), Q123(all except SG4), "
                            "all [default: %(default)s]")
     
+    parser.add_argument("-w", "--hwidth",
+                  action="store", dest="hwidth", type=int,
+                  default=2,
+                  help="Half width of the window to use for the reduction." 
+                  "If not specified, the default value %(default)s is used.")
+    
     parser.add_argument("-p", "--print",
                   action="store_true", dest="print_seq", default=False,
                   help="Print all detected sequences in the Data Set")
@@ -291,6 +297,15 @@ def main(arguments=None):
         rs_files = tmp_sci_files 
     
     
+    # Check if hwidth is a valid value
+    if init_options.hwidth != None:
+        if init_options.hwidth < 1:
+            parser.error("hwidth must be greater than 0")
+            parser.print_help()
+        else:
+            options['skysub']['hwidth'] = init_options.hwidth
+            print("===============================> hwidth = ", options['skysub']['hwidth'])
+
     log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     log.debug(">> Starting PAPI...")
     log.debug("   + source  : %s",general_opts['source'])

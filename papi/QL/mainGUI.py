@@ -3706,8 +3706,9 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
 
             try:
-                if self.m_masterNLC:
+                if self.m_masterNLC and os.path.isfile(self.m_masterNLC):
                     master_nlc =  self.m_masterNLC
+                    non_linearity_cds_offset_cntsr = self.config_dict['nonlinearity']['cds_offset_cntsr']   
                 else:
                     # master_nlc =  self.config_opts['nonlinearity']['model_cntsr']
                     # Find out the readmode
@@ -3715,6 +3716,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         myhdulist = fits.open(self.m_popup_l_sel[-1])
                         if myhdulist[0].header['READMODE'] == 'continuous.sampling.read':
                             master_nlc = self.config_opts['nonlinearity']['model_cntsr']
+                            non_linearity_cds_offset_cntsr = self.config_dict['nonlinearity']['cds_offset_cntsr']
                         elif myhdulist[0].header['READMODE'] == 'line.interlaced.read':
                             master_nlc = self.config_opts['nonlinearity']['model_lir']
                         elif myhdulist[0].header['READMODE'] == 'fast-reset-read.read':
@@ -3735,7 +3737,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         msg = "NLC Model to apply: %s"%master_nlc
                         log.info(msg)
                         self.logConsole.info(msg)
-                        nl_task = NonLinearityCorrection(master_nlc,
+                        nl_task = NonLinearityCorrection(non_linearity_cds_offset_cntsr, master_nlc,
                             self.m_popup_l_sel, out_dir=self.m_outputdir, suffix='_LC')
                         
                         # Submit task

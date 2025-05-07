@@ -753,6 +753,9 @@ File papi.cfg::
     # FITS file containing the NL model for correction
     model_lir = /data1/Calibs/mNONLIN_LIR_01.01.fits
     model_rrrmpia = /data1/Calibs/mNONLIN_RRR-MPIA_01.01.fits
+    model_cntsr = /data/Calibs2/BD_NLC/NLCORR_2025-04-08.fits
+    cds_offset_cntsr = /data/Calibs2/BD_NLC/CDS-OFFSET_2025-03-27.fits
+
 
     ##############################################################################
     [bpm]  
