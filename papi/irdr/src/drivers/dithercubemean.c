@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     float *plane, *meanplane, *wplane, *sumwplanes, *gainmap;
     float bkg, sig = 0.0, avgscale = 0.0;
     int sum_flag = 0; /* if =1, compute the simple arithmetic sum of the planes */
-    int debug = 1;
+    int debug = 0;
     char aux[256];
     
     if (argc < 5)
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
         
         if (debug)
             {
-                strcpy(aux,"/data2/tmp/shift_");
+                strcpy(aux,"/tmp/shift_");
                 strcat(aux, basename(fn[i]));
                 writefits(aux, fn[i], (char*)data[i], -32, nx + 2*border, ny + 2*border); 
             }

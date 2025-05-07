@@ -61,14 +61,17 @@ class NonLinearityCorrection(object):
     Class used to correct the Non-linearity of the PANIC detectors based on the 
     algorithm described by Bernhard Dorner at PANIC-DEC-TN-02_0_1.pdf.
     """
-    def __init__(self, model, input_files, out_dir='/tmp', 
+    def __init__(self, r_offset, model, input_files, out_dir='/tmp', 
                 suffix='_LC', force=False, coadd_correction=True):
         """
         Init the object.
         
         Parameters
         ----------
-                
+        r_offset : str
+            FITS filename of the reference offset (bias) to be used for; it must be 
+            subtracted from the input data before applying the model.
+
         model : str 
             FITS filename of the Non-Linearity model, ie., containing polynomial 
             coeffs (4th order) for correction that must has been previously 
@@ -239,6 +242,21 @@ class NonLinearityCorrection(object):
             hdulist.close()
             raise ValueError('Mismatch in header data format. Only MEF files allowed.')
 
+        # load reference offset file
+        if self.r_offset:
+            try:
+                ref_offset = fits.open(self.r_offset)[0].data
+                if ref_offset.shape != hdulist[0].data.shape:
+                    log.warning("Mismatch in header data for input reference offset")
+                    raise ValueError('Mismatch in header data for input reference offset')
+            except Exception as e:
+                log.error("Cannot read reference offset file '%s'" % self.r_offset)
+                raise e
+        else:
+            ref_offset = np.zeros(hdulist[0].data.shape, dtype='float32')
+            log.warning("No reference offset file provided. Using zero offset.")
+
+        
         # load model
         nlhdulist = fits.open(self.model)
         nlheader = nlhdulist[0].header
@@ -314,11 +332,15 @@ class NonLinearityCorrection(object):
             x1, x2, y1, y2 = self.parse_detsec(datadetsec)
             nlmaxs_subsection = nlmaxs[y1:y2, x1:x2]
             nlpolys_subsection = nlpolys[y1:y2, x1:x2, :]  # Assuming last dimension is polynomial coefficients
+            sub_r_offset = ref_offset[y1:y2, x1:x2]
         except ValueError:
             log.warning("Using full data since DETSEC parsing failed")
             nlmaxs_subsection = nlmaxs
             nlpolys_subsection = nlpolys
 
+        # subtract reference offset taking into account the coadd_correction (repetitions integrated)
+        data = data - sub_r_offset*n_coadd
+        
         # calculate linear corrected data
         lindata = self.polyval_map(nlpolys_subsection, data)
         
@@ -453,6 +475,10 @@ SEF-cubes, each plane is corrected individually.
                   action="store", dest="model",
                   help="FITS SEF (can be a cube) file of polinomial coeffs (c4, c3, c2, c1) of the NL model.")
 
+    parser.add_argument("-r", "--reference_offset",
+                  action="store", dest="r_offset",
+                  help="FITS file of reference offset (bias) to be used for previosly to apply the model")
+
     parser.add_argument("-i", "--input_file",
                   action="store", dest="input_file",
                   help="FITS file to be corrected.")
@@ -486,7 +512,7 @@ SEF-cubes, each plane is corrected individually.
 
     # Check required parameters
     if ((not args.source_file_list and not args.input_file) or not args.out_dir
-        or not args.model): # args is the leftover positional arguments after all options have been processed
+        or not args.model) or not args.r_offset: # args is the leftover positional arguments after all options have been processed
         parser.print_help()
         parser.error("incorrect number of arguments ")
     
@@ -499,7 +525,7 @@ SEF-cubes, each plane is corrected individually.
         parser.print_help()
         parser.error("incorrect number of arguments " )
 
-    NLC = NonLinearityCorrection(args.model, filelist, args.out_dir,
+    NLC = NonLinearityCorrection(args.r_offset, args.model, filelist, args.out_dir,
                                  args.suffix, args.force,
                                  args.coadd_correction)
 
