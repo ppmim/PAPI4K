@@ -16,16 +16,17 @@ sky subtraction, non-linear count-rate correction, robust alignment and registra
 removing the field distortion.
 
 
-This chapter gives an introduction in how to get started with PAPI, showing the 
-steps that would normally be necessary to reduce a data set from PANIC. In particular, 
-this example assumes that we have a series of FITS images from an observation run.
+This section provides a step-by-step guide to getting started with PAPI, illustrating 
+the typical workflow for reducing a data set from PANIC. Specifically, this example 
+assumes the availability of a series of FITS images from an observation run, and 
+demonstrates how to process them effectively.
 
 Quickstart
 ==========
 
 Running PAPI can be as simple as executing the following command in a terminal::
 	
-	$ papi -s raw_data -d result
+	$ run_papi -s raw_data -d result
 
 Where ``raw_data`` is the directory of the raw dataset (uncalibrated) having 
 both science or calibration files, and ``result`` is the path to the directory 
@@ -49,71 +50,84 @@ may be applied to help improve the reductions.
 
 The next command will show some of the available options::
 
-   $ papi --help
+   $ run_papi --help
 
 
 Then, the listing of the PAPI command line options:
 
 ::
 
-    Usage: papi [OPTION]... DIRECTORY...
-    
-    This is PAPI, the PANIC PIpeline data reduction system - IAA-CSIC - Version 1.2.20150508064845
+    usage: run_papi.py [-h] [--version] [-c CONFIG_FILE] [-s SOURCE]
+                   [-d OUTPUT_DIR] [-o OUTPUT_FILE] [-t TEMP_DIR]
+                   [-r ROWS ROWS] [-R] [-l] [-M REDUCTION_MODE] [-m OBS_MODE]
+                   [-S SEQ_TO_REDUCE SEQ_TO_REDUCE]
+                   [-W {Q1,Q2,Q3,Q4,Q123,all}] [-w HWIDTH] [-p]
+                   [-T {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}]
+                   [-b] [-A] [-C EXT_CALIBRATION_DB] [-D MASTER_DARK]
+                   [-F MASTER_FLAT] [-B BPM_FILE] [-g GROUP_BY] [-e]
 
-    Options:
-    --version             show program's version number and exit
+    This is PAPI, the PANIC PIpeline data reduction system - IAA-CSIC - Version
+    2.3.20250508083928
+
+    optional arguments:
     -h, --help            show this help message and exit
-    -c CONFIG_FILE, --config=CONFIG_FILE
+    --version             show program's version number and exit
+    -c CONFIG_FILE, --config CONFIG_FILE
                             Config file for the PANIC Pipeline application.If not
                             specified, './config_files/papi.cfg' is used.
-    -s SOURCE, --source=SOURCE
+    -s SOURCE, --source SOURCE
                             Source file list of data frames. It can be a fileor
                             directory name.
-    -d OUTPUT_DIR, --out_dir=OUTPUT_DIR
+    -d OUTPUT_DIR, --out_dir OUTPUT_DIR
                             Output dir for product files
-    -o OUTPUT_FILE, --output_file=OUTPUT_FILE
+    -o OUTPUT_FILE, --output_file OUTPUT_FILE
                             Final reduced output image
-    -t TEMP_DIR, --temp_dir=TEMP_DIR
+    -t TEMP_DIR, --temp_dir TEMP_DIR
                             Directory for temporal files
-    -r ROWS, --rows=ROWS  Use _only_ files of the source file-list in the
+    -r ROWS ROWS, --rows ROWS ROWS
+                            Use _only_ files of the source file-list in the
                             rangeof rows specified (0 to N, both included)
     -R, --recursive       Does recursive search for files in source directory
     -l, --list            Generate a list with all the source files read fromthe
                             source and sorted by MJD
-    -M REDUCTION_MODE, --red_mode=REDUCTION_MODE
-                            Mode of data reduction to do (quick|science|lab|lemon
-                            |quick-lemon).
-    -m OBS_MODE, --obs_mode=OBS_MODE
+    -M REDUCTION_MODE, --red_mode REDUCTION_MODE
+                            Mode of data reduction to do
+                            (quick|science|lab|lemon|quick-lemon).
+    -m OBS_MODE, --obs_mode OBS_MODE
                             Observing mode (dither|ext_dither|other)
-    -S SEQ_TO_REDUCE, --seq_to_reduce=SEQ_TO_REDUCE
+    -S SEQ_TO_REDUCE SEQ_TO_REDUCE, --seq_to_reduce SEQ_TO_REDUCE SEQ_TO_REDUCE
                             Sequence number to reduce. By default, all sequences
                             found will be reduced.
-    -W DETECTOR, --window_detector=DETECTOR
+    -W {Q1,Q2,Q3,Q4,Q123,all}, --window_detector {Q1,Q2,Q3,Q4,Q123,all}
                             Specify which detector to process:Q1(SG1), Q2(SG2),
                             Q3(SG3), Q4(SG4), Q123(all except SG4), all [default:
                             all]
+    -w HWIDTH, --hwidth HWIDTH
+                            Half width of the window to use for the reduction.If
+                            not specified, the default value 2 is used.
     -p, --print           Print all detected sequences in the Data Set
-    -T SEQ_TYPE, --sequences_type=SEQ_TYPE
+    -T {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}, --sequences_type {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}
                             Specify the type of sequences to show: DARK,
                             FLAT(all), DOME_FLAT, SKY_FLAT, FOCUS, SCIENCE, CAL,
                             all [default: all]
     -b, --build_calibrations
                             Build all the master calibrations files
-    -C EXT_CALIBRATION_DB, --ext_calibration_db=EXT_CALIBRATION_DB
+    -A, --apply_dark_flat
+                            Apply dark and flat calibration to source files
+                            [default: False]
+    -C EXT_CALIBRATION_DB, --ext_calibration_db EXT_CALIBRATION_DB
                             External calibration directory (library of Dark & Flat
                             calibrations)
-    -D MASTER_DARK, --master_dark=MASTER_DARK
+    -D MASTER_DARK, --master_dark MASTER_DARK
                             Master dark to subtract
-    -F MASTER_FLAT, --master_flat=MASTER_FLAT
+    -F MASTER_FLAT, --master_flat MASTER_FLAT
                             Master flat to divide by
-    -B BPM_FILE, --bpm_file=BPM_FILE
+    -B BPM_FILE, --bpm_file BPM_FILE
                             Bad pixel mask file
-    -g GROUP_BY, --group_by=GROUP_BY
+    -g GROUP_BY, --group_by GROUP_BY
                             kind of data grouping (based on) to do with thedataset
                             files (ot |filter)
-    -k, --check_data      if true, check data properties matching (type, expt,
-                            filter, ncoadd, mjd)
-    -e, --Check           Check if versions of PAPI modules are right.
+    -e, --check           Check if versions of PAPI modules are right.
 
   
 
@@ -124,49 +138,43 @@ GEIRS is capable of saving the frames in different modes (integrated, FITS-cubes
 MEF, etc ). Next ones are available in the OT when the OP (Observing Program) 
 is defined:
 
- - Multi-Extension FITS (MEF) - Integrated
- - Multi-Extension FITS (MEF) - Cube
- - Integrated All (SEF - Integrated)
- - FITS Cube (SEF - Cube)
- - Individual (SEF - Individual)
+ - Integrated All (save -i)
+ - FITS Cube (save -1)
+ - Single Frame Cube (save -S -1)
+   This mode can be seen the raw mode, where all the frames of the ramp
+   (including the initial reset frame) are saved into a FITS cube, taking into account also the number of
+   repetitions (NEXP); for example, in the cntsr mode, if we have an ITIME=5.8 secs and NEXP=5, we
+   will get a FITS cube of 15 frames. As result, this mode will require an important extra disk space to
+   store the data.
+ - Individual (save)
+   Similarly as in the FITS cube mode, but saving all the repetitions in Individual
+   files instead of a FITS cube; and therefore, no summation is performed.
  
 
-However, PAPI does not accept any kind of FITS data files available in GEIRS, only
+However, PAPI does not accept any kind of FITS data files available in GEIRS or the OT, only
 the configured in the OT, except `Individual`. As result, PAPI accepts 
 the next type of FITS files (in order of preference):
 
- - Integrated Multi-Extension-FITS (MEF): a unique FITS file with four extensions (MEF),
-   where each extension corresponds to one of the 4 images produced by the single
-   detector chips. 
+ - Integrated All: a unique FITS file with a single extension.
    If the number of coadd (NCOADDS) is > 0, then they will be integrated (arithmetic sum) 
    in a single image. This is the default and more common saving mode used; in fact, it
    is the **default** and more wished saving mode.   
    This mode will also be used when the software or hardware sub-windowing is set and 
    the integrated option is selected. Then, there will be an extension for each sub-window.
  
- - Non-integrated Multi-Extension-FITS (MEF): a unique FITS file with four extensions (MEF), 
-   one per each detector (or window), having each extension N planes, where N is the number 
-   of coadds (NCOADDS), i.e., a cube of N planes.  
+ - Non-integrated FITS Cube: a unique FITS file having a single extension with N planes, 
+   where N is the number of coadds (NCOADDS), i.e., a cube of N planes.  
    This mode will be also used when the software or hardware subwindowing is set up and 
    the no-integrated option is selected.
    
-   **Note**: Currently when PAPI finds a MEF-cube, it is collapsed adding the planes up 
+   **Note**: Currently when PAPI finds a FITS-cube, it is collapsed adding the planes up 
    arithmetically without any kind of image registration.
  
-   |
- 
- - Single integrated FITS file: the four detectors are saved in single file and in a 
-   single extension FITS image (SEF). If the number of coadds (NCOADDS) is > 0, then 
-   they are integrated (arithmetic sum) in a single frame.
-
- - Single non-integrated FITS-cube: the four detectors are saved in a single extension 
-   FITS (SEF) file, and each individual exposition in a plane/layer of a cube. It means N 
-   planes, where N is the number of coadds or expositions.
- 
- 
+  
  .. Note:: Currently PAPI is **not working** with non-integrated **individual** files of an 
-    exposition. In case you are interested in no-integrated files and wish to reduce 
-    the data with PAPI, you should use SEF of MEF non-integrated FITS-cube mode.
+    exposition. In case you are interested in **raw mode** (Single Frame Cube) and wish to reduce 
+    the data with PAPI, you should convert previously the data to correlated mode (CDS) using the routine `convRaw2CDS.py' 
+    that is included in the papi\commissioning directory.
 
 Show grouped files in a raw directory
 -------------------------------------
@@ -175,11 +183,11 @@ by the OT during the observation.
 
 Command::
 
-    $papi -s /my/raw_data/directory -p
+    $run_papi -s /my/raw_data/directory -p
     
 Example::
 
-    $papi -s /data2/2015-03-10/ -p
+    $run_papi -s /data2/2015-03-10/ -p
     
     [PAPI]: 2015-05-28 09:18:01,484 DEBUG    reductionset:1150: Found 16 groups of files
     [PAPI]: 2015-05-28 09:18:01,484 DEBUG    reductionset:1157: =========================================================
@@ -316,7 +324,7 @@ Show grouped files per filter and coordinates of a raw directory
 ----------------------------------------------------------------
 Command::
 
-    $papi -s /my/raw_data/directory -g filter -p
+    $run_papi -s /my/raw_data/directory -g filter -p
 
 
 Reduce (quick) a specificied number of sequences of the group list 
@@ -329,11 +337,11 @@ you have to use the `-S` parameter with two values, N1 and N2, where:
 
 Command::
 
-    $papi -s /my/raw_data/directory -S N1 N2
+    $run_papi -s /my/raw_data/directory -S N1 N2
 
 Example::
 
-    $papi -s /data2/2015-03-10/ -S 14 20
+    $run_papi -s /data2/2015-03-10/ -S 14 20
 
 By default, PAPI process the files in quick mode (single pass for sky subtraction), 
 however if you can use the 'science' mode (double pass for sky subtraction) adding
@@ -341,7 +349,7 @@ the '-M science' when you run PAPI:
 
 Example::
 
-    $papi -s /data2/2015-03-10/ -S 14 20 -M science
+    $run_papi -s /data2/2015-03-10/ -S 14 20 -M science
     
 
     
@@ -349,7 +357,7 @@ If you only want to reduce a specific sequence, for example number 14, you shoul
 
 ::
     
-    $papi -s /data2/2015-03-10/ -S 14 14
+    $run_papi -s /data2/2015-03-10/ -S 14 14
     
     [PAPI]: 2015-05-28 09:52:15,122 DEBUG    calDark:283: Saved master DARK to /data2/out/mDark_Xdb5bc_6_1.fits
     [PAPI]: 2015-05-28 09:52:15,122 DEBUG    calDark:284: createMasterDark' finished Elapsed time(s): 2.183243
@@ -366,7 +374,7 @@ Reduce all the sequences of a given directory
 
 Command::
 
-    $papi -s /my/raw_data/directory -d /my/output/directory
+    $run_papi -s /my/raw_data/directory -d /my/output/directory
     
 With this command, the pipeline will reduce all the detected sequences in the /my/raw_data/directory
 using the default values set in the $PAPI_CONFIG file, and with the reduction mode specified in 
@@ -376,7 +384,7 @@ using the `-M` option as follow:
 
 ::
     
-    $papi -s /my/raw_data/directory -d /my/output/directory -M quick
+    $run_papi -s /my/raw_data/directory -d /my/output/directory -M quick
 
 
 Reduce all the sequences of a given set of directories
@@ -391,7 +399,7 @@ you should create an script to do that; for example see next bash script:
     # Script to reduce a set of directories
 
 
-    PAPI=$HOME/bin/papi
+    PAPI=$HOME/bin/run_papi
     CONFIG_FILE=$PAPI_CONFIG
     MY_DIRS_JAN="2015-03-05 2015-03-06 2015-03-07 2015-03-08 2015-03-09"
     for dir in $MY_DIRS
@@ -435,7 +443,7 @@ look for them into the external calibration directory provided (/my/calibration/
 
 Command::
 
-    $papi -s /my/raw_data/directory -d /my/output/directory -C /my/calibrations/dir
+    $run_papi -s /my/raw_data/directory -d /my/output/directory -C /my/calibrations/dir
 
 Enable the Non-Linearity correction for the data processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -461,9 +469,22 @@ can use the option '-W Qx'::
 
 Example::
 
-    $papi -s /my/raw_data/directory -d /my/output/directory -W Q1
+    $run_papi -s /my/raw_data/directory -d /my/output/directory -W Q1
     
-    
+
+Setting the HWIDTH parameter for the sky background computation
+----------------------------------------------------------------
+
+This important parameter that can be set in the config file is the **hwidth** parameter, that is the half-width of the window of sky frames
+used to compute the sky background. The default value is 2, but it can be changed depending on the data and the dither pattern used.
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
+    hwidth = 2
+
+The **HWIDTH** parameter can also be provided in the command line with the option -W, for example:
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
+
+
+
 Reduction modes
 ===============
 
@@ -514,9 +535,85 @@ ones:
 .. index:: run, command line, config
 
 
-Examples
-========
-TBD
+PAPI step-by-step Guide
+=======================
+
+This is a quick guide to run reduce a dataset of a given observing night, doing the step-by-step required  using PAPI. 
+It is assumed that the user has already installed PAPI and has the environment variables set.
+This guide is based on the next assumptions:
+
+
+- source directory --> /data3/out/2025_01_19_cds/
+
+- output directory --> /data2/out/2025_01_19_out/
+
+- calibration directory --> /data2/out/2025_01_19_cal/
+
+
+0. Init PAPI environment:
+
+obs22@panic22:~> source bin/start_papi_env.sh
+Activating PAPI environment...
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi>
+
+Check the **configuration** file:
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> cat config_files/papi.cfg
+
+and check the values of the parameters, for example, if we want to apply the non-linearity correction, we have to set the parameter
+nonlinearity.apply = True in the config file.
+
+Other important parameter that can be set in the config file is the **hwidth** parameter, that is the half-width of the window of sky frames
+used to compute the sky background. The default value is 2, but it can be changed depending on the data and the dither pattern used.
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
+    hwidth = 2
+
+The **HWIDTH** parameter can also be provided in the command line with the option -W, for example:
+(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
+
+
+
+1. Convert raw data to integrated images (optional):
+
+This step is **only** required if you want to convert the raw data (saved as Single Frame Cube) to double correlated and integrated images.
+
+> python commissioning/convRaw2CDS.py -l /tmp/list_raw_files.txt -o /data3/out/2025_01_19_cds/
+
+
+2. Show the sequences in the source directory:
+
+python run_papi.py -s /data3/out/2025_01_19_cds/   -p
+
+
+3. Create the master calibrations:
+
+The calibrations should be created in the calibration directory in the next order:
+
+a) DARKs:
+
+   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DARK
+
+b) DOME_FLATs
+
+   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DOME_FLAT
+
+c) SKY_FLATs
+
+   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -C   /data2/out/2025_01_19_cal/ -T SKY_FLAT
+
+
+
+4. Process the SCI sequences
+
+There is two options to process the SCIENCE sequences:
+
+a) One by one or by groups selecting the IDs of the sequences to be processed:
+
+    >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/  -S seq_init seq_end
+
+b) All the SCIENCE sequences in the source directory:
+
+    >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/   -T SCIENCE
+
 
 .. _config:
 
@@ -1109,6 +1206,8 @@ Principal parameters to set
 ---------------------------
 Although all parameteres of the config file ($PAPI_CONFIG) are important, some of them have special 
 relevance to the right execution and in the results obtained (in bold are default values):
+
+- hwidth: (1 | **2** | 3 | 4)
 
 - apply_dark_flat: (0 | **1** | 2)
 

@@ -16,7 +16,7 @@ as they are needed in order to accomplish a complete data reduction of a set of 
 =======================     ===========
 Main Modules                Description
 =======================     ===========
-``papi``                    Main pipeline script to start the entire data reduction process 
+``run_papi``                    Main pipeline script to start the entire data reduction process 
 ``applyDarkFlat``           Applies basic calibration (dark and flat-field) to the given list of files.
 ``astrowarp``               Creates final aligned and coadded frame using SEx, SCAMP and SWARP 
 ``calBPM``                  Creates a master Bad Pixel Mask from a set of darks and flats calibration files
@@ -31,7 +31,7 @@ Main Modules                Description
 ``dxtalk``                  Removes cross-talk spots from input images
 ``makeobjmask``             Creates a objects mask (SExtractor OBJECTS images) for a list of FITS images.
 ``photometry``              Performs a photometric calibration comparison with 2MASS
-``solveAstrometry``         Performs a astrometric calibration using Astrometry.net and 42xx index files
+``solveAstrometry``         Performs a astrometric calibration using Astrometry.net and 4200/5200 index files
 ``remove_cosmics``          Detects and clean cosmic ray hits on images based on Pieter van 
                             Dokkum's L.A.Cosmic algorithm.
 ``eval_focus_serie``        Estimates the best focus value of a focus exposures
@@ -66,7 +66,7 @@ Utilities                   Description
 
 
 
-``papi``
+``run_papi``
 ********
 
 **Description:**
@@ -82,64 +82,77 @@ will be saved (and deleted at the end) in the ``temp_dir`` directory.
 
 ::
 
-    Usage: papi.py [OPTION]... DIRECTORY...
-    
-    This is PAPI, the PANIC PIpeline data reduction system - IAA-CSIC - Version 1.2.20150508064845
+    usage: run_papi.py [-h] [--version] [-c CONFIG_FILE] [-s SOURCE]
+                   [-d OUTPUT_DIR] [-o OUTPUT_FILE] [-t TEMP_DIR]
+                   [-r ROWS ROWS] [-R] [-l] [-M REDUCTION_MODE] [-m OBS_MODE]
+                   [-S SEQ_TO_REDUCE SEQ_TO_REDUCE]
+                   [-W {Q1,Q2,Q3,Q4,Q123,all}] [-w HWIDTH] [-p]
+                   [-T {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}]
+                   [-b] [-A] [-C EXT_CALIBRATION_DB] [-D MASTER_DARK]
+                   [-F MASTER_FLAT] [-B BPM_FILE] [-g GROUP_BY] [-e]
 
-    Options:
-    --version             show program's version number and exit
+    This is PAPI, the PANIC PIpeline data reduction system - IAA-CSIC - Version
+    2.3.20250508083928
+
+    optional arguments:
     -h, --help            show this help message and exit
-    -c CONFIG_FILE, --config=CONFIG_FILE
+    --version             show program's version number and exit
+    -c CONFIG_FILE, --config CONFIG_FILE
                             Config file for the PANIC Pipeline application.If not
                             specified, './config_files/papi.cfg' is used.
-    -s SOURCE, --source=SOURCE
+    -s SOURCE, --source SOURCE
                             Source file list of data frames. It can be a fileor
                             directory name.
-    -d OUTPUT_DIR, --out_dir=OUTPUT_DIR
+    -d OUTPUT_DIR, --out_dir OUTPUT_DIR
                             Output dir for product files
-    -o OUTPUT_FILE, --output_file=OUTPUT_FILE
+    -o OUTPUT_FILE, --output_file OUTPUT_FILE
                             Final reduced output image
-    -t TEMP_DIR, --temp_dir=TEMP_DIR
+    -t TEMP_DIR, --temp_dir TEMP_DIR
                             Directory for temporal files
-    -r ROWS, --rows=ROWS  Use _only_ files of the source file-list in the
+    -r ROWS ROWS, --rows ROWS ROWS
+                            Use _only_ files of the source file-list in the
                             rangeof rows specified (0 to N, both included)
     -R, --recursive       Does recursive search for files in source directory
     -l, --list            Generate a list with all the source files read fromthe
                             source and sorted by MJD
-    -M REDUCTION_MODE, --red_mode=REDUCTION_MODE
-                            Mode of data reduction to do (quick|science|lab|lemon
-                            |quick-lemon).
-    -m OBS_MODE, --obs_mode=OBS_MODE
+    -M REDUCTION_MODE, --red_mode REDUCTION_MODE
+                            Mode of data reduction to do
+                            (quick|science|lab|lemon|quick-lemon).
+    -m OBS_MODE, --obs_mode OBS_MODE
                             Observing mode (dither|ext_dither|other)
-    -S SEQ_TO_REDUCE, --seq_to_reduce=SEQ_TO_REDUCE
+    -S SEQ_TO_REDUCE SEQ_TO_REDUCE, --seq_to_reduce SEQ_TO_REDUCE SEQ_TO_REDUCE
                             Sequence number to reduce. By default, all sequences
                             found will be reduced.
-    -W DETECTOR, --window_detector=DETECTOR
+    -W {Q1,Q2,Q3,Q4,Q123,all}, --window_detector {Q1,Q2,Q3,Q4,Q123,all}
                             Specify which detector to process:Q1(SG1), Q2(SG2),
                             Q3(SG3), Q4(SG4), Q123(all except SG4), all [default:
                             all]
+    -w HWIDTH, --hwidth HWIDTH
+                            Half width of the window to use for the reduction.If
+                            not specified, the default value 2 is used.
     -p, --print           Print all detected sequences in the Data Set
-    -T SEQ_TYPE, --sequences_type=SEQ_TYPE
+    -T {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}, --sequences_type {DARK,FLAT,DOME_FLAT,SKY_FLAT,FOCUS,SCIENCE,CAL,all}
                             Specify the type of sequences to show: DARK,
                             FLAT(all), DOME_FLAT, SKY_FLAT, FOCUS, SCIENCE, CAL,
                             all [default: all]
     -b, --build_calibrations
                             Build all the master calibrations files
-    -C EXT_CALIBRATION_DB, --ext_calibration_db=EXT_CALIBRATION_DB
+    -A, --apply_dark_flat
+                            Apply dark and flat calibration to source files
+                            [default: False]
+    -C EXT_CALIBRATION_DB, --ext_calibration_db EXT_CALIBRATION_DB
                             External calibration directory (library of Dark & Flat
                             calibrations)
-    -D MASTER_DARK, --master_dark=MASTER_DARK
+    -D MASTER_DARK, --master_dark MASTER_DARK
                             Master dark to subtract
-    -F MASTER_FLAT, --master_flat=MASTER_FLAT
+    -F MASTER_FLAT, --master_flat MASTER_FLAT
                             Master flat to divide by
-    -B BPM_FILE, --bpm_file=BPM_FILE
+    -B BPM_FILE, --bpm_file BPM_FILE
                             Bad pixel mask file
-    -g GROUP_BY, --group_by=GROUP_BY
+    -g GROUP_BY, --group_by GROUP_BY
                             kind of data grouping (based on) to do with thedataset
                             files (ot |filter)
-    -k, --check_data      if true, check data properties matching (type, expt,
-                            filter, ncoadd, mjd)
-    -e, --Check           Check if versions of PAPI modules are right.
+    -e, --check           Check if versions of PAPI modules are right.
 
 
 PAPI creates a in-memory SQLite_ database to store the uncalibrated input data fits 
@@ -157,7 +170,7 @@ The following example reduce, in quick mode, all the sequences of the given dire
 
 ::
    
-   $papi.py -s /my/raw_data/directory -d /my/output/directory -M quick
+   $run_papi.py -s /my/raw_data/directory -d /my/output/directory -M quick
 
    
 .. index:: papi
@@ -596,7 +609,7 @@ Example::
 
 ``correctNonLinearity``
 ***********************
-HAWAII-2RG_ near-IR detectors exhibit an inherent non-linear response. 
+HAWAII-xRG_ near-IR detectors exhibit an inherent non-linear response. 
 It is caused by the change of the applied reverse bias voltage due to the 
 accumulation of generated charge.
 The effect increases with signal levels, so that the measured signal deviates stronger 
@@ -612,26 +625,43 @@ For details see
 `PANIC detector non-linearity correction data <http://panic.iaa.es/sites/default/files/PANIC-DET-TN-02_1_0_Nonlinearity_small.pdf>`_.
 
 
-Usage::
-  
-  Options:
-    -h, --help            show this help message and exit
-    -m MODEL, --model=MODEL
-                          FITS MEF-cube file of polinomial coeffs (c4, c3, c2, c1).
-    -s SOURCE_FILE_LIST, --source=SOURCE_FILE_LIST
-                          Source file list of FITS files to be corrected.
-    -o OUT_DIR, --out_dir=OUT_DIR
-                          filename of out data file (default=/tmp)
-    -S SUFFIX, --suffix=SUFFIX
-                          Suffix to use for new corrected files.
-    -f, --force           Force Non-linearity correction with no check of headervalues (NCOADD, DATE-OBS, DETROT90, ...
+usage: correctNonLinearity.py [-h] [-m MODEL] [-r R_OFFSET] [-i INPUT_FILE]
+                              [-s SOURCE_FILE_LIST] [-o OUT_DIR] [-S SUFFIX]
+                              [-f] [-c]
+
+Performs the non-linearity correction of the PANIC raw data files using the
+proper NL-Model (FITS file). Raw data files must be SEF files; if SEF-cubes,
+each plane is corrected individually.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m MODEL, --model MODEL
+                        FITS SEF (can be a cube) file of polinomial coeffs
+                        (c4, c3, c2, c1) of the NL model.
+  -r R_OFFSET, --reference_offset R_OFFSET
+                        FITS file of reference offset (bias) to be used for
+                        previosly to apply the model
+  -i INPUT_FILE, --input_file INPUT_FILE
+                        FITS file to be corrected.
+  -s SOURCE_FILE_LIST, --source SOURCE_FILE_LIST
+                        Source file list of FITS files to be corrected.
+  -o OUT_DIR, --out_dir OUT_DIR
+                        filename of out data file (default: /tmp)
+  -S SUFFIX, --suffix SUFFIX
+                        Suffix to use for new corrected files (default: _NLC)
+  -f, --force           Force Non-linearity correction with no check of
+                        headervalues (NCOADD, DATE-OBS, DETROT90, ...
+  -c, --coadd_correction
+                        Force NCOADDS correction and apply NLC
+
 
 
 
 ``solveAstrometry``
 *******************
 Performs the astrometric calibration of a set of images, in principle previously 
-reduced, but not mandatory; this routine is built on top of Astromety.net tool.
+reduced, but not mandatory; this routine is built on top of `Astrometry.net <https://astrometry.net/>`_ tool, and
+4200/5200 index files.
 
 Usage::
 

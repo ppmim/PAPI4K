@@ -131,7 +131,7 @@ Maintainer: jmiguel@iaa.es
 
 
 .. links:
-.. |logo| image:: ./QL/resources/logo_PANIC_100.jpg
+.. |logo| image:: ./papi/QL/resources/logo_PANIC_100.jpg
           :width: 127 px
           :alt: PANIC icon
 

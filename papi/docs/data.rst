@@ -33,50 +33,48 @@ capable of saving the frames in different FITS_ (Flexible Image Transport System
 formats (integrated, FITS-cubes, MEF, etc ). Next ones are available in the 
 Observation Tool (OT_) when an OP (Observing Program) is defined:
 
- - Multi-Extension FITS (MEF) - Integrated
- - Multi-Extension FITS (MEF) - Cube
- - Integrated All (SEF - Integrated)
- - FITS Cube (SEF - Cube)
- - Individual (SEF - Individual)
+ - Integrated All (save -i)
+ - FITS Cube (save -1)
+ - Single Frame Cube (save -S -1)
+   This mode can be seen the raw mode, where all the frames of the ramp
+   (including the initial reset frame) are saved into a FITS cube, taking into account also the number of
+   repetitions (NEXP); for example, in the cntsr mode, if we have an ITIME=5.8 secs and NEXP=5, we
+   will get a FITS cube of 15 frames. As result, this mode will require an important extra disk space to
+   store the data.
+ - Individual (save)
+   Similarly as in the FITS cube mode, but saving all the repetitions in Individual
+   files instead of a FITS cube; and therefore, no summation is performed.
  
 
-However, PAPI does not accept any kind of FITS_ data files available in GEIRS_, only
+However, PAPI does not accept any kind of FITS data files available in GEIRS or the OT, only
 the configured in the OT, except `Individual`. As result, PAPI accepts 
 the next type of FITS files (in order of preference):
 
- - Integrated Multi-Extension-FITS (MEF): a unique FITS file with four extensions (MEF),
-   where each extension corresponds to one of the 4 images produced by the single
-   detector chips. 
+ - Integrated All: a unique FITS file with a single extension.
    If the number of coadd (NCOADDS) is > 0, then they will be integrated (arithmetic sum) 
    in a single image. This is the default and more common saving mode used; in fact, it
    is the **default** and more wished saving mode.   
    This mode will also be used when the software or hardware sub-windowing is set and 
    the integrated option is selected. Then, there will be an extension for each sub-window.
-   (This mode makes sense only for the 4xH2RG)  
  
- - Non-integrated Multi-Extension-FITS (MEF): a unique FITS file with four extensions (MEF), 
-   one per each detector (or window), having each extension N planes, where N is the number 
-   of coadds (NCOADDS), ie. a cube of N planes.  
+ - Non-integrated FITS Cube: a unique FITS file having a single extension with N planes, 
+   where N is the number of coadds (NCOADDS), i.e., a cube of N planes.  
    This mode will be also used when the software or hardware subwindowing is set up and 
    the no-integrated option is selected.
-   (This mode makes sense only for the 4xH2RG) 
+   
+   **Note**: Currently when PAPI finds a FITS-cube, it is collapsed adding the planes up 
+   arithmetically without any kind of image registration.
  
- - Single integrated FITS file: the four H2RG detectors / single monolithic H4RG are/is saved in single file and in a 
-   single extension FITS image (SEF). If the number of coadds (NCOADDS) is > 0, then 
-   they are integrated (arithmetic sum) in a single frame.
+  
+ .. Note:: Currently PAPI is **not working** with non-integrated **individual** files of an 
+    exposition. In case you are interested in **raw mode** (Single Frame Cube) and wish to reduce 
+    the data with PAPI, you should convert previously the data to correlated mode (CDS) using the routine `convRaw2CDS.py' 
+    that is included in the papi\commissioning directory.
 
- - Single non-integrated FITS-cube: the four detectors/single monolithic H4RG are/is saved in a single extension 
-   FITS (SEF) file, and each individual exposition in a plane/layer of a cube. It means N 
-   planes, where N is the number of coadds or expositions.
- 
- 
- .. Note:: Currently PAPI is **not working** with non-integrated individual files of an 
-    exposition. In case you are interested in no-integrated files and wish to reduce 
-    the data with PAPI, you should use SEF or MEF non-integrated FITS-cube mode.
 
 |
 
-In the case of the **4 x H2RG**, beware that the order of the chips in the raw image produced is as described in
+In the case of the old **4 x H2RG**, beware that the order of the chips in the raw image produced is as described in
 next figure:
 
 .. image:: _static/standard_full_q.jpg

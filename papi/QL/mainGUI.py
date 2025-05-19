@@ -4749,11 +4749,11 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
         QMessageBox.about(self,
                           "PANIC Quick-Look Tool",
 """
-PQL version: %s\nCopyright (c) 2009-2022 IAA-CSIC  - All rights reserved.\n
+PQL version: %s\nCopyright (c) 2009-2025 IAA-CSIC  - All rights reserved.\n
 Author: Jose M. Ibanez-Mengual (jmiguel@iaa.es)
 Instituto de Astrofisica de Andalucia, IAA-CSIC
 
-This software is part of PAPI (PANIC Pipeline)
+This software is part of PAPI (PANIC-4K Pipeline)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

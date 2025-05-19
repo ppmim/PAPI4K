@@ -75,7 +75,7 @@ Starting PQL
 ============
 
 To start PQL GUI, you can lauch it from the PANIC computer (panic22/panic35) once you are
-logged as obs22/obs35 user. Thus, as any one of the workstations of the observing room,
+logged as obs22. Thus, as any one of the workstations of the observing room,
 open a X terminal window and log into the PANIC computer as follow:
   
 for 2.2m::
@@ -83,10 +83,6 @@ for 2.2m::
     $ ssh -X obs22@panic22 
     (ask Calar Alto staff for password)
    
-for 3.5m::
-
-    $ ssh -X obs35@panic35 
-    (ask Calar Alto staff for password)
    
 Once you are logged into the PANIC computer, to launch PQL GUI type next command::
 
@@ -277,15 +273,6 @@ with the currect night date. If the current night Input/Ouput directories donot 
 to create them.
 
 The currect night is supposed to start at 8 am (UTC) and to end at 8 am (UTC) of next day.
-
-Use GEIRS file
---------------
-
-When this checkbox is clicked, PQL will use the ~/tmp/fitsGeirsWritten file to detect the new files created by
-GEIRS. Files older than 1 day, will no be considered. 
-
-This detection method for FITS files is not frecuently used, but can be useful 
-whether some problem arise reading files just after they have been written by GEIRS.
 
 
 Filename filter 

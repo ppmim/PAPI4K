@@ -3,7 +3,7 @@
 License
 =======
 
-Copyright (c) 2008-2015 IAA-CSIC  - All rights reserved. 
+Copyright (c) 2008-2025 IAA-CSIC  - All rights reserved. 
 Author: Jose M. Ibanez. 
 Institute of Astrophysics of Andalusia, IAA-CSIC
 

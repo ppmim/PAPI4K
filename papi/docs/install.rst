@@ -22,11 +22,11 @@ Software Requirements
 
 Because PAPI is written mostly in Python_ and ANSI C, it can run on any platform
 that has the required Python modules and GCC compilier. However, it has been developed
-and deeply tested under `openSuSE`_ 15.4 and `Ubuntu`_ 19.1 x86_64 Linux OS.
+and deeply tested under `openSuSE`_ 15.5 and `Ubuntu`_ 24.04 x86_64 Linux OS.
 `Python 3.7.x <http://www.python.org>`_ or higher and the following packages
 are required:
 
-    * `Astropy <http://www.astropy.org/>`_ (4.3)
+    * `Astropy <http://www.astropy.org/>`_ (4.3.1)
     * `NumPy <http://numpy.scipy.org/>`_ (> v1.21.x)
     * `SciPy <http://www.scipy.org>`_ (> v1.7.3)
     * `Matplotlib <http://matplotlib.org/>`_ (> v3.5.2)
@@ -94,7 +94,7 @@ manager via pip. We recommend a fresh environment with only python installed. Vi
 .. warning::
 
     Due to Python 3.x incompatibilities present in several tasks, `STScI`_ recommends to install IRAF alongside Python 2.7.
-    However, PAPI is implemented for Python3, and no problems was found by the moment.
+    However, PAPI is implemented for Python3, and no problems were found by the moment.
 
 
 After the installation is complete go ahead and activate the “papienv” environment.
@@ -210,15 +210,11 @@ PAPI Installation
 
 To install a released (tagged) version, you can install directly from Github.  To install tagged release ``papi 2.2.0``::
 
-    $ pip install git+https://github.com/ppmim/PAPI.git
+    $ pip install git+https://github.com/ppmim/PAPI4K.git
 
 The latest development version (from ``master``) can also be installed from Github::
 
-    $ pip install git+https://github.com/ppmim/PAPI.git
-
-Or as a particular commit hash::
-
-    $ pip install git+https://github.com/ppmim/PAPI.git@3f03323c
+    $ pip install git+https://github.com/ppmim/PAPI4K.git
 
 
 
@@ -228,7 +224,7 @@ Installing for developers
 
 Fork and clone the repo::
 
-    $ git clone https://github.com/ppmim/PAPI.git
+    $ git clone https://github.com/ppmim/PAPI4K.git
     $ cd PAPI
 
 Install from your local checked out copy as an "editable" install::
@@ -243,7 +239,7 @@ If you want to run the tests and/or build the docs, you can make sure those depe
 
 Note: If you wish to install directly from github, but also include the extra dependencies, the syntax is as follows::
 
-    $ pip install "papi[test] @ git+https://github.com/ppmim/PAPI.git"
+    $ pip install "papi[test] @ git+https://github.com/ppmim/PAPI4K.git"
 
 Need other useful packages in your development environment::
 
@@ -282,7 +278,11 @@ Please submit issues with the `issue tracker`_ on github.
 
 Release Notes
 -------------
-* 3.0.0 
+* 2.3.x
+    - Fix many bugs and update NLC to work H4RG detector on openSuSE15.5 / Ubuntu 24.04
+* 2.2.x
+    - Fix many bugs and update to work H4RG detector on openSuSE15.5 / Ubuntu 24.04      
+* 2.1.0 
     - Fix many bugs and update to work H4RG detector on openSuSE15.4
 * 2.0.x
     - Support for new PANIC detector H4RG

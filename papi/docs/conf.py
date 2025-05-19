@@ -57,7 +57,7 @@ copyright = u'2008-2025, J.M.Ibáñez-Mengual (IAA-CSIC)'
 # built documents.
 #
 # The short X.Y version.
-version = '3.1'
+version = '2.3'
 from misc.version import __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__

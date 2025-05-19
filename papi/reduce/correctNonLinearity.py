@@ -247,9 +247,6 @@ class NonLinearityCorrection(object):
         if self.r_offset:
             try:
                 ref_offset = fits.open(self.r_offset)[0].data
-                if ref_offset.shape != hdulist[0].data.shape:
-                    log.warning("Mismatch in header data for input reference offset")
-                    raise ValueError('Mismatch in header data for input reference offset')
             except Exception as e:
                 log.error("Cannot read reference offset file '%s'" % self.r_offset)
                 raise e
@@ -345,7 +342,7 @@ class NonLinearityCorrection(object):
         log.debug("Mean value of data: %s" % str(np.mean(data)))
         data = data - sub_r_offset*n_coadd
         log.debug("Mean value of data after offset: %s" % str(np.mean(data)))
-        
+
         # calculate linear corrected data
         lindata = self.polyval_map(nlpolys_subsection, data)
         

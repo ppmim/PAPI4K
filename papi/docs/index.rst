@@ -14,8 +14,8 @@ PANIC Pipeline Documentation
 .. warning::
 
    1. This "Documentation" is still a work in progress; some of the material
-   is not organized, and several aspects of PAPI are not yet covered
-   with sufficient detail.
+   might be not well organized yet, and several aspects of PAPI are not yet covered
+   and some sections might be incomplete or subject to change as the pipeline evolves.
 
    2. This manual support **HAWAII-2RG** and **HAWAII-4RG** detectors.
 
@@ -25,8 +25,8 @@ all processing routines used by PQL are implented in PAPI.
 
 
 PAPI is the automatic image processing pipeline for data taken with the 
-`PAnoramic Near Infrared Camera (PANIC) <http://www.iaa.es/PANIC>`_ for the 2.2m 
-and 3.5m Telescopes at `Calar Alto Observatory (CAHA) <http://www.caha.es>`_. 
+`PAnoramic Near Infrared Camera (PANIC) <https://www.caha.es/joomlaCMS/es/component/sppagebuilder/page/187>`_ for the 2.2m telescope
+at `Calar Alto Observatory (CAHA) <http://www.caha.es>`_. 
 The pipeline is written in Python_ and developed at the `Institute of Astrophysics 
 of Andalusia (CSIC) <http://www.iaa.es/>`_. The automated processing steps 
 include basic calibration (removeing instrumental signature), cosmic-ray removal, 
@@ -39,12 +39,8 @@ by the PAPI pipeline, showing the status of the current pipeline version
 and describing data reduction process of the PANIC data using PAPI.
 
 Although PAPI was developed for the PANIC camera with **H2RG** detector, it was updated
-in 2022 to support the new **H4RG** detector integrated into PANIC.
+in 2025 to support the new **H4RG** detector integrated into PANIC.
 
-Moreover, its development was initiated using data from Omega2000_ camera at
-the 3.5m CAHA telescope and HAWK-I_ camera at the VLT; thus, in principle it
-should work with data these instruments, although it is not
-optimized for them.
 
 In addition to this html version of the manual, there is also a pdf_ version to download.
 
