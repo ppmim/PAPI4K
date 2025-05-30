@@ -563,7 +563,7 @@ def fixPix(im, mask, iraf=False):
       im = the image array
       mask = an array that is True (or >0) where im contains bad pixels
       iraf = True use IRAF.fixpix; False use numpy and a loop over 
-             all pixels (extremelly low)
+      all pixels (extremelly low)
 
     Outputs:
       fixed = the corrected image
@@ -658,14 +658,14 @@ def applyBPM(filename, master_bpm, output_filename, overwrite=False):
         If False, the input filename will no be modified, and bad pixels will 
         be masked in the output_filename.
 
-     Returns
-     -------
+     Returns:
+     --------
      output_filename: str
         If success, the output filename with the masked pixels.
 
-    TODO
-    ----
-    - add support for MEF files
+     TODO:
+     
+     - add support for MEF files
     
     """
     

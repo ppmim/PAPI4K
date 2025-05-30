@@ -89,7 +89,7 @@ This will contain a reference guide for developers of the application.
 :mod:`reduce.NonLinearity` --- Non-Linearity correction
 =======================================================
 
-.. automodule:: reduce.calNonLinearity
+.. automodule:: reduce.correctNonLinearity
    :synopsis: Non-Linearity correction
    :members:
    :undoc-members:      

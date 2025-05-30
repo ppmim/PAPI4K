@@ -329,7 +329,7 @@ def de_crosstalk_PANIC_full_detector(in_image, out_image=None, overwrite=False):
     of height. So, all the quadrant are processed in the same way.  
     
     Parameters:
-    ----------
+    -----------
     in_image: str
         Filename of the FITS image to remove the xtalk. It must be a single FITS,
         MEF are not supported yet.

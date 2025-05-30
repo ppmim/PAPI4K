@@ -9,13 +9,13 @@ Installation
 
 Does PAPI work with python 3?
 -----------------------------
-It has not been tested yet, but probably it does not work.
+Yes, it has been migrated and tested under python 3.7, but probably it does not work with higher versions due to PyRAF dependencies.
 
 What GUI toolkit does PAPI-QL use?
 ----------------------------------
-PAPI Quick-Look uses Qt toolkit.
+PAPI Quick-Look uses Qt toolkit (PyQt5)
 
-Can PAPI-QL work with PyQt5?
+Can PAPI-QL work with PyQt6?
 --------------------------
 It has not been tested yet, but probably it does not work.
 
@@ -31,7 +31,7 @@ meta-data about the observation, and thus the pipeline can group the data and
 find the required calibrations for a successful reduction. Then, you only have to
 type:
 
-> papi -s /data1/PANIC/my_program/ 
+> run_papi -s /data1/PANIC/my_raw_data/ 
 
 How can process a broken, interrupted or non OT sequence ?
 ----------------------------------------------------------

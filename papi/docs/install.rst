@@ -305,6 +305,6 @@ Release Notes
 .. _Ubuntu: https://ubuntu.com/download/desktop
 .. _Conda: https://docs.conda.io/projects/conda/en/latest/index.html
 .. _Anaconda3: https://www.anaconda.com/distribution/#download-section
-.. _issue tracker: https://github.com/ppmim/PAPI/issues
+.. _issue tracker: https://github.com/ppmim/PAPI4K/issues
 .. _Python: http://www.python.org
 .. _STScI: https://astroconda.readthedocs.io/en/latest/installation.html

@@ -26,7 +26,7 @@ Quickstart
 
 Running PAPI can be as simple as executing the following command in a terminal::
 	
-	$ run_papi -s raw_data -d result
+	$ run_papi -s raw_data -d /my/result/directory
 
 Where ``raw_data`` is the directory of the raw dataset (uncalibrated) having 
 both science or calibration files, and ``result`` is the path to the directory 
@@ -34,7 +34,7 @@ where the calibrated data produced by the pìpeline will be saved.
 
 Example::
 
-   $ papi -s /my/raw_data/directory -d /my/result/directory
+   $ run_papi -s /my/raw_data_source/directory -d /my/result/directory
 
 .. index:: uncalibrated, data
 
@@ -428,7 +428,7 @@ the same directory of the source data to be proceesed. However, the user can
 specify an anternative directory to look for calibrations using two different methods:
 
   * in the config file keyword *ext_calibration_db*
-  * in the command line parameter *--ext_calibration_db*
+  * in the command line parameter *--ext_calibration_db* / *-C*
   
 The second method has higher priority if both are used.
 
@@ -458,6 +458,10 @@ Note::
 
 Reduce a single detector
 ------------------------
+.. note::
+    This option is only available for old PANIC data with 4xH2RG FPA, and it is not available for PANIC-4K data.
+
+
 By default PAPI processes all the detector and builds the mosaic with the reduced detectors.
 However, if you do not need to reduce all the detectors, but only one of them (Q1...Q4), you
 can use the option '-W Qx'::
@@ -477,11 +481,17 @@ Setting the HWIDTH parameter for the sky background computation
 
 This important parameter that can be set in the config file is the **hwidth** parameter, that is the half-width of the window of sky frames
 used to compute the sky background. The default value is 2, but it can be changed depending on the data and the dither pattern used.
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
+
+Example::
+
+    (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
     hwidth = 2
 
 The **HWIDTH** parameter can also be provided in the command line with the option -W, for example:
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
+
+Example::
+
+    (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
 
 
 
@@ -550,69 +560,91 @@ This guide is based on the next assumptions:
 - calibration directory --> /data2/out/2025_01_19_cal/
 
 
-0. Init PAPI environment:
+    #. Init PAPI environment:
 
-obs22@panic22:~> source bin/start_papi_env.sh
-Activating PAPI environment...
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi>
+        ::
 
-Check the **configuration** file:
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> cat config_files/papi.cfg
+            obs22@panic22:~> source bin/start_papi_env.sh
+            Activating PAPI environment...
+            (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi>
 
-and check the values of the parameters, for example, if we want to apply the non-linearity correction, we have to set the parameter
-nonlinearity.apply = True in the config file.
+            Check the **configuration** file:
+            (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> cat config_files/papi.cfg
 
-Other important parameter that can be set in the config file is the **hwidth** parameter, that is the half-width of the window of sky frames
-used to compute the sky background. The default value is 2, but it can be changed depending on the data and the dither pattern used.
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
-    hwidth = 2
+        and check the values of the parameters, for example, if we want to apply the non-linearity correction, we have to set the parameter
+        nonlinearity.apply = True in the config file.
 
-The **HWIDTH** parameter can also be provided in the command line with the option -W, for example:
-(papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
+        Other important parameter that can be set in the config file is the **hwidth** parameter, that is the half-width of the window of sky frames
+        used to compute the sky background. The default value is 2, but it can be changed depending on the data and the dither pattern used.
+        
+        .. code-block:: bash
 
+            (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> grep hwidth config_files/papi.cfg
+            hwidth = 2
 
+        The **HWIDTH** parameter can also be provided in the command line with the option -W, for example:
 
-1. Convert raw data to integrated images (optional):
+        .. code-block:: bash
 
-This step is **only** required if you want to convert the raw data (saved as Single Frame Cube) to double correlated and integrated images.
-
-> python commissioning/convRaw2CDS.py -l /tmp/list_raw_files.txt -o /data3/out/2025_01_19_cds/
-
-
-2. Show the sequences in the source directory:
-
-python run_papi.py -s /data3/out/2025_01_19_cds/   -p
-
-
-3. Create the master calibrations:
-
-The calibrations should be created in the calibration directory in the next order:
-
-a) DARKs:
-
-   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DARK
-
-b) DOME_FLATs
-
-   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DOME_FLAT
-
-c) SKY_FLATs
-
-   >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -C   /data2/out/2025_01_19_cal/ -T SKY_FLAT
+            (papi) obs22@panic22:/data1/ICS/QL_INSTALL/PAPI22/papi> run_papi -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C /data2/out/2025_01_19_cal/ -w 3 -S seq_init seq_end
 
 
 
-4. Process the SCI sequences
+    #. Convert raw data to integrated images (optional):
 
-There is two options to process the SCIENCE sequences:
+       This step is **only** required if you want to convert the raw data (saved as Single Frame Cube) to double correlated and integrated images.
+       
+        .. code-block:: bash
 
-a) One by one or by groups selecting the IDs of the sequences to be processed:
+            > python commissioning/convRaw2CDS.py -l /tmp/list_raw_files.txt -o /data3/out/2025_01_19_cds/
 
-    >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/  -S seq_init seq_end
 
-b) All the SCIENCE sequences in the source directory:
+    #. Show the sequences in the source directory:
 
-    >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/   -T SCIENCE
+       .. code-block:: bash
+
+            > python run_papi.py -s /data3/out/2025_01_19_cds/   -p
+
+
+    #. Create the master calibrations:
+
+       The calibrations should be created in the calibration directory in the next order:
+
+       a) DARKs:
+
+        .. code-block:: bash
+
+            >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DARK
+
+       b) DOME_FLATs
+
+        .. code-block:: bash
+
+            >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -T DOME_FLAT
+
+       c) SKY_FLATs
+
+        .. code-block:: bash
+        
+             >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_cal/ -C   /data2/out/2025_01_19_cal/ -T SKY_FLAT
+
+
+
+    #. Process the SCI sequences
+
+       There is two options to process the SCIENCE sequences:
+
+       a) One by one or by groups selecting the IDs of the sequences to be processed:
+
+         .. code-block:: bash
+
+            >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/  -S seq_init seq_end
+
+       b) All the SCIENCE sequences in the source directory:
+
+       .. code-block:: bash
+
+          >python run_papi.py -s /data3/out/2025_01_19_cds/ -d /data2/out/2025_01_19_out/ -C   /data2/out/2025_01_19_cal/   -T SCIENCE
 
 
 .. _config:
@@ -1290,4 +1322,4 @@ and extended objects). Here are some tips for reducing each types of data:
 * Crowded fields:
 * Extended objects:
 
-*Add tips here*
+*TBC*

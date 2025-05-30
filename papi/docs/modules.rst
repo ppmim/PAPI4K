@@ -67,7 +67,7 @@ Utilities                   Description
 
 
 ``run_papi``
-********
+************
 
 **Description:**
 
@@ -499,7 +499,7 @@ Example::
 ``dxtalk``               
 **********
 
-PANIC HAWAII-2RG_ sensors with multiple parallel readout sections show crosstalk 
+PANIC HAWAII-xRG_ sensors with multiple parallel readout sections show crosstalk 
 in form of compact positive and negative ghost images whose amplitude varies between 
 readout sections. PAPI has a optional de-crosstalk module that assumes that the 
 amplitude is the same, therefore the correction will only partially remove the 
@@ -509,7 +509,7 @@ observations.
 
 It can be activated or deactivated in the :ref:`config` (remove_crosstalk=True|False).
 
-.. _note::
+.. note::
 
     "Characterization, Testing and Operation of Omega2000 Wide Field Infrared
     Camera", Zoltan Kovacs et.al.
@@ -607,6 +607,8 @@ Example::
 
     $ photometry.py -i /data/reduced.fits -o /tmp/calibration.pdf
 
+.. _nlc:
+
 ``correctNonLinearity``
 ***********************
 HAWAII-xRG_ near-IR detectors exhibit an inherent non-linear response. 
@@ -637,7 +639,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -m MODEL, --model MODEL
                         FITS SEF (can be a cube) file of polinomial coeffs
-                        (c4, c3, c2, c1) of the NL model.
+                        (c1 to c7) of the NL model.
   -r R_OFFSET, --reference_offset R_OFFSET
                         FITS file of reference offset (bias) to be used for
                         previosly to apply the model
@@ -656,6 +658,20 @@ optional arguments:
 
 
 
+Additionally, PAPI has a configuration file (default: ``papi.cfg``) that can be used to enable and set the
+default values of the parameters used by the non-linearity correction module (reference offset and model coefficients files).
+It is located in the ``config_files`` directory of the PAPI installation directory.
+
+Configuration file example::
+
+    [nonlinearity]
+    # Non-linearity correction configuration    
+    apply = True
+    suffix = "NL"
+    # FITS file containing the NL model for correction
+    model_cntsr = /data/Calibs2/BD_NLC/NLCORR_2025-04-09.fits
+    # FITS file containing the reference offset (bias) to be used for correction
+    cds_offset_cntsr = /data/Calibs2/BD_NLC/CDS-OFFSET_2025-03-27.fits  
 
 ``solveAstrometry``
 *******************
@@ -699,5 +715,5 @@ Usage::
 .. _scamp: http://www.astromatic.net/software/scamp
 .. _swarp: http://www.astromatic.net/software/swarp
 .. _SQLite: http://www.sqlite.org
-.. _HAWAII-2RG: http://panic.iaa.es/detectors
+.. _HAWAII-xRG: https://www.caha.es/images/panic/Hawaii-4RG.pdf
 

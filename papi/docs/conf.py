@@ -32,7 +32,12 @@ sys.path.insert(0, '../')
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx',
               'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.imgmath',
-              'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
+              'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'sphinx.ext.napoleon']
+
+
+
+#suppress_warnings = ['app.add_directive', ]
+
 # extensions.append('sphinx.ext.numpydoc')
 extensions.append('sphinx.ext.autosummary')
 
@@ -92,6 +97,7 @@ exclude_patterns = ['_build']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
+#pygments_style = 'lovelace'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []

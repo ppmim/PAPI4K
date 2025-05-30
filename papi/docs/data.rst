@@ -7,8 +7,7 @@ are organized. However, for a deeper description, see the GEIRS_ manual.
 Detector
 --------
 The PANIC instrument had initially was mounted with a mosaic of four 2k x 2k
-HAWAII-2RG_ detectors. However, during 2020 a new single (monolithic) 4k x 4k HAWAII-4RG_ detector
-was installed due to the damages in the HAWAII-2RG_.
+HAWAII-2RG_ detectors. However, during 2020 was initiated the installation of a new single (monolithic) 4k x 4k HAWAII-4RG_ detector due to the damages in the HAWAII-2RG_.
 
 
  * H2RG: The detector is an array (FPA) of four HAWAII-2RG_ detectors. The inter-chip

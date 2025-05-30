@@ -100,8 +100,9 @@ extern float *skysub_nomask(float *img, int nx, int ny, float bkg, float *bpm /*
     	else if (bpm[i] <= 0){
             if (fix_type==1) /* fix bad pixels with bkg level */
                 imgout[i] = bkg;   /* set bad pixels to bkg lvl */
-            else 
+            else{ 
                 imgout[i] = 0.0/0.0; /* grab bad pixels to NaN - default !*/
+	    }
         }
     	else{
             imgout[i] = img[i] + (skybkg - sky[i]); /* add constant (skybkg) to preserve original count level */
