@@ -968,7 +968,8 @@ class ReductionSet(object):
                 master_flat = self.ext_db.GetFilesT('MASTER_TW_FLAT', -1, filter)
         
 
-        if self.ext_db: 
+        if self.ext_db:
+            log.debug("External Calibration files: %s" % self.ext_db_files)
             self.ext_db.ListDataSet()
         
         # BPM
@@ -1452,10 +1453,9 @@ class ReductionSet(object):
         else:
             log.error("Observing mode not supported")
             raise Exception("Observing mode not supported in skyFilter")
-                  
-        
-        print("SKY_FILTER_CMD = ", skyfilter_cmd)
-        # print("CMD_ARGS = ", skyfilter_cmd.split())
+
+
+        log.debug("SKY_FILTER_CMD = %s", skyfilter_cmd)
         args = skyfilter_cmd.split()
         
         output_lines = []
@@ -1466,7 +1466,7 @@ class ReductionSet(object):
             sys.stdout.flush()
             sys.stderr.flush()
         except subprocess.CalledProcessError as e:
-            log.critical("Error running skyfilter: %s" % output_lines)
+            log.critical("Error running skyfilter: %s" % str(e.output))
             log.debug("Exception: %s"%str(e))
             raise Exception("Error running skyfilter")
         
@@ -2848,8 +2848,6 @@ class ReductionSet(object):
                 if self.red_mode == 'quick' or self.red_mode == 'quick-lemon':
                     # Quick-Mode: optionally calibrations are used.
                     if self.apply_dark_flat == 1 or self.apply_dark_flat == 2:
-                        if self.db is None: print("ERRORRRRR!!!")
-                        else: print("TODO OK !!") 
                         dark, flat, bpm = self.getCalibFor(sequence)
                 else:
                     # Science-Mode: always calibration are required or at least tried to find !

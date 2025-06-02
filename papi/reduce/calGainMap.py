@@ -57,6 +57,8 @@ from papi.reduce.calDomeFlat import MasterDomeFlat
 import papi.misc.robust as robust
 from papi.misc.version import __version__
 
+import warnings
+warnings.filterwarnings('ignore', category=fits.verify.VerifyWarning)
 
 class SkyGainMap(object):
     """ Compute the gain map from a list of sky frames """

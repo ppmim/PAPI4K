@@ -229,7 +229,6 @@ def main(arguments=None):
         config_file = init_options.config_file
     
     
-    print("init_options:", init_options)
 
     # Now, we "mix" the invokation parameter values with the values in the 
     # config file, having priority the invokation values over config file values
@@ -251,7 +250,6 @@ def main(arguments=None):
     # print "options = ",options
 
     general_opts = options['general']
-    print("GEN_OPTS",general_opts)
 
     if not general_opts['source'] or not general_opts['output_file'] \
         or not general_opts['output_dir'] or not general_opts['temp_dir']:
@@ -304,7 +302,6 @@ def main(arguments=None):
             parser.print_help()
         else:
             options['skysub']['hwidth'] = init_options.hwidth
-            print("===============================> hwidth = ", options['skysub']['hwidth'])
 
     log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     log.debug(">> Starting PAPI...")
@@ -317,6 +314,7 @@ def main(arguments=None):
     log.debug("   + Reduction_mode: %s",general_opts['reduction_mode'])
     log.debug("   + Astrometric catalog: %s", options['astrometry']['catalog'])
     log.debug("   + Check Data: %s", general_opts['check_data'])
+    log.debug("   + Hwidth: %d", options['skysub']['hwidth'])
     log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     
     # Create the RS (it works both simple FITS as MEF files)

@@ -239,6 +239,7 @@ class MasterDark(object):
                         nlow='0',
                         nhigh='1',
                         nkeep='1',
+                        blank='INDEF',
                         scale=scale_str,
                         #expname = 'EXPTIME'
                         #ParList = _getparlistname('darkcombine')

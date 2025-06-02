@@ -365,7 +365,7 @@ class NonLinearityCorrection(object):
         # add some info in the header
         linhdu.header['HISTORY'] = 'Nonlinearity correction applied'
         linhdu.header['HISTORY'] = 'Nonlinearity data: %s' %nlheader['ID']
-        linhdu.header['HISTORY'] = '<-- The PANIC team made this on 2024/02/29'
+        linhdu.header['HISTORY'] = '<-- The PANIC team made this on 2025/05/30'
         linhdu.header.set('PAPIVERS', __version__,'PANIC Pipeline version')
         linhdulist = fits.HDUList([linhdu])
         

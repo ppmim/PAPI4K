@@ -62,6 +62,9 @@ import papi.misc.cleanBadPix as cleanBadPix
 import numpy
 
 
+import warnings
+warnings.filterwarnings('ignore', category=fits.verify.VerifyWarning)
+
 class ExError (Exception): 
     """ Next class if for a general execution Exception """
     pass
@@ -436,7 +439,6 @@ class ApplyDarkFlat(object):
                     # the calibrations works correctly for data cubes of data, 
                     # no matter if they are MEF or single HDU fits.
                     f_mean = robust.r_nanmean(flat_data)
-                    print("FFLAT_MEAN = ", f_mean)  
                     sci_data = (sci_data - dark_data)  / (flat_data)
                     
                     # Now, apply BPM
@@ -487,7 +489,12 @@ class ApplyDarkFlat(object):
                 result_file_list.append(newpathname)            
                 log.debug('Saved new dark subtracted or/and flattened or/and BP Masked file  %s',
                           newpathname )
-        
+
+        if self.__mdark and dark is not None: dark.close()
+        if self.__mdark and cdark is not None: del cdark
+        if self.__mflat and flat is not None: flat.close()
+        if self.__mflat and cflat is not None: del cflat
+                
         log.debug(t.tac() )
         log.info("Successful end of applyDarkFlat !")
                 

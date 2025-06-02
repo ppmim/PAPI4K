@@ -26,6 +26,7 @@ from optparse import OptionParser
 from papi.misc.paLog import log
 from papi.datahandler.clfits import ClFits
 
+
 __docformat__ = "restructuredtext"  
 
 ############################################################
