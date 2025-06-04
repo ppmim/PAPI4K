@@ -3708,7 +3708,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
             try:
                 if self.m_masterNLC and os.path.isfile(self.m_masterNLC):
                     master_nlc =  self.m_masterNLC
-                    non_linearity_cds_offset_cntsr = self.config_dict['nonlinearity']['cds_offset_cntsr']   
+                    non_linearity_cds_offset_cntsr = self.config_opts['nonlinearity']['cds_offset_cntsr']   
                 else:
                     # master_nlc =  self.config_opts['nonlinearity']['model_cntsr']
                     # Find out the readmode
@@ -3716,7 +3716,7 @@ class MainGUI(QtWidgets.QMainWindow, form_class):
                         myhdulist = fits.open(self.m_popup_l_sel[-1])
                         if myhdulist[0].header['READMODE'] == 'continuous.sampling.read':
                             master_nlc = self.config_opts['nonlinearity']['model_cntsr']
-                            non_linearity_cds_offset_cntsr = self.config_dict['nonlinearity']['cds_offset_cntsr']
+                            non_linearity_cds_offset_cntsr = self.config_opts['nonlinearity']['cds_offset_cntsr']
                         elif myhdulist[0].header['READMODE'] == 'line.interlaced.read':
                             master_nlc = self.config_opts['nonlinearity']['model_lir']
                         elif myhdulist[0].header['READMODE'] == 'fast-reset-read.read':

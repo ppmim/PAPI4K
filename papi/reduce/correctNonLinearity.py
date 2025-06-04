@@ -246,7 +246,8 @@ class NonLinearityCorrection(object):
         # load reference offset file
         if self.r_offset:
             try:
-                ref_offset = fits.open(self.r_offset)[0].data
+                ref_offset_hdu = fits.open(self.r_offset)
+                ref_offset = ref_offset_hdu[0].data.astype('float32')
             except Exception as e:
                 log.error("Cannot read reference offset file '%s'" % self.r_offset)
                 raise e
@@ -317,8 +318,9 @@ class NonLinearityCorrection(object):
             log.info("Using provided n_coadd value.")
         # Fin-del-parche 
 
-        # load file data (and fix coadded images => coadd_correction)
-        data = hdulist[0].data / n_coadd
+        
+        # load file data
+        data = hdulist[0].data
         nlmaxs = nlhdulist['LINMAX'].data
         nlpolys = np.rollaxis(nlhdulist['LINPOLY'].data, 0, 3)
 
@@ -336,6 +338,9 @@ class NonLinearityCorrection(object):
             nlmaxs_subsection = nlmaxs
             nlpolys_subsection = nlpolys
 
+        # Print x,y ranges for debugging
+        log.debug(f"Using DETSEC: x1={x1}, x2={x2}, y1={y1}, y2={y2}")
+
         # subtract reference offset taking into account the coadd_correction (repetitions integrated)
         log.info("Subtracting reference offset")
         log.debug("Mean value of reference offset: %s" % str(np.mean(ref_offset)))
@@ -344,7 +349,7 @@ class NonLinearityCorrection(object):
         log.debug("Mean value of data after offset: %s" % str(np.mean(data)))
 
         # calculate linear corrected data
-        lindata = self.polyval_map(nlpolys_subsection, data)
+        lindata = self.polyval_map(nlpolys_subsection, data/n_coadd)
         
         # mask saturated inputs - to use nan it has to be a float array
         lindata[data > nlmaxs_subsection] = np.nan
@@ -358,6 +363,7 @@ class NonLinearityCorrection(object):
             # we have a single 2D image
             lindata[np.isnan(nlmaxs_subsection)] = np.nan
 
+        
         # Undo the coadd_correction
         lindata = lindata * n_coadd       
         linhdu.data = lindata.astype('float32')
@@ -377,7 +383,16 @@ class NonLinearityCorrection(object):
 
         # overwrite the output file if exists
         linhdulist.writeto(outfitsname, overwrite=True)
+
+        # close input files
+        hdulist.close()
+        nlhdulist.close()
+        ref_offset_hdu.close()
+        linhdulist.close()
+
+        log.info("Non-linearity correction applied to file '%s'" % outfitsname)
         
+        # remove the input file if it is a temporary file 
         if to_delete:
             os.unlink(to_delete)
 
