@@ -93,11 +93,13 @@ In next sections we describe the main calibration to be done by PAPI.
 
 Computing the master dark
 -------------------------
-TBD
+The master dark is built doing a median combine of a set of darks files with the same exposure time.
+It is done in ``calDark.py`` module.
+
 
 Computing the master flat-field
 -------------------------------
-TBD
+The master flat-field can be built from dome flat or sky (dusk or dawn) flats fields.
 
 Computing the Bad Pixel Mask
 ----------------------------
@@ -115,11 +117,49 @@ First pass sky subtraction
 
 Sky model
 ---------
-TBD
+In near-infrared (NIR) image processing, a sky model refers to an estimate of the spatial 
+and temporal structure of the sky background emission, which is then subtracted from the science images. 
+Constructing a good sky model is critical due to the bright, variable, and structured sky background in the NIR.
+
+A good sky model should:
+
+- Capture temporal variation (via adjacent exposures or interpolation)
+
+- Preserve object flux (no over-subtraction)
+
+- Handle residual structures or instrumental effects (e.g. persistence, striping)
+
+
+PAPI has implemented an sky model based on differenct strategies depending on the observing mode:
+
+#. Using dithered target images.
+
+    For sparse fields or small targets, sky can be estimated from the science images themselves by dithering.
+
+    A sky model is built using a stack (median or sigma-clipped average) of temporally adjacent frames (2*hwidth), excluding the objects via masking.
+
+    This is known as a self-sky or sky from dither method.
+
+#. Using dedicated sky frames.
+
+    When the target fills most of the field (e.g. extended objects), separate sky exposures (S) are taken.
+
+    A sky model is built by combining (e.g., median or sigma-clipped average) these temporally adjacent frames (2*hwidth)  after masking sources.
+
+    The model is subtrated to each target frame. This is known as extended object method.
+
+#. Fitting a sky surface per image.
+
+    A 2D surface or low-order polynomial is fitted to the background of each image after masking sources.
+
+    This local model is then subtracted. It is used for quick-look inspection of an target, and is kwnown as 
+    self-sky subtraction.
+
 
 Object detection
 ****************
-TBD
+The object detection is done using the well-known software SExtractor_, using its most recent version.
+
 
 Offset computation
 ******************
@@ -184,10 +224,32 @@ in the *general* section the keyword *remove_crosstalk = True*.
 
 Extended Objects
 ****************
+
 If your targets are really extended and/or very faint, then you should seriously 
 consider observing blank SKY fields. They will be recognized and automatically 
 used in the correct manner once identified by PAPI. No additional settings 
 have to be made. You should check though that the images have correct header keys.
+
+PAPI recognizes and can process the extended object dither patterns available in the 
+**Observation Tool (OT)**, which allow combining the dither pattern defined by the user 
+with different Target (T) and Sky (S) options:
+
+#. T-S (dither_on_off, skyfilteronff)
+#. T-S-T (dither_general, skyfilter_general)
+#. T-T-S (dither_general, skyfilter_general)
+#. T-T-S-S (dither_general, skyfilter_general)
+
+For these cases, PAPI will perform the sky subtration using 2*hwidth nearest Sky (S) images to the Target (T)
+image to build the sky model to be subtracted to each Target image (T).
+
+In addition to that dither patterns defined in the OT, PAPI is able to recognize and process almost
+any other combination of T and S images, using in that case the ``skifitler_general`` proccess. Similarly, 
+sky subtraction is performed using the 2*hwidth nearest sky images available (hwidth preceding and hwidth 
+following the target image). 
+
+
+After sky subtraction is applied to all Target images in the dither sequence, a final stacked (coadded) 
+image is generated using **only** the Target (T) images.
 
 
 

@@ -146,7 +146,7 @@ def main(arguments=None):
     parser.add_argument("-w", "--hwidth",
                   action="store", dest="hwidth", type=int,
                   default=2,
-                  help="Half width of the window to use for the reduction." 
+                  help="Half width of the window of the sky frames to use for computing the sky background to subtract." 
                   "If not specified, the default value %(default)s is used.")
     
     parser.add_argument("-p", "--print",
