@@ -1,6 +1,9 @@
 Full changelog
 ==============
 
+v2.2.1 (released)
+-----------------
+- New version with new directory structure
 
 v2.0.0 (released)
 -----------------

@@ -11,7 +11,7 @@ sky subtraction, non-linear count-rate correction, robust alignment and
 registration.
 
 Although PAPI was developed for the PANIC camera with H2RG detector, it was updated 
-in 2022 to support the new H4RG detector integrated into PANIC. 
+in 2025 to support the new H4RG detector integrated into PANIC. 
 
 PANIC_ is a general purpose Panoramic Near Infrared camera for Calar Alto. 
 It is optimized for use at the 2.2m telescope, but can also be installed 
