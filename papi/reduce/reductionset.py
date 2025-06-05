@@ -1470,7 +1470,8 @@ class ReductionSet(object):
             log.debug("Exception: %s"%str(e))
             raise Exception("Error running skyfilter")
         
-        
+        log.debug("Output from skyfilter: %s" % str(output_lines)) 
+
         # look for sky subtracted images created by irdr::skyfilter            
         files = [line.split(" ")[0].replace("\n","") 
                     for line in fileinput.input(list_file)] # it takes into account the two kind of possible inputs files to skyfilter

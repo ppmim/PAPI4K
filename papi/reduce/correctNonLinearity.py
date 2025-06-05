@@ -347,9 +347,11 @@ class NonLinearityCorrection(object):
         log.debug("Mean value of data: %s" % str(np.mean(data)))
         data = data - sub_r_offset*n_coadd
         log.debug("Mean value of data after offset: %s" % str(np.mean(data)))
+        # Correct data from n_coadd  
+        data = data / n_coadd
 
         # calculate linear corrected data
-        lindata = self.polyval_map(nlpolys_subsection, data/n_coadd)
+        lindata = self.polyval_map(nlpolys_subsection, data)
         
         # mask saturated inputs - to use nan it has to be a float array
         lindata[data > nlmaxs_subsection] = np.nan

@@ -75,7 +75,9 @@ int main(int argc, char *argv[])
         fix_type = atoi(argv[7]); /* if >0, some BadPix fix is done (replace with backlvl)*/
     else
         fix_type = 0; /* default: no BadPix fix is done (NaNs) */
-    
+
+    fprintf(stderr, "\nFIX_TYPE=%d\n", fix_type);
+
     if (usemask)
         nplanes = readlist(argv[1], fn, mfn, xshift, yshift, MAXNPLANES);
     else
