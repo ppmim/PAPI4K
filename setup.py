@@ -1,7 +1,6 @@
 from os.path import basename
 from setuptools import setup, find_packages
 from glob import glob
-from buildqt import BuildQt
 from setuptools.command.install import install
 import os
 import subprocess
@@ -78,7 +77,6 @@ TESTS_REQUIRE = [
 ]
 
 cmdclass = {}
-cmdclass['build_qt'] = BuildQt
 cmdclass['install'] = InstallWrapper
 
 setup(
