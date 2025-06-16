@@ -1,18 +1,26 @@
 ---
-author:
-- José-Miguel Ibáñez-Mengual$^{1}$[^1], Matilde Fernández$^{1}$
+title: "PAPI: An Open-Source Data Reduction Pipeline for the PANIC Instrument at Calar Alto Observatory"
+tags:
+  - Python
+  - astronomy
+  - infrared
+  - pipeline
+
+authors:
+  - name: Jose Miguel Ibáñez Mengual
+    orcid: 0000-0001-6182-0254
+    affiliation: 1
+
+affiliations:
+  - name: Instituto de Astrofísica de Andalucía (CSIC)
+    index: 1
+
+data: 16 Jun 2025
 bibliography:
 - references.bib
-date: 2025-06-09
-title: "PAPI: An Open-Source Data Reduction Pipeline for the PANIC
-  Instrument at Calar Alto Observatory"
 ---
 
-::: center
-$^1$Instituto de Astrofísica de Andalucía (IAA-CSIC), Granada, Spain
-:::
-
-# Summary {#summary .unnumbered}
+# Summary
 
 The PANIC Pipeline (PAPI) is an open-source Python-based software
 package designed for the automated reduction of near-infrared imaging
@@ -30,7 +38,7 @@ of extragalactic sources, such as galaxy surveys and cluster studies,
 and is adaptable to data from other instruments like Omega2000 and
 HAWK-I. [@ibanez2010panic]
 
-# Statement of Need {#statement-of-need .unnumbered}
+# Statement of Need
 
 Astronomical data reduction pipelines are critical for processing raw
 observational data into science-ready formats. The PANIC instrument, a
@@ -46,7 +54,7 @@ and compatibility with modern astronomical workflows. PAPI fills a gap
 for astronomers requiring efficient, high-quality data reduction for
 near-infrared imaging, particularly for extragalactic research.
 
-# Functionality {#functionality .unnumbered}
+# Functionality 
 
 PAPI automates the reduction of PANIC data through a modular
 architecture, with key processing steps including:
@@ -83,7 +91,7 @@ through a flexible `papi.cfg` file, allowing users to customize
 parameters such as input/output directories, calibration settings, and
 processing options. [@papi_docs]
 
-# Implementation {#implementation .unnumbered}
+# Implementation 
 
 PAPI is implemented in Python 3.7+ and relies on dependencies such as
 Astropy, NumPy, and SCAMP, with optional support for Montage and DS9 for
@@ -98,7 +106,7 @@ standalone execution of individual modules (e.g., to create master
 calibration frames) or full pipeline processing via the `run_papi.py`
 script. [@papi_docs]
 
-# Usage and Community {#usage-and-community .unnumbered}
+# Usage and Community 
 
 PAPI is primarily designed for PANIC data but is adaptable to other
 near-infrared instruments like Omega2000 and HAWK-I, though not fully
@@ -112,11 +120,18 @@ GitHub issue tracker. Recent updates (e.g., version 3.0.0) include
 support for the HAWAII-4RG detector and compatibility with modern Linux
 distributions. [@papi_docs]
 
-# Acknowledgements {#acknowledgements .unnumbered}
+# Citations
+- references.bib
+
+# Figures
+
+# Acknowledgements 
 
 We acknowledge support from the Instituto de Astrofísica de Andalucía
 (IAA-CSIC) and the Calar Alto Observatory. The development was partially
 funded by projects related to the PANIC instrument. The authors thank
 the astronomical community for feedback and contributions via GitHub.
+
+# References
 
 [^1]: `jmiguel@iaa.es`
